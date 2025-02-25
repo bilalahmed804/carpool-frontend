@@ -2,8 +2,6 @@ import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
 
-
-
 function Index(){
   const [formData, setFormData] = useState({
     email: '',
@@ -21,9 +19,10 @@ function Index(){
   return (
     <View style={styles.container}>
       <Image source={require('../assets/images/carpool.png')} style={styles.logo} />
-        <Text style={styles.title}>Welcome to Car Pool App</Text>
+        <Text style={styles.title}>Welcome To Carpool</Text>
         <Text style={styles.description}>
-          Join our community to share rides, save costs, and make your journey more enjoyable!
+        Join our community to share rides, save costs, and make your journey
+        more enjoyable!
         </Text>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Email</Text>
