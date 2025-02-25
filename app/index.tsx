@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
+import  globalStyle  from "../constant/constant";
 
 function Index() {
   return (
@@ -10,9 +11,11 @@ function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-      <TouchableOpacity onPress={()=> router.push("./pages/signup")}><Text style={{ backgroundColor: "#C4DEF6",
-        color: "white" ,padding : 10, }}>Click</Text></TouchableOpacity>
+      <Text style={globalStyle.heading}>Edit app/index.tsx to edit this screen.</Text>
+      <Text style={globalStyle.subHeading}>Edit app/index.tsx to edit this screen.</Text>
+    
+      <TouchableOpacity onPress={()=> router.push("./pages/signup")}><Text
+       style={[{ padding : 10, }, globalStyle.greenButton ]}>Click</Text></TouchableOpacity>
     </View>
   );
 }
