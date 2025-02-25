@@ -17,6 +17,7 @@ function Index(){
   };
 
   return (
+
     <View style={styles.container}>
       <Image source={require('../assets/images/carpool.png')} style={styles.logo} />
         <Text style={styles.title}>Welcome To Carpool</Text>
