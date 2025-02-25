@@ -17,14 +17,23 @@ const globalStyle = StyleSheet.create({
     },
 
     greenButton: {
-        backgroundColor: "#69E29C"
+        backgroundColor: "#4CAF50",
+        color: "white",
+        borderRadius:10,
+        width: 100,
+        textAlign: "center",
+
     },
     hovergreenButton: {
         backgroundColor: "#37D67A",
         elevation: 5,
     },
     blueButton: {
-        backgroundColor: "#42B2F2"
+        backgroundColor: "#5F9EE0",
+        color: "white",
+        borderRadius:10,
+        width: 100,
+        textAlign: "center",
     },
     hoverblueButton: {
         backgroundColor: "#0693E9",
