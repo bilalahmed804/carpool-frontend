@@ -1,9 +1,11 @@
 import Input from '@/components/Input';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
+import axios from "axios"
 import { View, Text, TextInput, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import GreenButton from '../components/greenButton';
+import { AppRoutes } from '@/constant/constant';
 
 
 export interface form_Data {
@@ -13,8 +15,22 @@ export interface form_Data {
 
 function Index() {
   const { control, handleSubmit } = useForm<form_Data>()
-  const Submit = (formData: form_Data) => {
+
+
+
+  
+  const Submit = async(formData: form_Data) => {
     console.log('Form Data:', formData);
+    try {
+      const obj = {
+        email: formData.email,
+        password: formData.password,
+      };
+      const response = await axios.post(AppRoutes.login, obj);
+      console.log("response==>", response.data.data);
+    } catch (error: any) {
+      console.log("error==>", error.message);
+    }
   };
 
   return (
@@ -53,8 +69,8 @@ function Index() {
               secureTextEntry={true}
             />
           </View>
-           <GreenButton onPress={handleSubmit(Submit)} text='submit'/>
-          <Text  >New Here? <Text style={styles.link} onPress={() => router.push("/pages/signup")}>Create A New Account</Text></Text>
+           <GreenButton onPress={Submit} text='submit'/>
+          <Text style={styles.link}>New Here? <Text style={styles.link1} onPress={() => router.push("/pages/signup")}>Create A New Account</Text></Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
