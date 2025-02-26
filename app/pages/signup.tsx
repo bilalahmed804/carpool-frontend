@@ -16,10 +16,10 @@ function SignUp() {
         more enjoyable!
       </Text>
       <View style={styles.btn}>
-      <GreenButton text="Register as driver"/>
+      <GreenButton onPress={() => router.push("/pages/driverRegister")} text="Register as driver"/>
       </View>
       <View style={styles.btn2}>
-      <BlueButton text="Register as user"/>
+      <BlueButton onPress={()=> router.push("/pages/userRegister")} text="Register as user"/>
       </View>
       <Text style={styles.link}>
         Already Have an Account?{" "}
