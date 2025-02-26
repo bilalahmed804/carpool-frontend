@@ -2,8 +2,10 @@ import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const [profileImage, setProfileImage] = useState();
-const [vehicleImage, setVehicleImage] = useState();
+function DriverImage() {
+  
+  const [profileImage, setProfileImage] = useState();
+  const [vehicleImage, setVehicleImage] = useState();
 
 const pickProfileImage = async () => {
   let result = await ImagePicker.launchImageLibraryAsync({
@@ -14,6 +16,28 @@ const pickProfileImage = async () => {
   });
   if (!result.canceled && result.assets.length > 0) {
     const uploadUrl = await uploadImageToCloudinary(result.assets[0]);
+    if(uploadUrl){
+      setVehicleImage(uploadUrl)
+      console.log(uploadUrl);
+      
+    }
+  }
+};
+const pickVehicleImage = async () => {
+  let result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [4, 4],
+    quality: 1,
+  });
+
+  if (!result.canceled && result.assets.length > 0) {
+    const uploadUrl = await uploadImageToCloudinaryV(result.assets[0]);
+    if (uploadUrl) {
+      setProfileImage(uploadUrl);
+      console.log("uploadUrl", uploadUrl);
+
+    }
   }
 };
 const uploadImageToCloudinary = async (image: any) => {
@@ -33,37 +57,24 @@ const uploadImageToCloudinary = async (image: any) => {
     console.error("Cloudinary cloud name is not defined");
     return null;
   }
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloud}/image/upload`,
-    {
-      method: "POST",
-      body: data,
-    }
-  )
-    .then((response) => response.json())
-    .then(async (data) => {
-      const URL = data.url;
-      setProfileImage(URL)
-    });
+  try{
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloud}/image/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    )
+    const jsonFile = await res.json();
+    return jsonFile.url
+  }catch(error){
+    console.error("upload", error);
+    return null
+   
+  }
 }
 
-const pickVehicleImage = async () => {
-  let result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    allowsEditing: true,
-    aspect: [4, 4],
-    quality: 1,
-  });
-
-  if (!result.canceled && result.assets.length > 0) {
-    const uploadUrl = await uploadImageToCloudinaryV(result.assets[0]);
-    if (uploadUrl) {
-      setProfileImage(uploadUrl);
-      console.log("uploadUrl", uploadUrl);
-
-    }
-  }
-};
 const uploadImageToCloudinaryV = async (image: any) => {
   const cloud = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUDNAME;
   if (!image.uri) return null;
@@ -81,26 +92,27 @@ const uploadImageToCloudinaryV = async (image: any) => {
     console.error("Cloudinary cloud name is not defined");
     return null;
   }
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${cloud}/image/upload`,
-    {
-      method: "POST",
-      body: data,
-    }
-  )
-    .then((response) => response.json())
-    .then(async (data) => {
-      const URL = data.url;
-      console.log("url", URL);
+  try{
 
-      setVehicleImage(URL)
-    });
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloud}/image/upload`,
+      {
+        method: "POST",
+        body: data,
+      }
+    )
+    const jsonFile = await res.json();
+    return jsonFile.url
+  }catch(error){
+    console.error("upload", error);
+    return null
+   
+  }
 }
 console.log(profileImage);
 console.log(vehicleImage);
 
 
-function DriverImage() {
   return (
     <View>
 

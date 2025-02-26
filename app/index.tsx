@@ -2,7 +2,8 @@ import Input from '@/components/Input';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { View, Text, TextInput, Button, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import GreenButton from '../components/greenButton';
 
 
 export interface form_Data {
@@ -52,7 +53,7 @@ function Index() {
               secureTextEntry={true}
             />
           </View>
-          <Button title="Submit" onPress={handleSubmit(Submit)} />
+           <GreenButton onPress={handleSubmit(Submit)} text='submit'/>
           <Text  >New Here? <Text style={styles.link} onPress={() => router.push("/pages/signup")}>Create A New Account</Text></Text>
         </View>
       </ScrollView>
@@ -100,11 +101,18 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#666",
   },
-  link: {
-    fontWeight: "bold",
-    color: "blue",
+  btn:{
+    marginVertical: 4
   },
-
+  link:{
+    fontSize: 16,
+    marginHorizontal: "auto",
+    marginVertical: 12,
+    fontWeight:"900",
+  },
+  link1:{
+    color : "#5F9EE0",
+  }
 });
 
 export default Index
