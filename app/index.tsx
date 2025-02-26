@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, Image } from 'react-native';
+import GreenButton from '../components/greenButton';
+import { View, Text, TextInput, StyleSheet, Image } from 'react-native';
 
 function Index(){
   const [formData, setFormData] = useState({
@@ -44,8 +45,11 @@ function Index(){
           secureTextEntry={true}
         />
       </View>
-      <Button title="Submit" onPress={handleSubmit} />
-      <Text  >New Here? <Text style={styles.link} onPress={() => router.push("/pages/signup")}>Create A New Account</Text></Text>
+      <View style={styles.btn}>
+
+      </View>
+      <GreenButton onPress={handleSubmit} text='submit'/>
+      <Text style={styles.link}>New Here?{" "}<Text style={styles.link1} onPress={() => router.push("/pages/signup")}>Create A New Account</Text></Text>
     </View>
   );
 };
@@ -90,11 +94,18 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#666",
   },
-  link:{
-    fontWeight:"bold",
-    color:"blue",
+  btn:{
+    marginVertical: 4
   },
-  
+  link:{
+    fontSize: 16,
+    marginHorizontal: "auto",
+    marginVertical: 12,
+    fontWeight:"900",
+  },
+  link1:{
+    color : "#5F9EE0",
+  }
 });
 
 export default Index
