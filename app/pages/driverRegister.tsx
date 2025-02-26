@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DriverImage from '../../components/driverImage';
+import BlueButton from '@/components/blueButton';
 
 function DriverRegister(){
   const [formData, setFormData] = useState({
@@ -22,6 +23,8 @@ function DriverRegister(){
  
   const handleChange = (key:any, value:any) => {
     setFormData({ ...formData, [key]: value });
+
+    
   };
 
   const handleSubmit = () => {
@@ -45,13 +48,13 @@ function DriverRegister(){
   return (
     <ScrollView style={{backgroundColor: "white"}}
   >
-     <View>
+     <View style={{flex:1 , alignItems : "center"}}>
           <Text
             style={{
               fontSize: 28,
               fontWeight: "800",
               marginBottom: 12,
-              color: "#28A745",
+              color: "#007BFF",
             }}
           >
             Sign Up
@@ -131,6 +134,7 @@ function DriverRegister(){
       />
       {error.address && <Text>{error.address}</Text>}
   </View>
+<View>
 
   <View style={styles.inputContainer}>
   <Text style={styles.label}>Gender</Text>
@@ -138,7 +142,7 @@ function DriverRegister(){
         selectedValue={formData.gender}
         onValueChange={(gender) => handleChange('gender', gender)}
         style={styles.picker}
-      >
+        >
         <Picker.Item label="Select an Gender" value="" />
         <Picker.Item label="Female" value="Female" />
         <Picker.Item label="Male" value="Male" />
@@ -150,13 +154,14 @@ function DriverRegister(){
         selectedValue={formData.vehicleType}
         onValueChange={(typeValue) => handleChange("typeValue" ,typeValue)}
         style={styles.picker}
-      >
+        >
         <Picker.Item label="Select an Vehicle Type" value="" />
         <Picker.Item label="Bike" value="Bike" />
         <Picker.Item label="Car" value="Car" />
         <Picker.Item label="Rickshaw" value="Rickshaw" />
       </Picker>
       {error.gender && <Text>{error.gender}</Text>}
+        </View>
   </View>
 
   <View style={styles.inputContainer}>
@@ -185,8 +190,7 @@ function DriverRegister(){
   <View style={styles.inputContainer}>
     </View>
        <DriverImage/> 
-
-  <Button title="Submit"  onPress={handleSubmit} />
+            <BlueButton onPress={handleSubmit}  text='Submit'/>
 </View>
 </ScrollView>
   );

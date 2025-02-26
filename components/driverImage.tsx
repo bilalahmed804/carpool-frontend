@@ -1,6 +1,7 @@
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import globalStyle from "@/constant/constant";
 
 function DriverImage() {
   
@@ -143,7 +144,7 @@ export default DriverImage
 
 const styles = StyleSheet.create({
   imagePickerButton: {
-    backgroundColor: "#007BFF",
+    backgroundColor:`${globalStyle.blueButton.backgroundColor}`,
     padding: 10,
     borderRadius: 4,
     alignItems: "center",
