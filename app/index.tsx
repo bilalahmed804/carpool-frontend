@@ -1,36 +1,20 @@
-import Input from '@/components/Input';
-import { router } from 'expo-router';
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import axios from "axios"
-import { View, Text, TextInput, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import GreenButton from '../components/greenButton';
-import { AppRoutes } from '@/constant/constant';
-
-
-export interface form_Data {
-  email: string,
-  password: string
-}
+import { router } from "expo-router";
+import React, { useState } from "react";
+import GreenButton from "../components/greenButton";
+import { View, Text, TextInput, StyleSheet, Image, KeyboardAvoidingView, Platform } from "react-native";
 
 function Index() {
-  const { control, handleSubmit } = useForm<form_Data>()
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
+  const handleChange = (key: any, value: any) => {
+    setFormData({ ...formData, [key]: value });
+  };
 
-
-  
-  const Submit = async(formData: form_Data) => {
-    console.log('Form Data:', formData);
-    try {
-      const obj = {
-        email: formData.email,
-        password: formData.password,
-      };
-      const response = await axios.post(AppRoutes.login, obj);
-      console.log("response==>", response.data.data);
-    } catch (error: any) {
-      console.log("error==>", error.message);
-    }
+  const handleSubmit = () => {
+    console.log("Form Data:", formData);
   };
 
   return (
@@ -39,43 +23,46 @@ function Index() {
       style={{ flex: 1, backgroundColor: 'white' }}
       behavior={Platform.OS == 'ios' ? 'padding' : undefined}
     >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-
-      >
-        <View style={styles.container}>
-          <Image source={require('../assets/images/carpool.png')} style={styles.logo} />
-          <Text style={styles.title}>Welcome To Carpool</Text>
-          <Text style={styles.description}>
-            Join our community to share rides, save costs, and make your journey
-            more enjoyable!
-          </Text>
-          <View style={styles.inputContainer}>
-            <Input
-              control={control}
-              placeholder="email"
-              name='email'
-              label='Email'
-              keyboardType="email-address"
-            />
+    <View style={styles.container}>
+      <Image
+        source={require("../assets/images/carpool.png")}
+        style={styles.logo}
+      />
+      <Text style={styles.title}>Welcome To Carpool</Text>
+      <Text style={styles.description}>
+        Join our community to share rides, save costs, and make your journey
+        more enjoyable!
+      </Text>
+      <View style={styles.inputContainer}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="user@gmail.com"
+          value={formData.email}
+          onChangeText={(text) => handleChange("email", text)}
+          keyboardType="email-address"
+        />
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="......"
+          value={formData.password}
+          onChangeText={(text) => handleChange("password", text)}
+          secureTextEntry={true}
+          />
           </View>
-          <View style={styles.inputContainer}>
-            <Input
-              control={control}
-              placeholder='password'
-              name='password'
-              label='Password'
-              secureTextEntry={true}
-            />
-          </View>
-           <GreenButton onPress={Submit} text='submit'/>
-          <Text style={styles.link}>New Here? <Text style={styles.link1} onPress={() => router.push("/pages/signup")}>Create A New Account</Text></Text>
-        </View>
-      </ScrollView>
+      <View style={styles.btn}></View>
+      <GreenButton onPress={handleSubmit} text="submit" />
+      <Text style={styles.link}>
+        New Here?{" "}
+        <Text style={styles.link1} onPress={() => router.push("/pages/signup")}>
+          Create A New Account
+        </Text>
+      </Text>
+    </View>
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -84,16 +71,16 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   inputContainer: {
-    marginBottom: 15,
+    gap: 10,
+    marginBottom: 16,
   },
   label: {
     fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5,
+    fontWeight: "bold",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
   },
@@ -117,18 +104,19 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#666",
   },
-  btn:{
-    marginVertical: 4
+  btn: {
+    marginVertical: 4,
   },
-  link:{
+  link: {
     fontSize: 16,
     marginHorizontal: "auto",
     marginVertical: 12,
-    fontWeight:"900",
+    fontWeight: "900",
   },
-  link1:{
-    color : "#5F9EE0",
-  }
+
+  link1: {
+    color: "#5F9EE0",
+  },
 });
 
-export default Index
+export default Index;
