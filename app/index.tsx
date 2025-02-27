@@ -13,6 +13,7 @@ export interface form_Data {
 
 function Index() {
   const { control, handleSubmit } = useForm<form_Data>()
+
   const Submit = (formData: form_Data) => {
     console.log('Form Data:', formData);
   };
