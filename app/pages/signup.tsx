@@ -1,3 +1,5 @@
+import BlueButton from "@/components/blueButton";
+import GreenButton from "@/components/greenButton";
 import { router } from "expo-router";
 import { Button, Image, StyleSheet, Text, View } from "react-native";
 
@@ -14,15 +16,15 @@ function SignUp() {
         more enjoyable!
       </Text>
       <View style={styles.btn}>
-        <Button title="Register As Driver" onPress={() => router.push("/pages/driverRegister")}/>
+      <GreenButton onPress={() => router.push("/pages/driverRegister")} text="Register as driver"/>
       </View>
       <View style={styles.btn2}>
-        <Button color="black" title="Register As User" onPress={() => router.push("/pages/userRegister")} />
+      <BlueButton onPress={()=> router.push("/pages/userRegister")} text="Register as user"/>
       </View>
-      <Text>
+      <Text style={styles.link}>
         Already Have an Account?{" "}
-        <Text style={styles.link} onPress={() => router.push("/")}>
-          Login
+        <Text style={styles.link1} onPress={() => router.push("/")}>
+          Login Here
         </Text>
       </Text>
     </View>
@@ -60,15 +62,20 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#666",
   },
-  link: {
-    fontWeight: "bold",
-    color: "blue",
+  link:{
+    fontSize: 16,
+    marginHorizontal: "auto",
+    marginVertical: 12,
+    fontWeight:"900",
+  },
+  link1:{
+    color: "#5F9EE0",
   },
   btn: {
-    marginVertical: 10,
+    marginVertical: 12,
   },
   btn2: {
-    marginVertical: 10,
+    marginVertical: 12,
   },
 });
 
