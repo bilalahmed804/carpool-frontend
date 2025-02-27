@@ -1,7 +1,7 @@
 import { Text, TextInputProps, TextInput, StyleSheet, KeyboardTypeOptions } from 'react-native'
 import React, { forwardRef, useId } from 'react'
 import { Control, Controller } from 'react-hook-form'
-import { form_Data } from '@/app'
+import { form_Data } from '@/app/pages/userRegister'
 
 interface Inputprops extends TextInputProps {
     placeholder: string,
@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#E0E0E0",
         borderRadius: 8,
-        padding: 10,
-        marginBottom: 15,
+        // padding: 10,
+        // marginBottom: 15,
         backgroundColor: "#FFFFFF",
         fontSize: 16,
         color: "#333",
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     errorText: {
         color: "#FF3B30",
         fontSize: 14,
-        marginBottom: 10,
+        // marginBottom: 10,
     },
 })
 
