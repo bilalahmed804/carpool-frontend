@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import DriverImage from '../../components/driverImage';
-import globalStyle from '@/constant/constant';
+import globalStyle, { AppRoutes } from '@/constant/constant';
 import GreenButton from '@/components/greenButton';
+import { router } from 'expo-router';
+import axios from "axios"
 
 function DriverRegister(){
   const [formData, setFormData] = useState({
@@ -28,7 +30,7 @@ function DriverRegister(){
     
   };
 
-  const handleSubmit = () => {
+  const handleSubmit =async () => {
       const newErrors: { [key: string]: string } = {}
     setError(newErrors)
     if(!formData.name) newErrors.name = "Name is required"; 
@@ -60,6 +62,18 @@ function DriverRegister(){
       vehicleImage: formData.vehicleImage,
       role: "driver",
     };
+    try {
+      const res = await axios.post(AppRoutes.signupRider, obj);
+      if (res && res.data) {
+        const data = res.data?.data;
+        // dispatch(userLogin(data))
+        console.log(data)
+        router.push("/pages/driverdashboard")
+
+      }
+    } catch (error) {
+      console.log("error when submiting the data", error);
+    }
     // console.log("obj", obj);
   };
   return (
