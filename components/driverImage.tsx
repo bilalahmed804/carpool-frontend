@@ -1,6 +1,6 @@
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 import globalStyle from "@/constant/constant";
 
 function DriverImage() {
@@ -109,55 +109,32 @@ const uploadImageToCloudinaryV = async (image: any) => {
     return null
    
   }
-}
-console.log(profileImage);
-console.log(vehicleImage);
-
+};
 
   return (
     <View>
 
       <TouchableOpacity
         onPress={pickProfileImage}
-        style={styles.imagePickerButton}
+        style={globalStyle.imagePickerButton}
       >
-        <Text style={styles.imagePickerText}>Profile Image</Text>
+        <Text style={globalStyle.imagePickerText}>Profile Image</Text>
       </TouchableOpacity>
       {profileImage && (
-        <Image source={{ uri: profileImage }} style={styles.image} />
+        <Image source={{ uri: profileImage }} style={globalStyle.image} />
       )}
       <TouchableOpacity
         onPress={pickVehicleImage}
-        style={styles.imagePickerButton}
+        style={globalStyle.imagePickerButton}
       >
-        <Text style={styles.imagePickerText}>Pick Vehicle Image</Text>
+        <Text style={globalStyle.imagePickerText}>Pick Vehicle Image</Text>
       </TouchableOpacity>
       {vehicleImage && (
-        <Image source={{ uri: vehicleImage }} style={styles.image} />
+        <Image source={{ uri: vehicleImage }} style={globalStyle.image} />
       )}
     </View>
   )
-}
+};
+export default DriverImage;
 
-export default DriverImage
 
-
-const styles = StyleSheet.create({
-  imagePickerButton: {
-    backgroundColor:`${globalStyle.blueButton.backgroundColor}`,
-    padding: 10,
-    borderRadius: 4,
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  imagePickerText: { color: "#FFFFFF", fontSize: 14, fontWeight: "900" },
-  image: {
-    width: 100,
-    height: 100,
-    alignSelf: "center",
-    marginBottom: 20,
-    marginTop: 10,
-    borderRadius: 8,
-  },
-}
-)
