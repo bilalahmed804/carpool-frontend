@@ -1,7 +1,9 @@
 import { router } from "expo-router";
 import React, { useState } from "react";
 import GreenButton from "../components/greenButton";
-import { View, Text, TextInput, StyleSheet, Image, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, ScrollView } from "react-native";
+import globalStyle, { AppRoutes } from "@/constant/constant";
+import axios from "axios"
 
 function Index() {
   const [formData, setFormData] = useState({
@@ -13,17 +15,24 @@ function Index() {
     setFormData({ ...formData, [key]: value });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log("Form Data:", formData);
+    const obj = {
+      email : formData.email,
+      password : formData.password
+    }
+    try {
+      const response = await axios.post(AppRoutes.login, obj)
+      console.log("res", response);
+    } catch (error) {
+      console.log("error", error);
+      
+    }
+
   };
 
   return (
-    <KeyboardAvoidingView
-      enabled
-      style={{ flex: 1, backgroundColor: 'white' }}
-      behavior={Platform.OS == 'ios' ? 'padding' : undefined}
-    >
-    <View style={styles.container}>
+    <ScrollView style={globalStyle.container}>
       <Image
         source={require("../assets/images/carpool.png")}
         style={styles.logo}
@@ -33,25 +42,26 @@ function Index() {
         Join our community to share rides, save costs, and make your journey
         more enjoyable!
       </Text>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Email</Text>
+      <View style={globalStyle.inputContainer}>
+        <Text style={globalStyle.label}>Email</Text>
         <TextInput
-          style={styles.input}
+          style={globalStyle.input}
           placeholder="user@gmail.com"
           value={formData.email}
           onChangeText={(text) => handleChange("email", text)}
           keyboardType="email-address"
         />
-        <Text style={styles.label}>Password</Text>
+        </View>
+        <View style={globalStyle.inputContainer}>
+        <Text style={globalStyle.label}>Password</Text>
         <TextInput
-          style={styles.input}
+          style={globalStyle.input}
           placeholder="......"
           value={formData.password}
           onChangeText={(text) => handleChange("password", text)}
           secureTextEntry={true}
           />
-          </View>
-      <View style={styles.btn}></View>
+        </View>
       <GreenButton onPress={handleSubmit} text="submit" />
       <Text style={styles.link}>
         New Here?{" "}
@@ -59,8 +69,7 @@ function Index() {
           Create A New Account
         </Text>
       </Text>
-    </View>
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 }
 
@@ -69,20 +78,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: "white",
-  },
-  inputContainer: {
-    gap: 10,
-    marginBottom: 16,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 10,
   },
   logo: {
     width: 220,
