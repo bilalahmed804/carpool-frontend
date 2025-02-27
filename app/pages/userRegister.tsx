@@ -1,4 +1,6 @@
 import BlueButton from "@/components/blueButton";
+import PickerImage from "@/components/pickerImage";
+import UserImage from "@/components/userImage";
 import globalStyle from "@/constant/constant";
 import { Picker } from "@react-native-picker/picker";
 import { useState } from "react";
@@ -123,6 +125,7 @@ function UserRegister(){
       {error.gender && <Text>{error.gender}</Text>}
 
         </View>
+        <UserImage/>
               <BlueButton text="Submit" onPress={()=>handleSubmit}/>    
         </View>
         </ScrollView>
