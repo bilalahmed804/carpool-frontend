@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, Text, TextInput, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import DriverImage from '../../components/driverImage';
+import DriverImage from '../cloudinary/driverImage';
 import globalStyle, { AppRoutes } from '@/constant/constant';
 import GreenButton from '@/components/greenButton';
 import { router } from 'expo-router';
 import axios from "axios"
+import { globalContext } from '@/context/globalContext';
 
 function DriverRegister(){
+  const {profileImage ,vehicleImage} = useContext(globalContext)
+  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,7 +19,7 @@ function DriverRegister(){
     password: "",
     address: "",
     gender: "",
-    vehicleType: "",
+    vehicleCategory: "",
     vehicleNumber: "",
     vehicleImage: null,
     profileImage: null,
@@ -26,10 +29,10 @@ function DriverRegister(){
  
   const handleChange = (key:any, value:any) => {
     setFormData({ ...formData, [key]: value });
-
+    console.log("jghfjg",formData.vehicleCategory);
     
-  };
-
+    
+  }
   const handleSubmit =async () => {
       const newErrors: { [key: string]: string } = {}
     setError(newErrors)
@@ -44,7 +47,7 @@ function DriverRegister(){
     if(!formData.profileImage) newErrors.profileImage = "profileImage is required";
     if(!formData.vehicleImage) newErrors.vehicleImage = "vehicleImage is required";
     if(!formData.vehicleNumber) newErrors.vehicleNumber = "vehicleNumber is required";
-    if(!formData.vehicleType) newErrors.vehicleType = "vehicleType is required";
+    if(!formData.vehicleCategory) newErrors.vehicleType = "vehicleType is required";
     
     // console.log('Form Data:', formData);
     const obj = {
@@ -54,25 +57,27 @@ function DriverRegister(){
       gender: formData.gender,
       phoneNumber: formData.contact,
       address: formData.address,
-      profileImage: formData.profileImage,
+      profileImage: profileImage,
       nicNo: formData.cnic,
-      vehicleCategory: formData.vehicleType,
+      vehicleCategory: formData.vehicleCategory,
       vehicleNo: formData.vehicleNumber,
       licenseNo: formData.licenseNumber,
-      vehicleImage: formData.vehicleImage,
+      vehicleImage: vehicleImage,
       role: "driver",
     };
+    console.log("vehicleCategory",obj.vehicleCategory);
+    
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);
       if (res && res.data) {
-        const data = res.data?.data;
-        // dispatch(userLogin(data))
+        const data = res.data?.data
         console.log(data)
         router.push("/pages/driverdashboard")
-
+        console.log("finlly");
+        
       }
     } catch (error) {
-      console.log("error when submiting the data", error);
+      console.error("error when submiting the data", error);
     }
     // console.log("obj", obj);
   };
@@ -169,15 +174,15 @@ function DriverRegister(){
         style={globalStyle.picker}
         >
         <Picker.Item label="Select an Gender" value="" />
-        <Picker.Item label="Female" value="female" />
-        <Picker.Item label="Male" value="male" />
+        <Picker.Item label="Female" value="Female" />
+        <Picker.Item label="Male" value="Male" />
       </Picker>
       {error.gender && <Text>{error.gender}</Text>}
 
   <Text style={globalStyle.label}>Vehicle Type</Text>
   <Picker
-        selectedValue={formData.vehicleType}
-        onValueChange={(typeValue) => handleChange("typeValue" ,typeValue)}
+        selectedValue={formData.vehicleCategory}
+        onValueChange={(vehicleCategory) => handleChange("vehicleCategory" ,vehicleCategory)}
         style={globalStyle.picker}
         >
         <Picker.Item label="Select an Vehicle Type" value="" />
@@ -185,7 +190,7 @@ function DriverRegister(){
         <Picker.Item label="Car" value="Car" />
         <Picker.Item label="Rickshaw" value="Rickshaw" />
       </Picker>
-      {error.vehicleType && <Text>{error.vehicleType}</Text>}
+      {error.vehicleCategory && <Text>{error.vehicleCategory}</Text>}
         </View>
   </View>
 
