@@ -1,11 +1,11 @@
 import GlobalContextProvider from "@/context/globalContext";
+import AuthContextProvider from "@/context/authContext";
 import { Stack } from "expo-router";
-
 export default function RootLayout( ) {
 
   return (
     <GlobalContextProvider>
-
+    <AuthContextProvider>
     <Stack screenOptions={{headerShown : false}} initialRouteName="index">
       <Stack.Screen name="index"/>
       <Stack.Screen name="/signup"/>
@@ -15,5 +15,6 @@ export default function RootLayout( ) {
       <Stack.Screen name="/driverdashboard"/>
     </Stack>
     </GlobalContextProvider>
+    </AuthContextProvider>
   );
 }

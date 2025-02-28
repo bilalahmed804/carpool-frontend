@@ -12,7 +12,9 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.jsx",
+    "**/*.js",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
 , "context/globalContext.js"  ]
+, "context/authContext.js"  ]
 }

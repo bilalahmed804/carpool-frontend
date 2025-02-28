@@ -16,6 +16,7 @@ const globalStyle = StyleSheet.create({
     },
     container: {
         padding: 20,
+        backgroundColor :"white"
     },
     inputContainer: {
         marginBottom: 15,
@@ -111,8 +112,9 @@ export default globalStyle;
 
 
 
-const devURL = "http://192.168.5.230:4000";
-// const prodURL = "https://carpool-backend-staging.up.railway.app";
+
+const devURL = "http://192.168.2.131:4000";
+const prodURL = "https://carpool-backend-staging.up.railway.app";
 
 export const BASE_URL = devURL;
 export const AppRoutes = {
