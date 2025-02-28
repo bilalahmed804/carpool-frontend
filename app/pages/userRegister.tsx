@@ -1,9 +1,11 @@
 import BlueButton from "@/components/blueButton";
-import PickerImage from "@/components/pickerImage";
-import UserImage from "@/components/userImage";
-import globalStyle from "@/constant/constant";
+import UserImage from "@/app/cloudinary/userImage";
+import globalStyle, { AppRoutes } from "@/constant/constant";
+import { globalContext } from "@/context/globalContext";
 import { Picker } from "@react-native-picker/picker";
-import { useState } from "react";
+import axios from "axios";
+import { router } from "expo-router";
+import { useContext, useState } from "react";
 import { ScrollView,Text, TextInput, View } from "react-native";
 
 export interface form_Data {
@@ -17,6 +19,9 @@ export interface form_Data {
 }
 
 function UserRegister(){
+
+  const {userprofileImage } = useContext(globalContext)
+  
      const [formData, setFormData] = useState({
        name: "",
        phoneNumber: "",
@@ -30,7 +35,7 @@ function UserRegister(){
       const handleChange = (key:any, value:any) => {
         setFormData({ ...formData, [key]: value });
       };
-    const handleSubmit = () => {
+    const handleSubmit =async () => {
         const newErrors: { [key: string]: string } = {}
       setError(newErrors)
       if(!formData.name) newErrors.name = "Name is required"; 
@@ -41,6 +46,15 @@ function UserRegister(){
       if(!formData.password) newErrors.password = "password is required"
   
       console.log('Form Data:', formData);
+
+      let data = { ...formData, role: "user" , profileImage : userprofileImage};
+      try {
+        const response = await axios.post(AppRoutes.signupUser, formData)
+            router.push("/pages/userdashboard")
+            return
+      } catch (error) {
+        console.log("error when sending the data in backend ", error)
+      } 
     };
     return(
          <ScrollView style={globalStyle.backgroundColor}

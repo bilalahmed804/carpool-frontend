@@ -1,11 +1,12 @@
-import { useState } from "react";
-import PickerImage from "./pickerImage";
+import { useContext, useState } from "react";
+import PickerImage from "../../components/pickerImage";
 import * as ImagePicker from "expo-image-picker";
 import { Image, View } from "react-native";
 import globalStyle from "@/constant/constant";
+import { globalContext } from "@/context/globalContext";
 
 function UserImage (){
-    const [profileImage, setProfileImage] = useState<string | null>(null);
+    const {userprofileImage , setUserProfileImage}= useContext(globalContext)
 
     const pickProfileImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -46,7 +47,7 @@ function UserImage (){
                         }
                     )
                     const jsonFile = await res.json()
-                    setProfileImage(jsonFile.url)
+                    setUserProfileImage(jsonFile.url)
                     return jsonFile.url
                 }catch(error){
                     console.error("upload", error);
@@ -58,9 +59,7 @@ function UserImage (){
         <View>
 
         <PickerImage onPress={pickProfileImage} text="Profile Image"/>
-        {profileImage  && (
-            <Image source={{ uri: profileImage  }} style={globalStyle.image} />
-        )}
+        {userprofileImage  && <Image source={{ uri: userprofileImage  }} style={globalStyle.image} />}
         </View>
     )
 }
