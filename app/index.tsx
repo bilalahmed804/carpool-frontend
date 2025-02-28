@@ -1,11 +1,16 @@
-import { router } from "expo-router";
-import React, { useState } from "react";
+import { router, useRouter } from "expo-router";
+import React, { useContext, useState } from "react";
 import GreenButton from "../components/greenButton";
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import { View, Text, TextInput, StyleSheet, Image, ScrollView } from "react-native";
 import globalStyle, { AppRoutes } from "@/constant/constant";
 import axios from "axios"
+import { AuthContext } from "@/context/authContext";
+import RoleBasedNavigation from "@/components/roleBasedNavigation";
 
 function Index() {
+  const { user } = useContext(AuthContext)
+  const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -16,26 +21,43 @@ function Index() {
   };
 
   const handleSubmit = async () => {
-    console.log("Form Data:", formData);
     const obj = {
       email : formData.email,
       password : formData.password
     }
     try {
       const response = await axios.post(AppRoutes.login, obj)
-      console.log("res", response);
+      const data = response?.data?.data
+      saveToken(data?.token)
+      console.log(user.role)
+      if(user?.role === "driver"){
+        router.push("/pages/driverdashboard")
+        return
+      }  
+      if(user?.role === "user"){
+        router.push("/pages/userdashboard")
+        return 
+      }
     } catch (error) {
       console.log("error", error);
-      
     }
-
   };
 
+  const saveToken = async (token:string) => {
+    try {
+      await AsyncStorage.setItem("token", token)
+    } catch (error) {
+      console.log("Error saving data in AsyncStorage==>", error)
+    }
+  }
+
   return (
+    <>
+    {user ? <RoleBasedNavigation/> : 
     <ScrollView style={globalStyle.container}>
       <Image
-        source={require("../assets/images/carpool.png")}
         style={styles.logo}
+        source={require("../assets/images/carpool.png")}
       />
       <Text style={styles.title}>Welcome To Carpool</Text>
       <Text style={styles.description}>
@@ -70,6 +92,8 @@ function Index() {
         </Text>
       </Text>
     </ScrollView>
+    }
+    </>
   );
 }
 
