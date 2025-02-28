@@ -8,7 +8,8 @@ export const AuthContext = createContext();
 
 function AuthContextProvider({ children }) {
   const [user, setUser] = useState(null);
-
+  const [token, setToken] = useState(AsyncStorage.getItem("token") || null );
+  
   useEffect(()=> {
     const getCurrentUserInfo = async () => {
       try {
@@ -22,7 +23,7 @@ function AuthContextProvider({ children }) {
       }
     }
     getCurrentUserInfo()
-  }, [])  
+  }, [token])  
   
 
 
