@@ -2,7 +2,7 @@ import { router, useRouter } from "expo-router";
 import React, { useContext, useState } from "react";
 import GreenButton from "../components/greenButton";
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { View, Text, TextInput, StyleSheet, Image, ScrollView } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, ScrollView, Alert } from "react-native";
 import globalStyle, { AppRoutes } from "@/constant/constant";
 import axios from "axios"
 import { AuthContext } from "@/context/authContext";
@@ -28,28 +28,20 @@ function Index() {
     try {
       const response = await axios.post(AppRoutes.login, obj)
       const data = response?.data?.data
-      saveToken(data?.token)
-      console.log(user.role)
-      if(user?.role === "driver"){
-        router.push("/pages/driverdashboard")
-        return
+      console.log(data);
+      AsyncStorage.setItem("token", data?.token)
+      if(data?.user?.role === "driver"){
+        return router.push("/pages/driverdashboard")
       }  
-      if(user?.role === "user"){
-        router.push("/pages/userdashboard")
-        return 
+      else if(data?.user?.role === "user"){
+        return router.push("/pages/userdashboard")
+      } else{
+        return router.push("/")
       }
     } catch (error) {
-      console.log("error", error);
+      console.log("error==>", error);
     }
   };
-
-  const saveToken = async (token:string) => {
-    try {
-      await AsyncStorage.setItem("token", token)
-    } catch (error) {
-      console.log("Error saving data in AsyncStorage==>", error)
-    }
-  }
 
   return (
     <>
@@ -92,7 +84,7 @@ function Index() {
         </Text>
       </Text>
     </ScrollView>
-    }
+     } 
     </>
   );
 }

@@ -6,7 +6,8 @@ function RoleBasedNavigation() {
   const { user } = useContext(AuthContext);
   const router = useRouter()
 
-  useEffect(() => {
+
+  useEffect(()=> {
     if (!user) {
       router.push("/");
       return;
@@ -23,7 +24,7 @@ function RoleBasedNavigation() {
           router.push("/"); 
       }
     }
-  }, [user]); 
+  }, [user])
 
   return <></>; 
 };
