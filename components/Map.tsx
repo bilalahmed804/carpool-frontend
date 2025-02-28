@@ -16,10 +16,12 @@ interface MapProps {
 
 export default function Map({ pickup_latlon, destination_latlon, initial_Route }: MapProps) {
 
+
     const [pickupLocation, setPickupLocation] = useState<LocationProps | null>(null);
     const [destinationLocation, setDestinationLocation] = useState<LocationProps | null>(null);
     const mapRef = useRef<MapView | null>(null);
     const apikey = process.env.EXPO_PUBLIC_API_KEY;
+
     const [region, setRegion] = useState<regionType | null>(null)
 
     useEffect(() => {
@@ -37,6 +39,7 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
 
     return (
         // map view
+
         <MapView
             style={{ width: width, height: height * 0.49 }}
             ref={mapRef}
@@ -52,6 +55,7 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
             }}
         >
             {/* pickup markup and destination markup */}
+
             {pickupLocation && destinationLocation ? (
                 <>
                     <Marker
@@ -71,6 +75,7 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
                         coordinate={destinationLocation}
                         title="Destination Location"
                         description="This is your destination"
+
                     >
                          <View style={{ width: "auto", height: "auto" }}>
                             <Image
@@ -93,6 +98,7 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
                     strokeColor="blue"
                 />
             )}
+
         </MapView>
     );
 }
