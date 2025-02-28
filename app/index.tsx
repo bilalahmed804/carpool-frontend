@@ -1,86 +1,88 @@
-import Input from '@/components/Input';
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { View, Text, TextInput, StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import GreenButton from '../components/greenButton';
+import { router } from "expo-router";
+import React, { useState } from "react";
+import GreenButton from "../components/greenButton";
+import { View, Text, TextInput, StyleSheet, Image, ScrollView } from "react-native";
+import globalStyle, { AppRoutes } from "@/constant/constant";
+import axios from "axios"
 
+function Index() {
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
-export interface form_Data {
-  email: string,
-  password: string
-}
+  const handleChange = (key: any, value: any) => {
+    setFormData({ ...formData, [key]: value });
+  };
+
+  const handleSubmit = async () => {
+    console.log("Form Data:", formData);
+    const obj = {
+      email : formData.email,
+      password : formData.password
+    }
+    try {
+      const response = await axios.post(AppRoutes.login, obj)
+      console.log("res", response);
+    } catch (error) {
+      console.log("error", error);
+      
+    }
 
 function Index() {
   const { control, handleSubmit } = useForm<form_Data>()
 
   const Submit = (formData: form_Data) => {
-    console.log('Form Data:', formData);
+    console.log('Form Data:', formData)
   };
 
   return (
-    <KeyboardAvoidingView
-      enabled
-      style={{ flex: 1, backgroundColor: 'white' }}
-      behavior={Platform.OS == 'ios' ? 'padding' : undefined}
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-
-      >
-        <View style={styles.container}>
-          <Image source={require('../assets/images/carpool.png')} style={styles.logo} />
-          <Text style={styles.title}>Welcome To Carpool</Text>
-          <Text style={styles.description}>
-            Join our community to share rides, save costs, and make your journey
-            more enjoyable!
-          </Text>
-          <View style={styles.inputContainer}>
-            <Input
-              control={control}
-              placeholder="email"
-              name='email'
-              label='Email'
-              keyboardType="email-address"
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <Input
-              control={control}
-              placeholder='password'
-              name='password'
-              label='Password'
-              secureTextEntry={true}
-            />
-          </View>
-           <GreenButton onPress={handleSubmit(Submit)} text='submit'/>
-          <Text  >New Here? <Text style={styles.link} onPress={() => router.push("/pages/signup")}>Create A New Account</Text></Text>
+    <ScrollView style={globalStyle.container}>
+      <Image
+        source={require("../assets/images/carpool.png")}
+        style={styles.logo}
+      />
+      <Text style={styles.title}>Welcome To Carpool</Text>
+      <Text style={styles.description}>
+        Join our community to share rides, save costs, and make your journey
+        more enjoyable!
+      </Text>
+      <View style={globalStyle.inputContainer}>
+        <Text style={globalStyle.label}>Email</Text>
+        <TextInput
+          style={globalStyle.input}
+          placeholder="user@gmail.com"
+          value={formData.email}
+          onChangeText={(text) => handleChange("email", text)}
+          keyboardType="email-address"
+        />
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        <View style={globalStyle.inputContainer}>
+        <Text style={globalStyle.label}>Password</Text>
+        <TextInput
+          style={globalStyle.input}
+          placeholder="......"
+          value={formData.password}
+          onChangeText={(text) => handleChange("password", text)}
+          secureTextEntry={true}
+          />
+        </View>
+      <GreenButton onPress={handleSubmit} text="submit" />
+      <Text style={styles.link}>
+        New Here?{" "}
+        <Text style={styles.link1} onPress={() => router.push("/pages/signup")}>
+          Create A New Account
+        </Text>
+      </Text>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
     backgroundColor: "white",
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 10,
   },
   logo: {
     width: 220,
@@ -102,18 +104,19 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#666",
   },
-  btn:{
-    marginVertical: 4
+  btn: {
+    marginVertical: 4,
   },
-  link:{
+  link: {
     fontSize: 16,
     marginHorizontal: "auto",
     marginVertical: 12,
-    fontWeight:"900",
+    fontWeight: "900",
   },
-  link1:{
-    color : "#5F9EE0",
-  }
+
+  link1: {
+    color: "#5F9EE0",
+  },
 });
 
-export default Index
+export default Index;
