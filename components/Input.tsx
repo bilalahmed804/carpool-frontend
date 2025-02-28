@@ -1,7 +1,7 @@
 import { Text, TextInputProps, TextInput, StyleSheet, KeyboardTypeOptions } from 'react-native'
 import React, { forwardRef, useId } from 'react'
 import { Control, Controller } from 'react-hook-form'
-import { form_Data } from '@/app'
+import { form_Data } from '@/app/pages/userRegister'
 
 interface Inputprops extends TextInputProps {
     placeholder: string,
