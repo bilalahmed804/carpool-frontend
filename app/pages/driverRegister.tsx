@@ -29,7 +29,6 @@ function DriverRegister(){
  
   const handleChange = (key:any, value:any) => {
     setFormData({ ...formData, [key]: value });
-    console.log("jghfjg",formData.vehicleCategory);
     
     
   }
@@ -65,7 +64,6 @@ function DriverRegister(){
       vehicleImage: vehicleImage,
       role: "driver",
     };
-    console.log("vehicleCategory",obj.vehicleCategory);
     
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);

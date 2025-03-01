@@ -23,12 +23,13 @@ function UserRegister(){
   const {userprofileImage } = useContext(globalContext)
   
      const [formData, setFormData] = useState({
-       name: "",
-       phoneNumber: "",
+      name: "",
+      phoneNumber: "",
       email: "",
       password: "",
       address: "",
       gender: "",
+
       });
      const [error , setError] = useState<{ [key: string]: string }>({})
      
@@ -37,32 +38,49 @@ function UserRegister(){
       };
     const handleSubmit =async () => {
         const newErrors: { [key: string]: string } = {}
-      setError(newErrors)
-      if(!formData.name) newErrors.name = "Name is required"; 
-      if(!formData.address) newErrors.address = "address is required"
-      if(!formData.phoneNumber) newErrors.phoneNumber = "contact is required";
-      if(!formData.email) newErrors.email = "email is required";
-      if(!formData.gender) newErrors.gender = "gender is required";
-      if(!formData.password) newErrors.password = "password is required"
-  
-      console.log('Form Data:', formData);
+        if(!formData.email) newErrors.email = "email is required";
+        if(!formData.password) newErrors.password = "password is required"
+        if(!formData.name) newErrors.name = "Name is required"; 
+        if(!formData.gender) newErrors.gender = "gender is required";
+        if(!formData.address) newErrors.address = "address is required"
+        if(!formData.phoneNumber) newErrors.phoneNumber = "Phone Number is required";
+        
+        setError(newErrors)
 
-      let data = { ...formData, role: "user" , profileImage : userprofileImage};
+        const obj = {
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+          gender: formData.gender,
+          phoneNumber: formData.phoneNumber,
+          address: formData.address,
+          profileImage: userprofileImage,
+          role: "user",
+        };
+      // let data = { ...formData, role: "user" , profileImage : userprofileImage};
+      console.log("all data",obj);
+      
       try {
-        const response = await axios.post(AppRoutes.signupUser, formData)
-            router.push("/pages/userdashboard")
-            return
+        const res = await axios.post(AppRoutes.signupUser, obj);
+console.log("res",res);
+
+        if (res && res.data) {
+          const data = res.data?.data
+          console.log(data)
+          router.push("/pages/userdashboard")
+          console.log("finlly");
+          
+        }
       } catch (error) {
-        console.log("error when sending the data in backend ", error)
-      } 
+        console.error("error when submiting the data", error);
+      }
     };
     return(
          <ScrollView style={globalStyle.backgroundColor}
        >
            <View style={globalStyle.textAlign}>
                     <Text
-                      style={globalStyle.pageHeading}
-                    >
+                      style={globalStyle.pageHeading}>
                       Sign Up
                     </Text>
                     </View>
@@ -96,11 +114,11 @@ function UserRegister(){
                     style={globalStyle.input}
                     placeholder="Enter your Contact"
                     value={formData.phoneNumber}
-                    onChangeText={(text) => handleChange('contact', text.replace(/[^0-9]/g, ''))}
+                    onChangeText={(text) => handleChange('phoneNumber', text.replace(/[^0-9]/g, ''))}
                     keyboardType="numeric"
                     maxLength={11}
                     />
-                    {error.contact && <Text>{error.contact}</Text>}
+                    {error.phoneNumber && <Text>{error.phoneNumber}</Text>}
                 </View>
 
                 <View style={globalStyle.inputContainer}>
@@ -126,7 +144,7 @@ function UserRegister(){
                       {error.address && <Text>{error.address}</Text>}
                   </View>
                   <View style={globalStyle.inputContainer}>
-  <Text style={globalStyle.label}>Gender</Text>
+  <Text style={globalStyle.label}>Select Gender</Text>
   <Picker
         selectedValue={formData.gender}
         onValueChange={(gender) => handleChange('gender', gender)}
@@ -140,7 +158,7 @@ function UserRegister(){
 
         </View>
         <UserImage/>
-              <BlueButton text="Submit" onPress={()=>handleSubmit}/>    
+              <BlueButton text="Submit" onPress={handleSubmit}/>    
         </View>
         </ScrollView>
     )
