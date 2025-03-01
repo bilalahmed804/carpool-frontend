@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons"; // For icons
+import { Ionicons } from "@expo/vector-icons"; 
 
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState("");
   const [destination, setDestination] = useState("");
   return (
     <View style={styles.container}>
-      {/* Map Background */}
       <MapView
         provider={PROVIDER_GOOGLE}
         style={StyleSheet.absoluteFillObject}
@@ -19,13 +18,10 @@ const UserDashboard = () => {
           longitudeDelta: 0.05,
         }}
       />
-
-      {/* Navbar */}
       <View style={styles.navbar}>
         <Ionicons name="menu" size={30} color="#007BFF" />
       </View>
 
-      {/* user Input Fields */}
       <View style={styles.rideContainer}>
         <TextInput
           style={styles.input}
@@ -41,7 +37,6 @@ const UserDashboard = () => {
           value={destination}
           onChangeText={setDestination}
         />
-        {/* search Rider */}
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Search Ride</Text>
         </TouchableOpacity>

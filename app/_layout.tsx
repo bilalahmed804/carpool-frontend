@@ -14,7 +14,7 @@ export default function RootLayout( ) {
       <Stack.Screen name="/userdashboard"/>
       <Stack.Screen name="/driverdashboard"/>
     </Stack>
-    </GlobalContextProvider>
     </AuthContextProvider>
+    </GlobalContextProvider>
   );
 }

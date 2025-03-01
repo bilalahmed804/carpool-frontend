@@ -8,6 +8,9 @@ import { globalContext } from "@/context/globalContext";
 function UserImage (){
     const {userprofileImage , setUserProfileImage}= useContext(globalContext)
 
+    console.log("user image",userprofileImage);
+    
+
     const pickProfileImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
