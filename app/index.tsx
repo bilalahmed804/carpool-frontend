@@ -28,6 +28,10 @@ function Index() {
     try {
       const response = await axios.post(AppRoutes.login, obj)
       const data = response?.data?.data
+<<<<<<< Updated upstream
+=======
+      // console.log(data);
+>>>>>>> Stashed changes
       AsyncStorage.setItem("token", data?.token)
       if(data?.user?.role === "driver"){
         return router.push("/pages/driverdashboard")
