@@ -9,11 +9,11 @@ import {
 } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons"; 
-import Map from "@/components/Map";
 import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
 import globalStyle from "@/constant/constant";
+import AreaCordinate from "@/components/areaCordinate";
 
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState("");
@@ -56,6 +56,7 @@ const UserDashboard = () => {
           value={destination}
           onChangeText={setDestination}
         />
+        <AreaCordinate/>
         <GreenButton text="search Ride" />
       </View>
     </View>
@@ -63,3 +64,38 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "transparent",
+    padding: 2,
+    color: "blue",
+  },
+  rideContainer: {
+    position: "absolute",
+    borderColor: "#5F9EE0",
+    borderWidth: 2,
+    bottom: 2,
+    left: 2,
+    right: 2,
+    backgroundColor: "white",
+    padding: 4,
+    borderRadius: 10,
+  },
+  inputstyle:{
+    margin:2
+  },
+  container2:{
+    flex : 1,
+    flexDirection: "row"
+  },
+  farebtn:{
+    width: "49%"
+  }
+});
