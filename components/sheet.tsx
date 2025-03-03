@@ -16,7 +16,6 @@ export default function Sheet() {
     setUser(null)
     router.push("/")
   }
-
   const closeSheet = () => {
     setOpen(!Open);
   };
@@ -55,8 +54,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   avatar:{
-    width: 46,
-    height: 46,
+    width: 44,
+    height: 44,
     borderRadius: 100
   },
   title: {
@@ -74,10 +73,6 @@ const styles = StyleSheet.create({
   },
   closeButtonText:{
     fontSize: 22
-  },
-  btn:{
-    flex:1,
-    justifyContent: "center",
-    alignItems: "center",
+
   }
 });

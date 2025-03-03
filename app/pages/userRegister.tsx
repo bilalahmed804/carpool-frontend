@@ -142,8 +142,6 @@ function UserRegister() {
           />
           {error.nicNo && <Text>{error.nicNo}</Text>}
         </View>
-=======
-
         <View style={globalStyle.inputContainer}>
           <Text style={globalStyle.label}>Address</Text>
           <TextInput

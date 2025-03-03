@@ -6,11 +6,11 @@ import {
 } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons"; 
-import Map from "@/components/Map";
 import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
 import globalStyle from "@/constant/constant";
+import AreaCordinate from "@/components/areaCordinate";
 
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState("");
@@ -53,6 +53,7 @@ const UserDashboard = () => {
           value={destination}
           onChangeText={setDestination}
         />
+        <AreaCordinate/>
         <GreenButton text="search Ride" />
       </View>
     </View>
@@ -60,8 +61,6 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
-
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -72,11 +71,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "transparent",
     padding: 2,
-    color: "green",
+    color: "blue",
   },
   rideContainer: {
     position: "absolute",
-    borderColor: "#4CAF50",
+    borderColor: "#5F9EE0",
     borderWidth: 2,
     bottom: 2,
     left: 2,
@@ -88,4 +87,5 @@ const styles = StyleSheet.create({
   inputstyle:{
     margin:2
   },
+
 });
