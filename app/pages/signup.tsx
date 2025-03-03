@@ -16,10 +16,16 @@ function SignUp() {
         more enjoyable!
       </Text>
       <View style={styles.btn}>
-      <GreenButton onPress={() => router.push("/pages/driverRegister")} text="Register as driver"/>
+        <GreenButton
+          onPress={() => router.push("/pages/driverRegister")}
+          text="Register as driver"
+        />
       </View>
       <View style={styles.btn2}>
-      <BlueButton onPress={()=> router.push("/pages/userRegister")} text="Register as user"/>
+        <BlueButton
+          onPress={() => router.push("/pages/userRegister")}
+          text="Register as user"
+        />
       </View>
       <Text style={styles.link}>
         Already Have an Account?{" "}
@@ -62,13 +68,13 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     color: "#666",
   },
-  link:{
+  link: {
     fontSize: 16,
     marginHorizontal: "auto",
     marginVertical: 12,
-    fontWeight:"900",
+    fontWeight: "900",
   },
-  link1:{
+  link1: {
     color: "#5F9EE0",
   },
   btn: {
