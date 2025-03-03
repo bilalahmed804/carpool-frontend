@@ -8,7 +8,8 @@ import {
   StyleSheet,
 } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons"; 
+import Map from "@/components/Map";
 import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
@@ -62,49 +63,3 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  navbar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "transparent",
-    padding: 2,
-    color: "green",
-  },
-  rideContainer: {
-    position: "absolute",
-    borderColor: "#4CAF50",
-    borderWidth: 2,
-    bottom: 2,
-    left: 2,
-    right: 2,
-    backgroundColor: "white",
-    padding: 4,
-    borderRadius: 10,
-  },
-  inputstyle:{
-    margin:2
-  },
-  input: {
-    backgroundColor: "white",
-    color: "black",
-    padding: 8,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
