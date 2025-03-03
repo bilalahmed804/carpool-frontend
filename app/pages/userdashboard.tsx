@@ -1,10 +1,7 @@
 import React, { useContext, useState } from "react";
 import {
   View,
-  Text,
   TextInput,
-  TouchableOpacity,
-  Image,
   StyleSheet,
 } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
@@ -63,3 +60,32 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "transparent",
+    padding: 2,
+    color: "green",
+  },
+  rideContainer: {
+    position: "absolute",
+    borderColor: "#4CAF50",
+    borderWidth: 2,
+    bottom: 2,
+    left: 2,
+    right: 2,
+    backgroundColor: "white",
+    padding: 4,
+    borderRadius: 10,
+  },
+  inputstyle:{
+    margin:2
+  },
+});
