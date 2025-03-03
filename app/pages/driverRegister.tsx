@@ -29,7 +29,6 @@ function DriverRegister(){
  
   const handleChange = (key:any, value:any) => {
     setFormData({ ...formData, [key]: value });
-    console.log("jghfjg",formData.vehicleCategory);
     
     
   }
@@ -65,7 +64,7 @@ function DriverRegister(){
       vehicleImage: vehicleImage,
       role: "driver",
     };
-    console.log("vehicleCategory",obj.vehicleCategory);
+    console.log("obj", obj);
     
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);
@@ -79,7 +78,6 @@ function DriverRegister(){
     } catch (error) {
       console.error("error when submiting the data", error);
     }
-    // console.log("obj", obj);
   };
   return (
     <ScrollView style={globalStyle.backgroundColor}
@@ -173,9 +171,9 @@ function DriverRegister(){
         onValueChange={(gender) => handleChange('gender', gender)}
         style={globalStyle.picker}
         >
-        <Picker.Item label="Select an Gender" value="" />
-        <Picker.Item label="Female" value="Female" />
-        <Picker.Item label="Male" value="Male" />
+        <Picker.Item label="Select Gender" value="" />
+        <Picker.Item label="Female" value="female" />
+        <Picker.Item label="Male" value="male" />
       </Picker>
       {error.gender && <Text>{error.gender}</Text>}
 

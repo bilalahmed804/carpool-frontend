@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import PickerImage from "../../components/pickerImage";
 import * as ImagePicker from "expo-image-picker";
 import { Image, View } from "react-native";
@@ -50,7 +50,7 @@ function UserImage (){
                     setUserProfileImage(jsonFile.url)
                     return jsonFile.url
                 }catch(error){
-                    console.error("upload", error);
+                    console.error("Error in uploading to cloudinary", error);
                     return null
                 }
             }

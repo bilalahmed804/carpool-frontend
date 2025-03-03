@@ -1,13 +1,27 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
+import React, { useContext, useState } from "react";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+} from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons"; // For icons
+import BlueButton from "@/components/blueButton";
+import globalStyle from "@/constant/constant";
+import Sheet from "@/components/sheet";
+import { globalContext } from "@/context/globalContext";
 
 const DriverDashboard = () => {
   const [initialLocation, setInitialLocation] = useState("");
   const [destination, setDestination] = useState("");
   const [fare, setFare] = useState("");
   const [seats, setSeats] = useState("");
+  const { setOpen, Open } = useContext(globalContext)
+
+  const closeSheet = () => {
+    setOpen(!Open);
+  };
+
 
   return (
     <View style={styles.container}>
@@ -25,27 +39,30 @@ const DriverDashboard = () => {
 
       {/* Navbar */}
       <View style={styles.navbar}>
-        <Ionicons name="menu" size={30} color="#007BFF" />
+        <Ionicons name="menu" size={30} color="#5F9EE0" onPress={closeSheet} />
       </View>
+
+      {Open && ( <Sheet/>)}
 
       {/* Driver Input Fields */}
       <View style={styles.rideContainer}>
         <TextInput
-          style={styles.input}
+          style={[globalStyle.input, styles.inputstyle]}
           placeholder="Initial Location"
           placeholderTextColor="gray"
           value={initialLocation}
           onChangeText={setInitialLocation}
         />
         <TextInput
-          style={styles.input}
+          style={[globalStyle.input, styles.inputstyle]}
           placeholder="Destination"
           placeholderTextColor="gray"
           value={destination}
           onChangeText={setDestination}
         />
+        <View style={styles.container2}>
         <TextInput
-          style={styles.input}
+          style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
           placeholder="Fare"
           placeholderTextColor="gray"
           keyboardType="numeric"
@@ -53,7 +70,7 @@ const DriverDashboard = () => {
           onChangeText={setFare}
         />
         <TextInput
-          style={styles.input}
+          style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
           placeholder="Seats Available"
           placeholderTextColor="gray"
           keyboardType="numeric"
@@ -61,10 +78,10 @@ const DriverDashboard = () => {
           onChangeText={setSeats}
         />
 
+        </View>
+
         {/* Add Ride Button */}
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Add Ride</Text>
-        </TouchableOpacity>
+        <BlueButton text="Add Ride" />
       </View>
     </View>
   );
@@ -81,38 +98,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "transparent",
-    padding: 10,
-    paddingTop: 20,
-    color:"blue",
+    padding: 2,
+    color: "blue",
   },
-
   rideContainer: {
     position: "absolute",
-   borderColor:"#007BFF",
-   borderWidth:2,
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "lightgray",
-    padding: 10,
+    borderColor: "#5F9EE0",
+    borderWidth: 2,
+    bottom: 2,
+    left: 2,
+    right: 2,
+    backgroundColor: "white",
+    padding: 4,
     borderRadius: 10,
   },
-  input: {
-    backgroundColor: "white ",
-    color: "black",
-    padding: 8,
-    borderRadius: 5,
-    marginBottom: 10,
+  inputstyle:{
+    margin:2
   },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
+  container2:{
+    flex : 1,
+    flexDirection: "row"
   },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+  farebtn:{
+    width: "49%"
+  }
 });
