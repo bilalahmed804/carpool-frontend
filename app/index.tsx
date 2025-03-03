@@ -28,7 +28,10 @@ function Index() {
     try {
       const response = await axios.post(AppRoutes.login, obj)
       const data = response?.data?.data
-      console.log(data);
+<<<<<<< Updated upstream
+=======
+      // console.log(data);
+>>>>>>> Stashed changes
       AsyncStorage.setItem("token", data?.token)
       if(data?.user?.role === "driver"){
         return router.push("/pages/driverdashboard")
@@ -38,8 +41,8 @@ function Index() {
       } else{
         return router.push("/")
       }
-    } catch (error) {
-      console.log("error==>", error);
+    } catch (error:any) {
+      console.log("error==>", error.message);
     }
   };
 

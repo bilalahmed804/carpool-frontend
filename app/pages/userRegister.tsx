@@ -14,12 +14,12 @@ export interface form_Data {
   email: string;
   password: string;
   address: string;
+  nicNo: string;
   gender: string;
-  role?: string
+  role?: string;
 }
 
 function UserRegister() {
-
   const { userprofileImage } = useContext(globalContext)
   const router = useRouter()
   const [formData, setFormData] = useState({
@@ -31,7 +31,7 @@ function UserRegister() {
     gender: "",
     nicNo: ""
   });
-  const [error, setError] = useState<{ [key: string]: string }>({})
+  const [error, setError] = useState<{ [key: string]: string }>({});
 
   const handleChange = (key: any, value: any) => {
     setFormData({ ...formData, [key]: value });
@@ -47,7 +47,6 @@ function UserRegister() {
     if (!formData.phoneNumber) newErrors.phoneNumber = "Phone Number is required";
 
     setError(newErrors)
-
     const obj = {
       email: formData.email,
       password: formData.password,
@@ -143,6 +142,7 @@ function UserRegister() {
           />
           {error.nicNo && <Text>{error.nicNo}</Text>}
         </View>
+=======
 
         <View style={globalStyle.inputContainer}>
           <Text style={globalStyle.label}>Address</Text>
@@ -161,9 +161,9 @@ function UserRegister() {
             onValueChange={(gender) => handleChange('gender', gender)}
             style={globalStyle.picker}
           >
-            <Picker.Item label="Select an Gender" value="" />
-            <Picker.Item label="Female" value="female" />
-            <Picker.Item label="Male" value="male" />
+            <Picker.Item label="Select Gender" value="" />
+            <Picker.Item label="Female" value="Female" />
+            <Picker.Item label="Male" value="Male" />
           </Picker>
           {error.gender && <Text>{error.gender}</Text>}
 
