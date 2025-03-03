@@ -33,7 +33,9 @@ export default function Sheet() {
       </View>
         <Text style={styles.title}>Name</Text>
         <Text style={styles.email}>Name</Text>
+        <View style={styles.btn}>
       <BlueButton onPress={handleLogout} text="logout" />
+        </View>
     </View>
   );
 }
@@ -42,21 +44,19 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     left: 0,
-    width: "55%",
-    height: '100%',
+    width: "100%",
     backgroundColor: "white",
     elevation: 5,
     padding: 10,
   },
   header: {
     justifyContent: "center",
-    flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
   },
   avatar:{
-    width: 44,
-    height: 44,
+    width: 46,
+    height: 46,
     borderRadius: 100
   },
   title: {
@@ -75,15 +75,9 @@ const styles = StyleSheet.create({
   closeButtonText:{
     fontSize: 22
   },
-  logoutButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 5,
+  btn:{
+    flex:1,
+    justifyContent: "center",
     alignItems: "center",
-  },
-  logoutText: {
-    fontSize: 14,
-    color: "black",
   }
-})
+});

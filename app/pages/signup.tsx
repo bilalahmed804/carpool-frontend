@@ -1,7 +1,7 @@
 import BlueButton from "@/components/blueButton";
 import GreenButton from "@/components/greenButton";
 import { router } from "expo-router";
-import { Button, Image, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 
 function SignUp() {
   return (
