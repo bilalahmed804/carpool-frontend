@@ -59,7 +59,7 @@ function UserImage (){
         <View>
 
         <PickerImage onPress={pickProfileImage} text="Profile Image"/>
-        {userprofileImage  && <Image source={{ uri: userprofileImage  }} style={globalStyle.image} />}
+        {userprofileImage  && <Image source={{ uri: userprofileImage || "" }} style={globalStyle.image} />}
         </View>
     )
 }

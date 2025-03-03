@@ -109,13 +109,9 @@ const uploadImageToCloudinaryV = async (image: any) => {
   return (
     <View>
       <PickerImage onPress={pickProfileImage} text="Profile Image"/>
-      {profileImage && (
-        <Image source={{ uri: profileImage }} style={globalStyle.image} />
-      )}
+      {profileImage && <Image source={{ uri: profileImage || "" }} style={globalStyle.image} />}
       <PickerImage onPress={pickVehicleImage} text="Pick Vehicle Image"/>
-      {vehicleImage  && (
-        <Image source={{ uri: vehicleImage  }} style={globalStyle.image} />
-      )}
+      {vehicleImage  && <Image source={{ uri: vehicleImage || ""  }} style={globalStyle.image} />}
     </View>
   )
 };

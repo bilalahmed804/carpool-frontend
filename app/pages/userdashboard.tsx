@@ -2,24 +2,28 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons"; // For icons
+import Map from "@/components/Map";
+import { LocationProps } from "@/types/types";
 
 const UserDashboard = () => {
-  const [initialLocation, setInitialLocation] = useState("");
-  const [destination, setDestination] = useState("");
+  // const [initialLocation, setInitialLocation] = useState('');
+  // const [destination, setDestination] = useState('')
+
+  // const [initialLocationm, setInitialLocationm] = useState<LocationProps>({
+  //   latitude: 24.917,
+  //   longitude: 67.083
+  // });
+  // const [destinationm, setDestinationm] = useState<LocationProps>({
+  //   latitude: 24.86972,
+  //   longitude: 67.36017
+  // })
+
   return (
     <View style={styles.container}>
-      {/* Map Background */}
-      <MapView
-        provider={PROVIDER_GOOGLE}
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={{
-          latitude: 24.8607,
-          longitude: 67.0011,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-      />
 
+      {/* Map*/}
+      <Map  pickup_latlon={initialLocationm} destination_latlon={destinationm}  showtimeandate={true}/>
+   
       {/* Navbar */}
       <View style={styles.navbar}>
         <Ionicons name="menu" size={30} color="#007BFF" />
@@ -41,6 +45,7 @@ const UserDashboard = () => {
           value={destination}
           onChangeText={setDestination}
         />
+
         {/* search Rider */}
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Search Ride</Text>
@@ -63,13 +68,13 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     padding: 10,
     paddingTop: 20,
-    color:"blue",
+    color: "blue",
   },
 
   rideContainer: {
     position: "absolute",
-   borderColor:"#007BFF",
-   borderWidth:2,
+    borderColor: "#007BFF",
+    borderWidth: 2,
     bottom: 10,
     left: 20,
     right: 20,
