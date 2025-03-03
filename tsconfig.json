@@ -3,9 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -14,13 +12,7 @@
     "**/*.jsx",
     "**/*.js",
     ".expo/types/**/*.ts",
-<<<<<<< Updated upstream
-    "expo-env.d.ts",
-    "context/globalContext.js" ,
-  "context/authContext.js" ]
-=======
     "expo-env.d.ts" ,
     "context/globalContext.js" ,
  "context/authContext.js" ]
->>>>>>> Stashed changes
 }
