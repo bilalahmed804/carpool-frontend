@@ -1,21 +1,25 @@
 import { LocationProps, regionType } from '@/types/types';
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Image, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { images } from '@/assets/index';
+import { GetCoordsOfUser } from '@/Hooks/GetCoords';
 
 const { width, height } = Dimensions.get('screen');
+
 
 interface MapProps {
     pickup_latlon: LocationProps,
     destination_latlon: LocationProps,
-    initial_Route: regionType
+    showtimeandate : boolean
 }
 
 
-export default function Map({ pickup_latlon, destination_latlon, initial_Route }: MapProps) {
+export default function Map({ pickup_latlon, destination_latlon , showtimeandate }: MapProps) {
 
+    const [time , setTime ] = useState(0)
+    const [distance , setdistance ] = useState(0)
     const [pickupLocation, setPickupLocation] = useState<LocationProps | null>(null);
     const [destinationLocation, setDestinationLocation] = useState<LocationProps | null>(null);
     const mapRef = useRef<MapView | null>(null);
@@ -23,22 +27,46 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
     const [region, setRegion] = useState<regionType | null>(null)
 
     useEffect(() => {
-        if (pickup_latlon) {
-            setPickupLocation(pickup_latlon)
-        }
-        if (destination_latlon) {
-            setDestinationLocation(destination_latlon)
-        }
-        if (initial_Route) {
-            setRegion(initial_Route)
-        }
-    }, [pickup_latlon, destination_latlon, initial_Route])
+        const accesslocation = async () => {
+            // pickup location
+            if (pickup_latlon) {
+                const data = {
+                    ...pickup_latlon,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421
+                }
+                setPickupLocation(data)
+                if (mapRef.current) {
+                    setTimeout(() => {
+                        mapRef.current?.animateToRegion(data, 1000);
+                    }, 1000);
+                }
+            }
 
+            // destination location 
+            if (destination_latlon) {
+                setDestinationLocation(destination_latlon)
+            }
+
+            // inital routes 
+            const intialroutes = await GetCoordsOfUser();
+            if (intialroutes?.latitude && intialroutes?.longitude) {
+                setRegion({
+                    ...intialroutes,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421
+                });
+            }
+        }
+        accesslocation()
+    }, [pickup_latlon, destination_latlon])
+    console.log("distance", distance);
+    console.log("time" , time)
 
     return (
         // map view
         <MapView
-            style={{ width: width, height: height * 0.49 }}
+            style={{ width: width, height: height * 0.9 }}
             ref={mapRef}
             showsCompass={true}
             showsTraffic={true}
@@ -59,11 +87,11 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
                         title="You"
                         description="This is your pickup location"
                     >
-                        <View style={{ width: "auto", height: "auto" }}>
+                        <View style={styles.markerContainer}>
                             <Image
-                                source={{ uri: images.oval_1_png }}
+                                source={images.oval_1_png}
                                 resizeMode='contain'
-                                style={{ width: '100%', height: "100%" }}
+                                style={styles.markerImage}
                             />
                         </View>
                     </Marker>
@@ -72,11 +100,11 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
                         title="Destination Location"
                         description="This is your destination"
                     >
-                         <View style={{ width: "auto", height: "auto" }}>
+                        <View style={styles.markerContainer}>
                             <Image
-                                source={{ uri: images.Marker_png}}
+                                source={images.Marker_png}
                                 resizeMode='contain'
-                                style={{ width: '100%', height: "100%" }}
+                                style={styles.markerImage}
                             />
                         </View>
                     </Marker>
@@ -89,10 +117,41 @@ export default function Map({ pickup_latlon, destination_latlon, initial_Route }
                     origin={pickupLocation}
                     destination={destinationLocation}
                     apikey={apikey || ""}
-                    strokeWidth={2.5}
-                    strokeColor="blue"
+                    strokeWidth={4}
+                    strokeColor="#1D1616"
+                    onReady={(result)=>{
+                        if(showtimeandate){
+                            const timee= Number(result.duration);
+                            const distance = Number(result.distance);
+                            setTime(parseFloat(timee.toFixed(2)))
+                            setdistance(parseFloat(distance.toFixed(2)))
+                        }
+                    }}
                 />
             )}
+            
         </MapView>
     );
 }
+
+
+
+const styles = StyleSheet.create({
+    markerContainer: {
+        width: 50,
+        height: 50,
+        alignItems: "center",
+        justifyContent: "center", 
+        borderRadius: 25, 
+        backgroundColor: "rgba(255, 255, 100, 0.3)",
+        shadowColor: "#626F47", 
+        shadowOffset: { width: 0, height: 0 }, 
+        shadowOpacity: 0.3, 
+        shadowRadius: 4, 
+        elevation: 10, 
+    },
+    markerImage: {
+        width: 40,
+        height: 40,
+    },
+});

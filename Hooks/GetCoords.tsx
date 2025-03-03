@@ -10,12 +10,13 @@ export  async function GetCoordsOfUser() {
     if (status !== "granted") {
       console.log("Permission denied");
     }
+    
     const getLocation = await Location.getCurrentPositionAsync();
     return getLocation.coords
 
   } catch (error) {
     console.log("Error getting location:", error);
-    return []
+    return null
   }
 }
 

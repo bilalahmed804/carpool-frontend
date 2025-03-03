@@ -1,10 +1,7 @@
 import React, { useContext, useState } from "react";
 import {
   View,
-  Text,
   TextInput,
-  TouchableOpacity,
-  Image,
   StyleSheet,
 } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
@@ -64,7 +61,6 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -91,11 +87,5 @@ const styles = StyleSheet.create({
   inputstyle:{
     margin:2
   },
-  container2:{
-    flex : 1,
-    flexDirection: "row"
-  },
-  farebtn:{
-    width: "49%"
-  }
+
 });

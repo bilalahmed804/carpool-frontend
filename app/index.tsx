@@ -1,4 +1,4 @@
-import { router, useRouter } from "expo-router";
+import {useRouter } from "expo-router";
 import React, { useContext, useState } from "react";
 import GreenButton from "../components/greenButton";
 import AsyncStorage from "@react-native-async-storage/async-storage"

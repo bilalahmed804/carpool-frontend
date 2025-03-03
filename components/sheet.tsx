@@ -6,7 +6,7 @@ import BlueButton from "./blueButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 
-function Sheet() {
+export default function Sheet() {
   const { setOpen, Open } = useContext(globalContext)
   const { user, setUser } = useContext(AuthContext)
   const router = useRouter()
@@ -32,7 +32,9 @@ function Sheet() {
       </View>
         <Text style={styles.title}>Name</Text>
         <Text style={styles.email}>Name</Text>
+        <View style={styles.btn}>
       <BlueButton onPress={handleLogout} text="logout" />
+        </View>
     </View>
   );
 }
@@ -41,8 +43,7 @@ const styles = StyleSheet.create({
   container: {
     position: "absolute",
     left: 0,
-    width: "55%",
-    height: '100%',
+    width: "100%",
     backgroundColor: "white",
     elevation: 5,
     padding: 10,
@@ -72,7 +73,6 @@ const styles = StyleSheet.create({
   },
   closeButtonText:{
     fontSize: 22
+
   }
 });
-
-export default Sheet;
