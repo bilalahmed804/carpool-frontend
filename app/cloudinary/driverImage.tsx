@@ -103,7 +103,7 @@ function DriverImage() {
   return (
     <View>
       <PickerImage onPress={pickProfileImage} text="Profile Image" />
-      {profileImage && (
+      { profileImage && (
         <Image source={{ uri: profileImage }} style={globalStyle.image} />
       )}
       <PickerImage onPress={pickVehicleImage} text="Pick Vehicle Image" />

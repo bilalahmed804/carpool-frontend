@@ -4,6 +4,7 @@ import { useState, createContext } from "react";
 export const globalContext = createContext();
 
 function GlobalContextProvider({ children }) {
+
     const [profileImage, setProfileImage] = useState();
     const [vehicleImage, setVehicleImage] = useState();
     const [userprofileImage , setUserProfileImage] = useState()
