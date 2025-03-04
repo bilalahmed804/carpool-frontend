@@ -10,7 +10,7 @@ export default function Sheet() {
   const { setOpen, Open } = useContext(globalContext)
   const { user, setUser } = useContext(AuthContext)
   const router = useRouter()
-
+  
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token")
     setUser(null)
@@ -28,10 +28,10 @@ export default function Sheet() {
         </TouchableOpacity>
       </View>
       <View style={styles.header}>
-        <Image source={{uri:"http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740119423/Ride_Sharing/Drivers/iltctosvnecmglgceznv.jpg"}} alt="CP" style={styles.avatar}/>
+        <Image source={user?.profileImage} alt="CP" style={styles.avatar}/>
       </View>
-        <Text style={styles.title}>Name</Text>
-        <Text style={styles.email}>Name</Text>
+        <Text style={styles.title}>{user?.name}</Text>
+        <Text style={styles.email}>{user?.email}</Text>
         <View style={styles.btn}>
       <BlueButton onPress={handleLogout} text="logout" />
         </View>
@@ -72,7 +72,10 @@ const styles = StyleSheet.create({
     alignItems :"flex-end",
   },
   closeButtonText:{
-    fontSize: 22
-
+    fontSize: 26,
+  },btn:{
+    flex :1,
+    justifyContent:"center",
+    alignItems:"center"
   }
 });

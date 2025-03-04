@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   },
   rideContainer: {
     position: "absolute",
-    borderColor: "#5F9EE0",
+    borderColor: "#4CAF50",
     borderWidth: 2,
     bottom: 2,
     left: 2,

@@ -38,13 +38,13 @@ function UserRegister() {
   };
   const handleSubmit = async () => {
     const newErrors: { [key: string]: string } = {}
-    if (!formData.email) newErrors.email = "email is required";
-    if (!formData.password) newErrors.password = "password is required"
+    if (!formData.email) newErrors.email = "Email is required";
+    if (!formData.password) newErrors.password = "Password is required"
     if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.gender) newErrors.gender = "gender is required";
-    if (!formData.address) newErrors.address = "address is required"
-    if (!formData.nicNo) newErrors.nicNo = "CNIC is required"
-    if (!formData.phoneNumber) newErrors.phoneNumber = "Phone Number is required";
+    if (!formData.gender) newErrors.gender = "Select Your Gender";
+    if (!formData.address) newErrors.address = "Enter Valid Address"
+    if (!formData.nicNo) newErrors.nicNo = "Enter Valid CNIC"
+    if (!formData.phoneNumber) newErrors.phoneNumber = "Enter Valid Phone Number";
 
     setError(newErrors)
     const obj = {
@@ -83,11 +83,11 @@ function UserRegister() {
       </View>
       <View style={globalStyle.container}>
         <View style={globalStyle.inputContainer}>
-
+        <UserImage />
           <Text style={globalStyle.label}>Name</Text>
           <TextInput
             style={globalStyle.input}
-            placeholder="Enter your Driver Name"
+            placeholder="Enter your Name"
             value={formData.name}
             onChangeText={(text) => handleChange('name', text)}
           />
@@ -105,18 +105,6 @@ function UserRegister() {
           />
           {error.email && <Text>{error.email}</Text>}
         </View>
-        <View style={globalStyle.inputContainer}>
-          <Text style={globalStyle.label}>Contact</Text>
-          <TextInput
-            style={globalStyle.input}
-            placeholder="Enter your Contact"
-            value={formData.phoneNumber}
-            onChangeText={(text) => handleChange('phoneNumber', text.replace(/[^0-9]/g, ''))}
-            keyboardType="numeric"
-            // maxLength={11}
-          />
-          {error.phoneNumber && <Text>{error.phoneNumber}</Text>}
-        </View>
 
         <View style={globalStyle.inputContainer}>
           <Text style={globalStyle.label}>Password</Text>
@@ -131,10 +119,23 @@ function UserRegister() {
         </View>
 
         <View style={globalStyle.inputContainer}>
-          <Text style={globalStyle.label}>CNIC</Text>
+          <Text style={globalStyle.label}>Contact No.</Text>
           <TextInput
             style={globalStyle.input}
-            placeholder="Enter your CNIC (without dashes)"
+            placeholder="Enter your Contact No."
+            value={formData.phoneNumber}
+            onChangeText={(text) => handleChange('phoneNumber', text.replace(/[^0-9]/g, ''))}
+            keyboardType="numeric"
+            // maxLength={11}
+          />
+          {error.phoneNumber && <Text>{error.phoneNumber}</Text>}
+        </View>
+
+        <View style={globalStyle.inputContainer}>
+          <Text style={globalStyle.label}>CNIC No.</Text>
+          <TextInput
+            style={globalStyle.input}
+            placeholder="Enter your CNIC No. (without dashes)"
             value={formData.nicNo}
             onChangeText={(text) => handleChange('nicNo', text.replace(/[^0-9]/g, ''))}
             keyboardType="numeric"
@@ -166,7 +167,7 @@ function UserRegister() {
           {error.gender && <Text>{error.gender}</Text>}
 
         </View>
-        <UserImage />
+        
         <BlueButton text="Submit" onPress={handleSubmit} />
       </View>
     </ScrollView>
