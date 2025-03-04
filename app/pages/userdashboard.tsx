@@ -11,15 +11,24 @@ import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
 import globalStyle from "@/constant/constant";
 import AreaCordinate from "@/components/areaCordinate";
+import { useRouter } from "expo-router";
+
 
 const UserDashboard = () => {
+  const router = useRouter()
   const [initialLocation, setInitialLocation] = useState("");
   const [destination, setDestination] = useState("");
   const { setOpen, Open } = useContext(globalContext);
-
+  
   const closeSheet = () => {
     setOpen(!Open);
   };
+  
+  const handleSearchRides =() => {
+    router.push("/pages/searchedRides")
+  }
+
+
   return (
     <View style={styles.container}>
       <MapView
@@ -54,7 +63,7 @@ const UserDashboard = () => {
           onChangeText={setDestination}
         />
         <AreaCordinate/>
-        <GreenButton text="search Ride" />
+        <GreenButton onPress={handleSearchRides} text="search Ride" />
       </View>
     </View>
   );
