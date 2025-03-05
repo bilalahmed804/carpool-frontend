@@ -66,7 +66,6 @@ function DriverRegister(){
     };
     console.log("obj", obj);
     
-    router.push("/pages/driverdashboard")
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);
       if (res && res.data) {
