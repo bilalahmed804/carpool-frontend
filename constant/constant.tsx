@@ -104,12 +104,11 @@ const globalStyle = StyleSheet.create({
         alignItems: "center",
         marginBottom: 8,
       },
-
 })
 
 export default globalStyle;
-const devURL = "http://192.168.100.50:4000";
-const prodURL = "https://carpool-backend-staging.up.railway.app";
+const devURL = "http://192.168.5.230:4000";
+// const prodURL = "https://carpool-backend-staging.up.railway.app";
 
 
 export const BASE_URL = devURL;

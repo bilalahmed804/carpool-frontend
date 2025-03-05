@@ -61,8 +61,6 @@ function UserRegister() {
     // let data = { ...formData, role: "user" , profileImage : userprofileImage};
     console.log("all data", obj);
     console.log("userImage", userprofileImage);
-    router.push("/pages/userdashboard")
-
     try {
       const res = await axios.post(AppRoutes.signupUser, obj);
       const data = res.data?.data

@@ -10,7 +10,7 @@ import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
 import globalStyle from "@/constant/constant";
-import AreaCordinate from "@/components/areaCordinate";
+import AutoComplete from "@/components/autoComplete";
 
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState("");
@@ -53,10 +53,13 @@ const UserDashboard = () => {
           value={destination}
           onChangeText={setDestination}
         />
-        <AreaCordinate/>
         <GreenButton text="search Ride" />
       </View>
     </View>
+    // <AutoComplete onPress={(data, details = null) => {
+
+    //   console.log(data, details);
+    // }} text=""/>
   );
 };
 
