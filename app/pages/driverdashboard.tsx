@@ -5,15 +5,17 @@ import {
   StyleSheet,
 } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons"; // For icons
+import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
 import globalStyle from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
+import AutoComplete from "@/components/autoComplete";
+import { GooglePlaceDetail } from "react-native-google-places-autocomplete"; 
 
 const DriverDashboard = () => {
-  const [initialLocation, setInitialLocation] = useState("");
-  const [destination, setDestination] = useState("");
+  const [initialLocation, setInitialLocation] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [destination, setDestination] = useState<{ latitude: number, longitude: number } | null>(null);
   const [fare, setFare] = useState("");
   const [seats, setSeats] = useState("");
   const { setOpen, Open } = useContext(globalContext)
@@ -22,10 +24,23 @@ const DriverDashboard = () => {
     setOpen(!Open);
   };
 
+  const handleAddRide =() =>{
+    const rideData = {
+      initialLatitude: initialLocation?.latitude, 
+      initialLongitude: initialLocation?.longitude,
+      destinationLatitude: destination?.latitude,
+      destinationLongitude: destination?.longitude,
+      fare,
+      seats
+    }
+    console.log("rideDAta",rideData);
+    
+  }
+
+  console.log("area list", initialLocation?.latitude, destination?.longitude);
 
   return (
     <View style={styles.container}>
-      {/* Map Background */}
       <MapView
         provider={PROVIDER_GOOGLE}
         style={StyleSheet.absoluteFillObject}
@@ -37,51 +52,58 @@ const DriverDashboard = () => {
         }}
       />
 
-      {/* Navbar */}
       <View style={styles.navbar}>
         <Ionicons name="menu" size={30} color="#5F9EE0" onPress={closeSheet} />
       </View>
 
-      {Open && ( <Sheet/>)}
+      {Open && <Sheet />}
 
-      {/* Driver Input Fields */}
       <View style={styles.rideContainer}>
-        <TextInput
-          style={[globalStyle.input, styles.inputstyle]}
-          placeholder="Initial Location"
-          placeholderTextColor="gray"
-          value={initialLocation}
-          onChangeText={setInitialLocation}
+        <AutoComplete 
+          onPress={(details: GooglePlaceDetail | null) => { 
+            if (details?.geometry?.location) {
+              const selectLatitude = details.geometry.location.lat;
+              const selectLongitude = details.geometry.location.lng;
+              setInitialLocation({ latitude: selectLatitude, longitude: selectLongitude });
+            } else {
+              console.log("No location found");
+            }
+          }} 
+          text="Enter pickup location" 
         />
-        <TextInput
-          style={[globalStyle.input, styles.inputstyle]}
-          placeholder="Destination"
-          placeholderTextColor="gray"
-          value={destination}
-          onChangeText={setDestination}
+
+        <AutoComplete 
+          onPress={(details: GooglePlaceDetail | null) => {
+            if (details?.geometry?.location) {
+              const selectLatitude = details.geometry.location.lat;
+              const selectLongitude = details.geometry.location.lng;
+              setDestination({ latitude: selectLatitude, longitude: selectLongitude });
+            } else {
+              console.log("No location found");
+            }
+          }} 
+          text="Enter destination" 
         />
+
         <View style={styles.container2}>
-        <TextInput
-          style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
-          placeholder="Fare"
-          placeholderTextColor="gray"
-          keyboardType="numeric"
-          value={fare}
-          onChangeText={setFare}
-        />
-        <TextInput
-          style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
-          placeholder="Seats Available"
-          placeholderTextColor="gray"
-          keyboardType="numeric"
-          value={seats}
-          onChangeText={setSeats}
-        />
-
+          <TextInput
+            style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
+            placeholder="Fare"
+            placeholderTextColor="gray"
+            keyboardType="numeric"
+            value={fare}
+            onChangeText={setFare}
+          />
+          <TextInput
+            style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
+            placeholder="Seats Available"
+            placeholderTextColor="gray"
+            keyboardType="numeric"
+            value={seats}
+            onChangeText={setSeats}
+          />
         </View>
-
-        {/* Add Ride Button */}
-        <BlueButton text="Add Ride" />
+        <BlueButton text="Add Ride" onPress={handleAddRide}/>
       </View>
     </View>
   );
@@ -112,14 +134,14 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 10,
   },
-  inputstyle:{
-    margin:2
+  inputstyle: {
+    margin: 2
   },
-  container2:{
-    flex : 1,
+  container2: {
+    flex: 1,
     flexDirection: "row"
   },
-  farebtn:{
+  farebtn: {
     width: "49%"
   }
 });

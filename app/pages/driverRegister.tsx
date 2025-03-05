@@ -66,12 +66,13 @@ function DriverRegister(){
     };
     console.log("obj", obj);
     
+    router.push("/pages/driverdashboard")
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);
       if (res && res.data) {
         const data = res.data?.data
-        console.log(data)
         router.push("/pages/driverdashboard")
+        console.log(data)
         console.log("finlly");
         
       }

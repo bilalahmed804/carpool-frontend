@@ -1,5 +1,6 @@
 import GlobalContextProvider from "@/context/globalContext";
 import AuthContextProvider from "@/context/authContext";
+import 'react-native-get-random-values';
 import { Stack } from "expo-router";
 export default function RootLayout( ) {
 

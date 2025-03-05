@@ -104,7 +104,6 @@ const globalStyle = StyleSheet.create({
         alignItems: "center",
         marginBottom: 8,
       },
-
 })
 
 export default globalStyle;

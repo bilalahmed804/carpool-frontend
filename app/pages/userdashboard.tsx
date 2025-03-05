@@ -10,9 +10,8 @@ import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
 import globalStyle from "@/constant/constant";
-import AreaCordinate from "@/components/areaCordinate";
+import AutoComplete from "@/components/autoComplete";
 import { useRouter } from "expo-router";
-
 
 const UserDashboard = () => {
   const router = useRouter()
@@ -62,10 +61,14 @@ const UserDashboard = () => {
           value={destination}
           onChangeText={setDestination}
         />
-        <AreaCordinate/>
+
         <GreenButton onPress={handleSearchRides} text="search Ride" />
       </View>
     </View>
+    // <AutoComplete onPress={(data, details = null) => {
+
+    //   console.log(data, details);
+    // }} text=""/>
   );
 };
 
