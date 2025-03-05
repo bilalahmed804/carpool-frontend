@@ -65,7 +65,6 @@ function DriverRegister(){
       role: "driver",
     };
     console.log("obj", obj);
-    
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);
       if (res && res.data) {
