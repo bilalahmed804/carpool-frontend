@@ -32,7 +32,7 @@ console.log("userid",user);
 
   const handleAddRide =async() =>{
     const rideData = {
-      userID : "76567yhjhff87jn",
+      userID : user._id,
       availableSeats :seats,
       status:"pending",
       farePerSeat :fare,
