@@ -30,7 +30,6 @@ console.log("userid",user);
 
   const router = useRouter()
   const socket = io(BASE_URL)
-  const {user } = useContext(AuthContext)
   
   const closeSheet = () => {
     setOpen(!Open);
