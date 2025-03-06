@@ -30,7 +30,7 @@ console.log("userid",user);
 
   const router = useRouter()
   const socket = io(BASE_URL)
-
+  
   const closeSheet = () => {
     setOpen(!Open);
   };

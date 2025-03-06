@@ -22,7 +22,7 @@ function AuthContextProvider({ children }) {
       }
     }
     getCurrentUserInfo()
-  }, [token])  
+  }, [])  
   
 
 

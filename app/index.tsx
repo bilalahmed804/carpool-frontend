@@ -9,7 +9,7 @@ import { AuthContext } from "@/context/authContext";
 import RoleBasedNavigation from "@/components/roleBasedNavigation";
 
 function Index() {
-  const { user } = useContext(AuthContext)
+  const { user, setUser } = useContext(AuthContext)
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
@@ -29,6 +29,7 @@ function Index() {
       const response = await axios.post(AppRoutes.login, obj)
       const data = response?.data?.data
       AsyncStorage.setItem("token", data?.token)
+      setUser(data?.user)
       if(data?.user?.role === "driver"){
         return router.push("/pages/driverdashboard")
       }  

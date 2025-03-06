@@ -22,7 +22,7 @@ function RoleBasedNavigation(){
       default:
         router.push("/");
     }
-  }, [user, router]);
+  }, [user]);
 
   return null; 
 };
