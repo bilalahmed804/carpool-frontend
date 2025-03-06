@@ -18,7 +18,7 @@ function AuthContextProvider({ children }) {
         })
         setUser(response?.data?.data)
       } catch (error) {
-        console.log("context me error==>", error)
+        console.log("no token==>", error)
       }
     }
     getCurrentUserInfo()

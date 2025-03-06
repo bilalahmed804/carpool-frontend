@@ -11,7 +11,6 @@ function RoleBasedNavigation(){
       router.push("/");
       return;
     }
-    
     switch (user?.role) {
       case "driver":
         router.push("/pages/driverdashboard");
