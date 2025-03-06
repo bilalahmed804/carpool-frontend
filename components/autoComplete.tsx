@@ -17,6 +17,10 @@ const AutoComplete = ({text,onPress}:typeString) => {
       fetchDetails={true}
   placeholder={text}
   onPress={onPress}
+  onFail={(error)=>{
+    console.log("google errror",error);
+    
+  }}
   query={{
     key: process.env.EXPO_PUBLIC_API_KEY,
     language: "en",
