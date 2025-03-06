@@ -24,6 +24,7 @@ export default function Map({ pickup_latlon, destination_latlon , showtimeandate
     const [destinationLocation, setDestinationLocation] = useState<LocationProps | null>(null);
     const mapRef = useRef<MapView | null>(null);
     const apikey = process.env.EXPO_PUBLIC_API_KEY;
+
     const [region, setRegion] = useState<regionType | null>(null)
 
     useEffect(() => {
@@ -65,6 +66,7 @@ export default function Map({ pickup_latlon, destination_latlon , showtimeandate
 
     return (
         // map view
+
         <MapView
             style={{ width: width, height: height * 0.9 }}
             ref={mapRef}
@@ -80,6 +82,7 @@ export default function Map({ pickup_latlon, destination_latlon , showtimeandate
             }}
         >
             {/* pickup markup and destination markup */}
+
             {pickupLocation && destinationLocation ? (
                 <>
                     <Marker
@@ -99,6 +102,7 @@ export default function Map({ pickup_latlon, destination_latlon , showtimeandate
                         coordinate={destinationLocation}
                         title="Destination Location"
                         description="This is your destination"
+
                     >
                         <View style={styles.markerContainer}>
                             <Image

@@ -3,5 +3,6 @@ export const images = {
   oval_1_png: require('./images/Oval.png'),
   oval_2_png: require('./images/Oval2x.png'),
   Marker_png: require('./images/greenMarker.png'),
-  Marker_2_png: require('./images/greenMarker2x.png')
+  Marker_2_png: require('./images/greenMarker2x.png'),
+  Logo : require('./images/carpool.png')
 }
