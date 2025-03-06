@@ -61,6 +61,7 @@ function UserRegister() {
     // let data = { ...formData, role: "user" , profileImage : userprofileImage};
     console.log("all data", obj);
     console.log("userImage", userprofileImage);
+    // router.push("/pages/userdashboard")
     try {
       const res = await axios.post(AppRoutes.signupUser, obj);
       const data = res.data?.data
@@ -159,8 +160,8 @@ function UserRegister() {
             style={globalStyle.picker}
           >
             <Picker.Item label="Select Gender" value="" />
-            <Picker.Item label="Female" value="Female" />
-            <Picker.Item label="Male" value="Male" />
+            <Picker.Item label="Female" value="female" />
+            <Picker.Item label="Male" value="male" />
           </Picker>
           {error.gender && <Text>{error.gender}</Text>}
 
