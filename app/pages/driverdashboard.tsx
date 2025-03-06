@@ -44,7 +44,6 @@ console.log("userid",user);
       routes :[{latitude:initialLocation?.latitude ,longitude:initialLocation?.longitude},
         {latitude: destination?.latitude, longitude:destination?.longitude}
       ],
-
     }
     console.log("rideDAta",rideData);
 
