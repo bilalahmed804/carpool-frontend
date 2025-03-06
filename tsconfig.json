@@ -3,9 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
@@ -14,7 +12,7 @@
     "**/*.jsx",
     "**/*.js",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "context/globalContext.js",
- "context/authContext.js"  ]
+    "expo-env.d.ts" ,
+    "context/globalContext.js" ,
+ "context/authContext.js" ]
 }

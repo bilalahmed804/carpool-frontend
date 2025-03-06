@@ -4,13 +4,17 @@ import { useState, createContext } from "react";
 export const globalContext = createContext();
 
 function GlobalContextProvider({ children }) {
-    const [profileImage, setProfileImage] = useState('');
-    const [vehicleImage, setVehicleImage] = useState('');
-    const [userprofileImage , setUserProfileImage] = useState('')
+
+    const [profileImage, setProfileImage] = useState();
+    const [vehicleImage, setVehicleImage] = useState();
+    const [userprofileImage , setUserProfileImage] = useState()
+    const [Open, setOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
+
   
   return (
     <globalContext.Provider value={{profileImage, setProfileImage, vehicleImage, setVehicleImage,
-      userprofileImage , setUserProfileImage
+      userprofileImage , setUserProfileImage, Open, setOpen, modalOpen, setModalOpen
     }}>
       {children}
     </globalContext.Provider>

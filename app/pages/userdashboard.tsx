@@ -1,62 +1,78 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet } from "react-native";
+import React, { useContext, useState } from "react";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+} from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons"; // For icons
-import Map from "@/components/Map";
-import { LocationProps } from "@/types/types";
+import { Ionicons } from "@expo/vector-icons"; 
+import GreenButton from "@/components/greenButton";
+import { globalContext } from "@/context/globalContext";
+import Sheet from "@/components/sheet";
+import globalStyle from "@/constant/constant";
+import AutoComplete from "@/components/autoComplete";
+import { useRouter } from "expo-router";
 
 const UserDashboard = () => {
-  // const [initialLocation, setInitialLocation] = useState('');
-  // const [destination, setDestination] = useState('')
+  const router = useRouter()
+  const [initialLocation, setInitialLocation] = useState("");
+  const [destination, setDestination] = useState("");
+  const { setOpen, Open } = useContext(globalContext);
+  
+  const closeSheet = () => {
+    setOpen(!Open);
+  };
+  
+  const handleSearchRides =() => {
+    router.push("/pages/searchedRides")
+  }
 
-  // const [initialLocationm, setInitialLocationm] = useState<LocationProps>({
-  //   latitude: 24.917,
-  //   longitude: 67.083
-  // });
-  // const [destinationm, setDestinationm] = useState<LocationProps>({
-  //   latitude: 24.86972,
-  //   longitude: 67.36017
-  // })
 
   return (
     <View style={styles.container}>
-
-      {/* Map*/}
-      <Map  pickup_latlon={initialLocationm} destination_latlon={destinationm}  showtimeandate={true}/>
-   
-      {/* Navbar */}
+      <MapView
+        provider={PROVIDER_GOOGLE}
+        style={StyleSheet.absoluteFillObject}
+        initialRegion={{
+          latitude: 24.8607,
+          longitude: 67.0011,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      />
       <View style={styles.navbar}>
-        <Ionicons name="menu" size={30} color="#007BFF" />
+        <Ionicons name="menu" size={30} color="#4CAF50" onPress={closeSheet} />
       </View>
 
-      {/* user Input Fields */}
+      {Open && <Sheet />}
+
       <View style={styles.rideContainer}>
         <TextInput
-          style={styles.input}
+          style={[globalStyle.input, styles.inputstyle]}
           placeholder="Enter pickup location"
           placeholderTextColor="gray"
           value={initialLocation}
           onChangeText={setInitialLocation}
         />
         <TextInput
-          style={styles.input}
+          style={[globalStyle.input, styles.inputstyle]}
           placeholder="Enter destination"
           placeholderTextColor="gray"
           value={destination}
           onChangeText={setDestination}
         />
 
-        {/* search Rider */}
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Search Ride</Text>
-        </TouchableOpacity>
+        <GreenButton onPress={handleSearchRides} text="search Ride" />
       </View>
     </View>
+    // <AutoComplete onPress={(data, details = null) => {
+
+    //   console.log(data, details);
+    // }} text=""/>
   );
 };
 
 export default UserDashboard;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -66,38 +82,22 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "transparent",
-    padding: 10,
-    paddingTop: 20,
+    padding: 2,
     color: "blue",
   },
-
   rideContainer: {
     position: "absolute",
-    borderColor: "#007BFF",
+    borderColor: "#4CAF50",
     borderWidth: 2,
-    bottom: 10,
-    left: 20,
-    right: 20,
-    backgroundColor: "lightgray",
-    padding: 10,
+    bottom: 2,
+    left: 2,
+    right: 2,
+    backgroundColor: "white",
+    padding: 4,
     borderRadius: 10,
   },
-  input: {
-    backgroundColor: "white",
-    color: "black",
-    padding: 8,
-    borderRadius: 5,
-    marginBottom: 10,
+  inputstyle:{
+    margin:2
   },
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 12,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+
 });

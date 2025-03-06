@@ -1,5 +1,6 @@
 import GlobalContextProvider from "@/context/globalContext";
 import AuthContextProvider from "@/context/authContext";
+import 'react-native-get-random-values';
 import { Stack } from "expo-router";
 export default function RootLayout( ) {
 
@@ -13,6 +14,7 @@ export default function RootLayout( ) {
       <Stack.Screen name="/driverRegister"/>
       <Stack.Screen name="/userdashboard"/>
       <Stack.Screen name="/driverdashboard"/>
+      <Stack.Screen name="/searchedRides"/>
     </Stack>
     </AuthContextProvider>
     </GlobalContextProvider>

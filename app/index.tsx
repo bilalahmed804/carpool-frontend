@@ -1,4 +1,4 @@
-import { router, useRouter } from "expo-router";
+import {useRouter } from "expo-router";
 import React, { useContext, useState } from "react";
 import GreenButton from "../components/greenButton";
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -28,7 +28,6 @@ function Index() {
     try {
       const response = await axios.post(AppRoutes.login, obj)
       const data = response?.data?.data
-      console.log(data);
       AsyncStorage.setItem("token", data?.token)
       if(data?.user?.role === "driver"){
         return router.push("/pages/driverdashboard")
@@ -38,8 +37,8 @@ function Index() {
       } else{
         return router.push("/")
       }
-    } catch (error) {
-      console.log("error==>", error);
+    } catch (error:any) {
+      console.log("error==>", error.message);
     }
   };
 

@@ -29,7 +29,6 @@ function DriverRegister(){
  
   const handleChange = (key:any, value:any) => {
     setFormData({ ...formData, [key]: value });
-    console.log("jghfjg",formData.vehicleCategory);
     
     
   }
@@ -37,13 +36,13 @@ function DriverRegister(){
       const newErrors: { [key: string]: string } = {}
     setError(newErrors)
     if(!formData.name) newErrors.name = "Name is required"; 
-    if(!formData.address) newErrors.address = "address is required"
-    if(!formData.cnic) newErrors.cnic = "nic is required";
-    if(!formData.contact) newErrors.contact = "contact is required";
-    if(!formData.email) newErrors.email = "email is required";
-    if(!formData.gender) newErrors.gender = "gender is required";
-    if(!formData.licenseNumber) newErrors.licenseNumber = "licenseNumber is required";
-    if(!formData.password) newErrors.password = "password is required";
+    if(!formData.address) newErrors.address = "Enter Valid Address"
+    if(!formData.cnic) newErrors.cnic = "Enter Valid CNIC";
+    if(!formData.contact) newErrors.contact = "Enter Valid Contact No.";
+    if(!formData.email) newErrors.email = "Email is required";
+    if(!formData.gender) newErrors.gender = "Select Your Gender";
+    if(!formData.licenseNumber) newErrors.licenseNumber = "LicenseNumber is required";
+    if(!formData.password) newErrors.password = "Password is required";
     if(!formData.profileImage) newErrors.profileImage = "profileImage is required";
     if(!formData.vehicleImage) newErrors.vehicleImage = "vehicleImage is required";
     if(!formData.vehicleNumber) newErrors.vehicleNumber = "vehicleNumber is required";
@@ -65,21 +64,19 @@ function DriverRegister(){
       vehicleImage: vehicleImage,
       role: "driver",
     };
-    console.log("vehicleCategory",obj.vehicleCategory);
-    
+    console.log("obj", obj);
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);
       if (res && res.data) {
         const data = res.data?.data
-        console.log(data)
         router.push("/pages/driverdashboard")
+        console.log(data)
         console.log("finlly");
         
       }
     } catch (error) {
       console.error("error when submiting the data", error);
     }
-    // console.log("obj", obj);
   };
   return (
     <ScrollView style={globalStyle.backgroundColor}
@@ -96,7 +93,7 @@ function DriverRegister(){
     <Text style={globalStyle.label}>Name</Text>
     <TextInput
       style={globalStyle.input}
-      placeholder="Enter your Driver Name"
+      placeholder="Enter your Name"
       value={formData.name}
       onChangeText={(text) => handleChange('name', text)}
     />
@@ -117,32 +114,6 @@ function DriverRegister(){
   </View>
 
   <View style={globalStyle.inputContainer}>
-    <Text style={globalStyle.label}>Contact</Text>
-    <TextInput
-      style={globalStyle.input}
-      placeholder="Enter your Contact"
-      value={formData.contact}
-      onChangeText={(text) => handleChange('contact', text.replace(/[^0-9]/g, ''))}
-      keyboardType="numeric"
-      maxLength={11}
-      />
-      {error.contact && <Text>{error.contact}</Text>}
-  </View>
-
-  <View style={globalStyle.inputContainer}>
-    <Text style={globalStyle.label}>CNIC</Text>
-    <TextInput
-      style={globalStyle.input}
-      placeholder="Enter your CNIC (without dashes)"
-      value={formData.cnic}
-      onChangeText={(text) => handleChange('cnic', text.replace(/[^0-9]/g, ''))}
-      keyboardType="numeric"
-      maxLength={13}
-      />
-      {error.cnic && <Text>{error.cnic}</Text>}
-  </View>
-
-  <View style={globalStyle.inputContainer}>
     <Text style={globalStyle.label}>Password</Text>
     <TextInput
       style={globalStyle.input}
@@ -153,6 +124,34 @@ function DriverRegister(){
       />
       {error.password && <Text>{error.password}</Text>}
   </View>
+
+  <View style={globalStyle.inputContainer}>
+    <Text style={globalStyle.label}>Contact No.</Text>
+    <TextInput
+      style={globalStyle.input}
+      placeholder="Enter your Contact No."
+      value={formData.contact}
+      onChangeText={(text) => handleChange('contact', text.replace(/[^0-9]/g, ''))}
+      keyboardType="numeric"
+      maxLength={11}
+      />
+      {error.contact && <Text>{error.contact}</Text>}
+  </View>
+
+  <View style={globalStyle.inputContainer}>
+    <Text style={globalStyle.label}>CNIC No.</Text>
+    <TextInput
+      style={globalStyle.input}
+      placeholder="Enter your CNIC No. (without dashes)"
+      value={formData.cnic}
+      onChangeText={(text) => handleChange('cnic', text.replace(/[^0-9]/g, ''))}
+      keyboardType="numeric"
+      maxLength={13}
+      />
+      {error.cnic && <Text>{error.cnic}</Text>}
+  </View>
+
+  
 
   <View style={globalStyle.inputContainer}>
     <Text style={globalStyle.label}>Address</Text>
@@ -173,9 +172,9 @@ function DriverRegister(){
         onValueChange={(gender) => handleChange('gender', gender)}
         style={globalStyle.picker}
         >
-        <Picker.Item label="Select an Gender" value="" />
-        <Picker.Item label="Female" value="Female" />
-        <Picker.Item label="Male" value="Male" />
+        <Picker.Item label="Select Gender" value="" />
+        <Picker.Item label="Female" value="female" />
+        <Picker.Item label="Male" value="male" />
       </Picker>
       {error.gender && <Text>{error.gender}</Text>}
 
@@ -193,6 +192,20 @@ function DriverRegister(){
       {error.vehicleCategory && <Text>{error.vehicleCategory}</Text>}
         </View>
   </View>
+    
+  <DriverImage/> 
+
+  <View style={globalStyle.inputContainer}>
+    <Text style={globalStyle.label}>License Number</Text>
+    <TextInput
+      style={globalStyle.input}
+      placeholder="Enter your License Number"
+      value={formData.licenseNumber}
+      onChangeText={(text) => handleChange('licenseNumber', text)}
+      autoCapitalize="characters"
+      />
+      {error.licenseNumber && <Text>{error.licenseNumber}</Text>}
+  </View>
 
   <View style={globalStyle.inputContainer}>
     <Text style={globalStyle.label}>Vehicle Number</Text>
@@ -206,20 +219,9 @@ function DriverRegister(){
       {error.vehicleNumber && <Text>{error.vehicleNumber}</Text>}
   </View>
 
-  <View style={globalStyle.inputContainer}>
-    <Text style={globalStyle.label}>License Number</Text>
-    <TextInput
-      style={globalStyle.input}
-      placeholder="Enter your License Number"
-      value={formData.licenseNumber}
-      onChangeText={(text) => handleChange('licenseNumber', text)}
-      autoCapitalize="characters"
-      />
-      {error.licenseNumber && <Text>{error.licenseNumber}</Text>}
-  </View>
-  <View style={globalStyle.inputContainer}>
-    </View>
-       <DriverImage/> 
+  
+  
+       
             <GreenButton onPress={handleSubmit}  text='Submit'/>
 </View>
 </ScrollView>
