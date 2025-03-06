@@ -7,11 +7,13 @@ import {
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
-import globalStyle, { AppRoutes } from "@/constant/constant";
+import globalStyle, { BASE_URL, AppRoutes } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete"; 
+import { io } from "socket.io-client";
+import { router, useRouter } from "expo-router";
 import {GooglePlacesAutocomplete} from "react-native-google-places-autocomplete";
 import axios from "axios";
 import { AuthContext } from "@/context/authContext";
@@ -25,6 +27,9 @@ const DriverDashboard = () => {
   const {user} = useContext(AuthContext)
 
 console.log("userid",user);
+
+  const router = useRouter()
+  const socket = io(BASE_URL)
 
   const closeSheet = () => {
     setOpen(!Open);
@@ -42,6 +47,7 @@ console.log("userid",user);
 
     }
     console.log("rideDAta",rideData);
+
     try{
       const response = await axios.post(AppRoutes.DriverJourney , rideData)
       console.log("finally",response.data);

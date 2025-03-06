@@ -1,11 +1,10 @@
 import GreenButton from "@/components/greenButton";
 import { BASE_URL } from "@/constant/constant";
+import { AuthContext } from "@/context/authContext";
 import { globalContext } from "@/context/globalContext";
 import React, { useContext } from "react";
 import {
-  FlatList,
   Image,
-  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -35,19 +34,25 @@ export default function SearchedRides() {
     },
   ];
   const { setModalOpen, modalOpen } = useContext(globalContext);
-
+  const { user } = useContext(AuthContext)
+  console.log("searchedrides pe ==>",user);
+  
   const closeModal = () => {
     setModalOpen(!modalOpen);
   };
 
   const handleRequest = () => {
     const socket = io(BASE_URL)
-    socket.on("data", (payload)=>{
-      console.log(payload);
-    })
-    socket.emit("data1", (payload1:any)=>{
-      console.log(payload1);
-    })
+    // socket.on("data", (payload)=>{
+    //   console.log(payload);
+    // })
+    const userData = {
+      "name": user?.name,
+      "phoneNumber" : user?.phoneNumber,
+      "profileImage" : user?.profileImage 
+    }
+  
+    socket.emit("userData", userData)
   }
 
   return (
