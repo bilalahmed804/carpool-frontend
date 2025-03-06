@@ -118,7 +118,7 @@ export const AppRoutes = {
   login: BASE_URL + "/user/login",
   getAllUser: BASE_URL + "/user/allUsers",
   getCurrentUser: BASE_URL + "/user/currentUser",
-  UserJourney : BASE_URL + '/rides/user',
+  UserJourney : BASE_URL + "/rides/user",
   DriverJourney : BASE_URL + '/rides/rider',
   areaCordinate : BASE_URL + "/location/getLocations"
 };
