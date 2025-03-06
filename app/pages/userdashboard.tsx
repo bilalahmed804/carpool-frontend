@@ -23,7 +23,11 @@ const UserDashboard = () => {
   const closeSheet = () => {
     setOpen(!Open);
   };
+
+  const {user } =useContext(AuthContext)
+  console.log(user);
   
+
   const handleSearchRides =() => {
     router.push("/pages/searchedRides")
   }

@@ -14,6 +14,7 @@ import AutoComplete from "@/components/autoComplete";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete"; 
 import { io } from "socket.io-client";
 import { router, useRouter } from "expo-router";
+import { AuthContext } from "@/context/authContext";
 
 const DriverDashboard = () => {
   const [initialLocation, setInitialLocation] = useState<{ latitude: number, longitude: number } | null>(null);
@@ -21,10 +22,10 @@ const DriverDashboard = () => {
   const [fare, setFare] = useState("");
   const [seats, setSeats] = useState("");
   const { setOpen, Open } = useContext(globalContext)
-
   const router = useRouter()
   const socket = io(BASE_URL)
-
+  const {user } = useContext(AuthContext)
+  
   const closeSheet = () => {
     setOpen(!Open);
   };
