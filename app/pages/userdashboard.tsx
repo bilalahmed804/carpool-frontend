@@ -12,6 +12,7 @@ import Sheet from "@/components/sheet";
 import globalStyle from "@/constant/constant";
 import AutoComplete from "@/components/autoComplete";
 import { useRouter } from "expo-router";
+import { AuthContext } from "@/context/authContext";
 
 const UserDashboard = () => {
   const router = useRouter()

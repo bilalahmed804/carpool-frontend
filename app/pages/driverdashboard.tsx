@@ -7,11 +7,13 @@ import {
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
-import globalStyle from "@/constant/constant";
+import globalStyle, { BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete"; 
+import { io } from "socket.io-client";
+import { router, useRouter } from "expo-router";
 
 const DriverDashboard = () => {
   const [initialLocation, setInitialLocation] = useState<{ latitude: number, longitude: number } | null>(null);
@@ -19,6 +21,9 @@ const DriverDashboard = () => {
   const [fare, setFare] = useState("");
   const [seats, setSeats] = useState("");
   const { setOpen, Open } = useContext(globalContext)
+
+  const router = useRouter()
+  const socket = io(BASE_URL)
 
   const closeSheet = () => {
     setOpen(!Open);
@@ -34,6 +39,7 @@ const DriverDashboard = () => {
       seats
     }
     console.log("rideDAta",rideData);
+    router.push("/pages/driverResponse")
     
   }
 
