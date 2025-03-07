@@ -10,7 +10,6 @@ import { globalContext } from '@/context/globalContext';
 
 function DriverRegister(){
   const {profileImage ,vehicleImage} = useContext(globalContext)
-  
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -217,11 +216,7 @@ function DriverRegister(){
       autoCapitalize="characters"
       />
       {error.vehicleNumber && <Text>{error.vehicleNumber}</Text>}
-  </View>
-
-  
-  
-       
+  </View>  
             <GreenButton onPress={handleSubmit}  text='Submit'/>
 </View>
 </ScrollView>
