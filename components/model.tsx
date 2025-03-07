@@ -8,12 +8,10 @@ type BottomSheetModalProps = {
   name: string;
   fare: string;
   Vehicle: string;
-  onAccept: () => void;
-  onReject: () => void;
   onClose: () => void;
 };
 
-const BottomSheetModal = ({ isVisible, message,name,fare,Vehicle, onAccept,onReject ,onClose }: BottomSheetModalProps) => {
+const BottomSheetModal = ({ isVisible, message,name,fare,Vehicle ,onClose }: BottomSheetModalProps) => {
   return (
     <Modal visible={isVisible} transparent animationType="slide">
       <View style={styles.overlay}>

@@ -23,6 +23,7 @@ const DriverDashboard = () => {
     longitude: number;
   } | null>(null);
   const [fare, setFare] = useState("");
+  const [modalVisible, setModalVisible] = useState(false)
   const [seats, setSeats] = useState("");
   const { setOpen, Open } = useContext(globalContext);
   const { user } = useContext(AuthContext);
@@ -68,7 +69,6 @@ const DriverDashboard = () => {
         
     }
   }
-  console.log("area list", initialLocation?.latitude, destination?.longitude);
 
   return (
     <View style={styles.container}>
@@ -84,7 +84,7 @@ const DriverDashboard = () => {
       />
 <RoutePolyline routeCoordinates={coordinates} />
       <View style={styles.navbar}>
-        <Ionicons name="menu" size={30} color="#5F9EE0" onPress={closeSheet} />
+        <Ionicons name="menu" size={30} onPress={closeSheet} />
       </View>
 
       {Open && <Sheet />}
@@ -154,14 +154,6 @@ const DriverDashboard = () => {
         name="Driver Modal"
         fare="500"
         Vehicle="Car"
-        onAccept={() => {
-          console.log("Cancel Ride");
-          setModalVisible(false);
-        }}
-        onReject={() => {
-          console.log("Start Ride");
-          setModalVisible(false);
-        }}
         onClose={() => setModalVisible(false)}
       />
         <BlueButton text="Add Ride" onPress={handleAddRide} />
