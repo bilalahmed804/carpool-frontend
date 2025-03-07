@@ -1,65 +1,60 @@
 import React, { useContext, useState } from "react";
-import {
-  View,
-  TextInput,
-  StyleSheet,
-} from "react-native";
+import { View, TextInput, StyleSheet } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
-import globalStyle, { BASE_URL, AppRoutes } from "@/constant/constant";
+import globalStyle, {  AppRoutes } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
-import { GooglePlaceDetail } from "react-native-google-places-autocomplete"; 
-import { io } from "socket.io-client";
-import { router, useRouter } from "expo-router";
-import {GooglePlacesAutocomplete} from "react-native-google-places-autocomplete";
+import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import axios from "axios";
 import { AuthContext } from "@/context/authContext";
 
 const DriverDashboard = () => {
-  const [initialLocation, setInitialLocation] = useState<{ latitude: number, longitude: number } | null>(null);
-  const [destination, setDestination] = useState<{ latitude: number, longitude: number } | null>(null);
+  const [driverInitialLocation, setDriverInitialLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [driverDestination, setDriverDestination] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [fare, setFare] = useState("");
   const [seats, setSeats] = useState("");
-  const { setOpen, Open } = useContext(globalContext)
-  const {user} = useContext(AuthContext)
+  const { setOpen, Open } = useContext(globalContext);
+  const { user } = useContext(AuthContext);
 
-console.log("userid",user);
-
-  const router = useRouter()
-  const socket = io(BASE_URL)
-  
   const closeSheet = () => {
     setOpen(!Open);
   };
 
-  const handleAddRide =async() =>{
+  const handleAddRide = async () => {
     const rideData = {
-      userID : user._id,
-      availableSeats :seats,
-      status:"pending",
-      farePerSeat :fare,
-      routes :[{latitude:initialLocation?.latitude ,longitude:initialLocation?.longitude},
-        {latitude: destination?.latitude, longitude:destination?.longitude}
+      userID: user._id,
+      availableSeats: seats,
+      status: "pending",
+      farePerSeat: fare,
+      routes: [
+        {
+          latitude: driverInitialLocation?.latitude,
+          longitude: driverInitialLocation?.longitude,
+        },
+        {
+          latitude: driverDestination?.latitude,
+          longitude: driverDestination?.longitude,
+        },
       ],
-    }
-    console.log("rideDAta",rideData);
+    };
+    console.log("rideDAta", rideData);
 
-    try{
-      const response = await axios.post(AppRoutes.DriverJourney , rideData)
-      console.log("finally",response.data);
-      
-    }catch(error){
-        console.log(error);
-        
+    try {
+      const response = await axios.post(AppRoutes.DriverJourney, rideData);
+      console.log("Ride Added", response.data);
+    } catch (error) {
+      console.log(error);
     }
-    
-  }
-  console.log("area list", initialLocation?.latitude, destination?.longitude);
-  
-
+  };
 
   return (
     <View style={styles.container}>
@@ -81,84 +76,45 @@ console.log("userid",user);
       {Open && <Sheet />}
 
       <View style={styles.rideContainer}>
-            <GooglePlacesAutocomplete
-              fetchDetails={true}
-          placeholder="Initial loaction"
-          onPress={(data ,details: GooglePlaceDetail | null) => { 
+        <AutoComplete
+          onPress={(data: any, details: GooglePlaceDetail | null) => {
             if (details?.geometry?.location) {
-              const selectLatitude = details?.geometry?.location.lat;
-              const selectLongitude = details?.geometry?.location.lng;
-              setInitialLocation({ latitude: selectLatitude, longitude: selectLongitude });
+              const initialCordinate = details?.geometry?.location;
+              setDriverInitialLocation({
+                latitude: initialCordinate.lat,
+                longitude: initialCordinate.lng,
+              });
+              console.log(
+                "data des",
+                data.description,
+                details?.geometry?.location
+              );
             } else {
-              console.log("No location found");
-            }}}
-          query={{
-            key: process.env.EXPO_PUBLIC_API_KEY,
-            language: "en",
+              console.log("no location found");
+            }
           }}
-          styles={{ textInputContainer: {
-            backgroundColor: "white",
-            borderRadius: 10,
-            marginHorizontal: 10,
-          },
-          textInput: {
-            height: 50,
-            color: "black",  
-            fontSize: 16,
-            borderRadius: 10,
-            paddingLeft: 10,
-          },
-          listView: {
-            position: "absolute",
-            top: 60, 
-            left: 10,
-            right: 10,
-            backgroundColor: "white",
-            borderRadius: 10,
-            elevation: 5, 
-            zIndex: 1
-          }}}
-        />
-            <GooglePlacesAutocomplete
-              fetchDetails={true}
-          placeholder="Destination loaction"
-          onPress={(data ,details: GooglePlaceDetail | null) => { 
-            if (details?.geometry?.location) {
-              const selectLatitude = details?.geometry?.location.lat;
-              const selectLongitude = details?.geometry?.location.lng;
-              setDestination({ latitude: selectLatitude, longitude: selectLongitude });
-            } else {
-              console.log("No location found");
-            }}}
-          query={{
-            key: process.env.EXPO_PUBLIC_API_KEY,
-            language: "en",
-          }}
-          styles={{ textInputContainer: {
-            backgroundColor: "white",
-            borderRadius: 10,
-            marginHorizontal: 10,
-          },
-          textInput: {
-            height: 50,
-            color: "black",  
-            fontSize: 16,
-            borderRadius: 10,
-            paddingLeft: 10,
-          },
-          listView: {
-            position: "absolute",
-            top: 60, 
-            left: 10,
-            right: 10,
-            backgroundColor: "white",
-            borderRadius: 10,
-            elevation: 5, 
-            zIndex: 1
-          }}}
+          text="Enter Initial Location"
         />
 
-      
+        <AutoComplete
+          onPress={(data: any, details: GooglePlaceDetail | null) => {
+            if (details?.geometry?.location) {
+              const initialCordinate = details?.geometry?.location;
+              setDriverDestination({
+                latitude: initialCordinate.lat,
+                longitude: initialCordinate.lng,
+              });
+              console.log(
+                "data des",
+                data.description,
+                details?.geometry?.location
+              );
+            } else {
+              console.log("no location found");
+            }
+          }}
+          text="Destination"
+        />
 
         <View style={styles.container2}>
           <TextInput
@@ -178,7 +134,7 @@ console.log("userid",user);
             onChangeText={setSeats}
           />
         </View>
-        <BlueButton text="Add Ride" onPress={handleAddRide}/>
+        <BlueButton text="Add Ride" onPress={handleAddRide} />
       </View>
     </View>
   );
@@ -210,13 +166,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   inputstyle: {
-    margin: 2
+    margin: 2,
   },
   container2: {
     flex: 1,
-    flexDirection: "row"
+    flexDirection: "row",
   },
   farebtn: {
-    width: "49%"
-  }
+    width: "49%",
+  },
 });
