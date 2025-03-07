@@ -40,12 +40,12 @@ export default function Sheet() {
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
     left: 0,
-    width: "100%",
+    width: "60%",
+    height:"65%",
+    borderTopRightRadius:20,
     backgroundColor: "white",
     elevation: 5,
-    padding: 10,
   },
   header: {
     justifyContent: "center",
@@ -72,10 +72,12 @@ const styles = StyleSheet.create({
   },
   closeButtonText:{
     fontSize: 26,
-  },btn:{
+  }
+  ,btn:{
     flex :1,
-    justifyContent:"center",
-    alignItems:"center"
+    justifyContent:"flex-end",
+padding:10,
+marginBottom:30,
   }
 });
 
