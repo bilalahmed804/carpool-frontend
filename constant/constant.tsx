@@ -38,7 +38,54 @@ const globalStyle = StyleSheet.create({
         fontWeight: "semibold",
         fontFamily: "sans-serif",
     },
-
+    buttonText: {
+        color: "white",
+        fontSize: 16,
+        fontWeight: "bold",
+      },
+      overlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+      },
+      modalContainer: {
+        width: 320,
+        padding: 20,
+        backgroundColor: "white",
+        borderRadius: 10,
+        alignItems: "center",
+        elevation: 5,
+      },
+      message: {
+        fontSize: 18,
+        marginBottom: 20,
+        textAlign: "center",
+        fontWeight: "bold",
+      },
+      buttonContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+      },
+      button: {
+        flex: 1,
+        padding: 12,
+        borderRadius: 5,
+        alignItems: "center",
+        marginHorizontal: 5,
+      },
+      acceptButton: {
+        backgroundColor: "#4CAF50",
+      },
+      rejectButton: {
+        backgroundColor: "lightcoral",
+      },
+      closeButton: {
+        position: "absolute",
+        top: 10,
+        right: 10,
+      },
     greenButton: {
         backgroundColor: "#4CAF50",
         color: "white",

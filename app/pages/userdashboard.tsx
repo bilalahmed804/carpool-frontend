@@ -9,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
-import globalStyle, { AppRoutes } from "@/constant/constant";
+import { AppRoutes } from "@/constant/constant";
 import AutoComplete from "@/components/autoComplete";
 import { useRouter } from "expo-router";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete";

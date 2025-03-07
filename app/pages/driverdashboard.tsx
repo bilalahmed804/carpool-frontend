@@ -10,6 +10,8 @@ import AutoComplete from "@/components/autoComplete";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import axios from "axios";
 import { AuthContext } from "@/context/authContext";
+import Modal from "@/components/model";
+import RoutePolyline from "@/components/pollyline";
 
 const DriverDashboard = () => {
   const [driverInitialLocation, setDriverInitialLocation] = useState<{
@@ -29,7 +31,15 @@ const DriverDashboard = () => {
     setOpen(!Open);
   };
 
-  const handleAddRide = async () => {
+  const coordinates = [
+    { latitude: 24.8607, longitude: 67.0011 }, 
+    { latitude: 24.8707, longitude: 67.0111 }, 
+    { latitude: 24.8807, longitude: 67.0211 }, 
+  ];
+
+  const handleAddRide =async() =>{
+    const modelValue = true;
+    setModalVisible(true);
     const rideData = {
       userID: user._id,
       availableSeats: seats,
@@ -48,13 +58,17 @@ const DriverDashboard = () => {
     };
     console.log("rideDAta", rideData);
 
-    try {
-      const response = await axios.post(AppRoutes.DriverJourney, rideData);
-      console.log("Ride Added", response.data);
-    } catch (error) {
-      console.log(error);
+    try{
+      const response = await axios.post(AppRoutes.DriverJourney , rideData)
+      console.log("finally",response.data);
+      
+      
+    }catch(error){
+        console.log(error);
+        
     }
-  };
+  }
+  console.log("area list", initialLocation?.latitude, destination?.longitude);
 
   return (
     <View style={styles.container}>
@@ -68,7 +82,7 @@ const DriverDashboard = () => {
           longitudeDelta: 0.05,
         }}
       />
-
+<RoutePolyline routeCoordinates={coordinates} />
       <View style={styles.navbar}>
         <Ionicons name="menu" size={30} color="#5F9EE0" onPress={closeSheet} />
       </View>
@@ -134,6 +148,22 @@ const DriverDashboard = () => {
             onChangeText={setSeats}
           />
         </View>
+       <Modal
+        isVisible={modalVisible}
+        message="Waiting for Passengers.."
+        name="Driver Modal"
+        fare="500"
+        Vehicle="Car"
+        onAccept={() => {
+          console.log("Cancel Ride");
+          setModalVisible(false);
+        }}
+        onReject={() => {
+          console.log("Start Ride");
+          setModalVisible(false);
+        }}
+        onClose={() => setModalVisible(false)}
+      />
         <BlueButton text="Add Ride" onPress={handleAddRide} />
       </View>
     </View>

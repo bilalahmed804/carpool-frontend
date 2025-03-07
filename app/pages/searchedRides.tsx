@@ -92,12 +92,12 @@ export default function SearchedRides() {
           </View>
           <View style={styles.infoContainer}>
             <Text style={styles.title}>Name</Text>
-            <Text style={styles.gender}>Gender</Text>
-            <Text style={styles.vehicletype}>Vehicle</Text>
-            <Text style={styles.vehicleNo}>Vehicle No.</Text>
-            <Text style={styles.seats}>Available Seats</Text>
-            <Text style={styles.routes}>Routes</Text>
-            <Text style={styles.charges}>Charges</Text>
+            <Text style={styles.nameStyle}>Gender</Text>
+            <Text style={styles.nameStyle}>Vehicle</Text>
+            <Text style={styles.nameStyle}>Vehicle No.</Text>
+            <Text style={styles.nameStyle}>Available Seats</Text>
+            <Text style={styles.nameStyle}>Routes</Text>
+            <Text style={styles.nameStyle}>Charges</Text>
           </View>
           <View style={styles.btn}>
             <GreenButton onPress={closeModal} text="call" />
@@ -158,27 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
   },
-  vehicletype: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  gender: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  seats: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  vehicleNo: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  routes: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  charges: {
+  nameStyle: {
     fontSize: 16,
     textAlign: "center",
   },
