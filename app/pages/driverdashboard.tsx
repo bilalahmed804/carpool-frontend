@@ -33,6 +33,7 @@ const DriverDashboard = () => {
     longitude: number;
   } | null>(null);
   const [fare, setFare] = useState("");
+  const [modalVisible, setModalVisible] = useState(false)
   const [seats, setSeats] = useState("");
   const { setOpen, Open } = useContext(globalContext);
   const { user } = useContext(AuthContext);
@@ -124,7 +125,7 @@ const DriverDashboard = () => {
       />
 <RoutePolyline routeCoordinates={coordinates} />
       <View style={styles.navbar}>
-        <Ionicons name="menu" size={30} color="#5F9EE0" onPress={closeSheet} />
+        <Ionicons name="menu" size={30} onPress={closeSheet} />
       </View>
 
       {Open && <Sheet />}
@@ -188,6 +189,7 @@ const DriverDashboard = () => {
             onChangeText={setSeats}
           />
         </View>
+
     <Modal visible={modalVisible} transparent animationType="slide">
           <View style={styles.overlay}>
             <View style={styles.modalContainer}>
