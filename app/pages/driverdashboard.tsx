@@ -70,7 +70,6 @@ const DriverDashboard = () => {
   const [seats, setSeats] = useState("");
   const { setOpen, Open } = useContext(globalContext);
   const { user } = useContext(AuthContext);
-  const [modalVisible, setModalVisible] = useState(false);
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -165,7 +164,6 @@ const DriverDashboard = () => {
           onPress={closeSheet}
           color={"#5F9EE0"}
         />
-      </View>
 
       {Open && <Sheet />}
       <View style={styles.rideContainer}>
@@ -216,7 +214,6 @@ const DriverDashboard = () => {
   text="Destination"
 />
 
-          />
          
           <View style={styles.fareContainer}>
             <TextInput
