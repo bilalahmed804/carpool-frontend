@@ -3,7 +3,7 @@ import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityInd
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
-import globalStyle, {  AppRoutes } from "@/constant/constant";
+import globalStyle, { AppRoutes } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
@@ -12,7 +12,6 @@ import axios from "axios";
 import { AuthContext } from "@/context/authContext";
 import { Modal } from "react-native";
 import RoutePolyline from "@/components/pollyline";
-import GreenButton from "@/components/greenButton";
 
 interface UserData {
   name: string;
@@ -67,6 +66,7 @@ const DriverDashboard = () => {
     longitude: number;
   } | null>(null);
   const [fare, setFare] = useState("");
+  const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
   const { setOpen, Open } = useContext(globalContext);
   const { user } = useContext(AuthContext);
@@ -83,19 +83,21 @@ const DriverDashboard = () => {
         seat: 2,
         area: {
           latitude: "north karachi",
-          longitude: "islamabad",
+          longitude: "korangi",
         },
       });
       setLoading(false);
-    }, 5000)
+    }, 5000);
   }, []);
 
   const driverData = {
     name: "Ali Khan",
     profilePic:
       "http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740661676/Ride_Sharing/Drivers/nyabkfscagusux11fxl8.jpg",
-    fare: "500 PKR",
+    fare: "Rs.500",
     vehicle: "Toyota Corolla",
+    initialLocation: "zaitoon ashraf",
+    DestinationLocation: "Gulshan",
   };
 
   const onClose = () => {
@@ -106,17 +108,16 @@ const DriverDashboard = () => {
     setOpen(!Open);
   };
 
-
   const coordinates = [
-    { latitude: 24.8607, longitude: 67.0011 }, 
-    { latitude: 24.8707, longitude: 67.0111 }, 
-    { latitude: 24.8807, longitude: 67.0211 }, 
+    { latitude: 24.8607, longitude: 67.0011 },
+    { latitude: 24.8707, longitude: 67.0111 },
+    { latitude: 24.8807, longitude: 67.0211 },
   ];
 
   const handleAddRide =async() =>{
       
     getIntermediatePoints(driverInitialLocation, driverDestination, 4);
-      
+
     setModalVisible(true);
     const rideData = {
       userID: user._id,
@@ -136,16 +137,13 @@ const DriverDashboard = () => {
     };
     console.log("rideDAta", rideData);
 
-    try{
-      const response = await axios.post(AppRoutes.DriverJourney , rideData)
-      console.log("finally",response.data);
-      
-      
-    }catch(error){
-        console.log(error);
-        
+    try {
+      const response = await axios.post(AppRoutes.DriverJourney, rideData);
+      console.log("finally", response.data);
+    } catch (error) {
+      console.log(error);
     }
-  }
+  };
 
   return (
     <View style={styles.container}>
@@ -159,13 +157,17 @@ const DriverDashboard = () => {
           longitudeDelta: 0.05,
         }}
       />
-<RoutePolyline routeCoordinates={coordinates} />
+      <RoutePolyline routeCoordinates={coordinates} />
       <View style={styles.navbar}>
-        <Ionicons name="menu" size={30} color="#5F9EE0" onPress={closeSheet} />
+        <Ionicons
+          name="menu"
+          size={40}
+          onPress={closeSheet}
+          color={"#5F9EE0"}
+        />
       </View>
 
       {Open && <Sheet />}
-
       <View style={styles.rideContainer}>
          <AutoComplete
   onPress={(data: any, details: GooglePlaceDetail | null) => {
@@ -214,99 +216,102 @@ const DriverDashboard = () => {
   text="Destination"
 />
 
-        <View style={styles.container2}>
-          <TextInput
-            style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
-            placeholder="Fare"
-            placeholderTextColor="gray"
-            keyboardType="numeric"
-            value={fare}
-            onChangeText={setFare}
           />
-          <TextInput
-            style={[globalStyle.input, styles.farebtn, styles.inputstyle]}
-            placeholder="Seats Available"
-            placeholderTextColor="gray"
-            keyboardType="number-pad"
-            value={seats}
-            onChangeText={setSeats}
-          />
+         
+          <View style={styles.fareContainer}>
+            <TextInput
+              style={styles.inputField}
+              placeholder="Fare"
+              placeholderTextColor="gray"
+              keyboardType="numeric"
+              value={fare}
+              onChangeText={setFare}
+            />
+            <TextInput
+              style={styles.inputField}
+              placeholder="Seats Available"
+              placeholderTextColor="gray"
+              keyboardType="number-pad"
+              value={seats}
+              onChangeText={setSeats}
+            />
+          </View>
+          <BlueButton text="Add Ride" onPress={handleAddRide} />
         </View>
-    <Modal visible={modalVisible} transparent animationType="slide">
+        <Modal visible={modalVisible} transparent animationType="slide">
           <View style={styles.overlay}>
             <View style={styles.modalContainer}>
               <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Ionicons name="close" size={24} color="#333" />
+                <Ionicons name="close" size={40} color="#333" />
               </TouchableOpacity>
-    
-              <Text style={styles.message}>{loading ? "massege" 
-                      : "Waiting for driver to accept"}</Text>
-              <View style={styles.card}>
-                <Image source={{ uri: driverData.profilePic }} style={styles.driverImage} />
+
+              <Text style={styles.message}>
+                {loading ? "massege" : "Waiting for Passanger..."}
+              </Text>
+              <View style={styles.driverCard}>
                 <View style={styles.info}>
-                  <Text style={styles.name}>{driverData.name}</Text>
-                  <Text style={styles.fare}>{driverData.fare}</Text>
-                  <Text style={styles.vehicle}>{driverData.vehicle}</Text>
+                  <Text style={styles.fare}>
+                    {driverData.fare} {" - "} {driverData.initialLocation} to{" "}
+                    {driverData.DestinationLocation}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={onClose} //temprary on close
+                  >
+                    <View style={styles.button}>
+                      <Text style={styles.buttonText}>Cancel My Ride</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
               </View>
-              <View style={styles.card}>
+              <View style={styles.driverCard}>
                 {loading ? (
                   <>
-                    <ActivityIndicator size="large" color="#007BFF" style={styles.spinner} />
-    
-                    <Text style={styles.message}>"Wating user passanger..."</Text>
+                    <ActivityIndicator
+                      size="large"
+                      color="#007BFF"
+                      style={styles.spinner}
+                    />
+
+                    <Text style={styles.message}>
+                      "Wating user passanger..."
+                    </Text>
                   </>
                 ) : (
                   <>
-                    {/* {userData && <Image source={{ uri: userData.profilePic }} style={styles.userImage} />} */}
                     <View>
                       {userData && (
                         <View style={styles.userCard}>
-                          <Image source={{ uri: userData.profilePic }} style={styles.userImage} />
-                          <View>
-                          <Text style={styles.name}>{userData.name}</Text>
-                          <Text style={styles.detail}>Seats: {userData.seat}</Text>
-                          <Text style={styles.detail}>
-                            Area: Lat {userData.area.latitude}, Lng {userData.area.longitude}
-                          </Text>
+                          <Image
+                            source={{ uri: userData.profilePic }}
+                            style={styles.userImage}
+                          />
+                          <View style={styles.userInfo}>
+                            <Text style={styles.name}>{userData.name}</Text>
+                            <Text style={styles.detail}>
+                              Seats: {userData.seat}
+                            </Text>
+                            <Text style={styles.detail}>
+                              from {userData.area.latitude} to {""}
+                              {userData.area.longitude}
+                            </Text>
                           </View>
                         </View>
                       )}
-                          <View style={styles.buttonAccept}>
-                    <TouchableOpacity >
-                      <View style={styles.buttonuser1}>
-                        <Text style={styles.buttonTextuser1}>Accept</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity >
-                      <View style={styles.buttonuser}>
-                        <Text style={styles.buttonTextuser}>Reject</Text>
-                        </View>
-                    </TouchableOpacity>
-                              </View>
+                      <View style={styles.buttonRow}>
+                        <TouchableOpacity style={styles.buttonAccept}>
+                          <Text style={styles.buttonText}>Accept</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.buttonReject}>
+                          <Text style={styles.buttonText}>Reject</Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </>
                 )}
               </View>
-    
-            
-    <View style={styles.buttonpadding}>
- <TouchableOpacity >
-      <View style={styles.button}>
-        <Text style={styles.buttonText}>Cencel Ride</Text>
-      </View>
-    </TouchableOpacity>
- <TouchableOpacity >
-      <View style={styles.button}>
-        <Text style={styles.buttonText}>Start Now</Text>
-      </View>
-    </TouchableOpacity>
-            
-    </View>
             </View>
           </View>
         </Modal>
-        <BlueButton text="Add Ride" onPress={handleAddRide} />
       </View>
     </View>
   );
@@ -334,18 +339,8 @@ const styles = StyleSheet.create({
     left: 2,
     right: 2,
     backgroundColor: "white",
-    padding: 4,
-    borderRadius: 10,
-  },
-  inputstyle: {
-    margin: 2,
-  },
-  container2: {
-    flex: 1,
-    flexDirection: "row",
-  },
-  farebtn: {
-    width: "49%",
+    padding: 8,
+    borderRadius: 20,
   },
   overlay: {
     flex: 1,
@@ -354,10 +349,11 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     backgroundColor: "#fff",
-    padding: 20,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
-    gap: 4,
+    paddingLeft: 15,
+    paddingRight: 15,
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+    gap: 2,
     minHeight: "95%",
     alignItems: "center",
     shadowColor: "#000",
@@ -370,86 +366,106 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     padding: 5,
   },
-
-  buttonpadding: {
-    padding: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  buttonAccept: {
-    padding: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-
-  },
   button: {
-    backgroundColor: "#007BFF",
+    backgroundColor: "#dc3545",
     padding: 10,
     borderRadius: 5,
+    marginTop: 10,
+    alignItems: "center",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 15,
+  },
+  buttonAccept: {
+    backgroundColor: "#28a745",
+    padding: 12,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  buttonReject: {
+    backgroundColor: "#dc3545",
+    padding: 12,
+    borderRadius: 8,
+    flex: 1,
     alignItems: "center",
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
+    fontWeight: "500",
   },
-  buttonuser: {
-    backgroundColor: "red",
-    padding: 20,
-    fontWeight: "bold",
-    borderRadius: 5,
-    alignItems: "center",
+  inputCard: {
+    backgroundColor: "#FFF",
+    padding: 12,
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    marginBottom: 10,
   },
-  buttonuser1: {
-    backgroundColor: "green",
-    padding: 20,
-    borderRadius: 5,
-    alignItems: "center",
-  },
-  buttonTextuser: {
-    color: "#fff",
-    fontSize: 16,
-  },
-  buttonTextuser1: {
-    fontWeight: "bold",
-    fontSize: 20,
-    color: "#fff",
-    textAlign: "center",
-    width: 170,
-    
-
-  },
-  card: {
+  fareContainer: {
     flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  inputField: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+    padding: 12,
+    borderRadius: 8,
+    marginHorizontal: 5,
+    borderWidth: 1,
+    borderColor: "#CCC",
+  },
+
+  name: {
+    fontSize: 18,
+    fontWeight: "500",
+  },
+  driverCard: {
+    flexDirection: "row",
+    borderEndEndRadius: 30,
+    borderTopLeftRadius: 30,
+    justifyContent: "space-between",
     alignItems: "center",
     padding: 15,
-    backgroundColor: "#f8f9fa",
-    // borderRadius:6,
+    marginBottom: 20,
+    backgroundColor: "",
     width: "100%",
-    // shadowColor: "#000",
-    // shadowOpacity: 0.1,
-    // shadowRadius: 5,
-    elevation: 3,
-    marginTop: 10,
+    elevation: 5,
+    borderColor: "gray",
   },
-  userCard:{
+  userCard: {
     flexDirection: "row",
-    height: 80,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 5,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 5,
+    elevation: 3,
+    marginVertical: 5,
+    width: "100%",
   },
   userImage: {
-    width: 60,
-    height: 60,
-    padding: 10,
+    width: 55,
+    height: 55,
+    borderRadius: 50,
     marginRight: 15,
-    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: "#007BFF",
   },
-  driverImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 15,
-  },
+  userInfo: { flex: 1 },
+  detail: { fontSize: 17, fontWeight: "500", color: "#666" },
   info: {
     flex: 1,
   },
@@ -460,23 +476,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#555",
     textAlign: "center",
-    marginVertical: 10,
-  },
-  name: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#222",
-  },
-  detail: {
-    fontSize: 16,
-    color: "#555",
   },
   fare: {
-    fontSize: 16,
+    fontSize: 18,
+    justifyContent: "space-between",
+    fontWeight: "500",
+    marginRight: 20,
     color: "#555",
-  },
-  vehicle: {
-    fontSize: 14,
-    color: "#777",
   },
 });

@@ -5,6 +5,7 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import BlueButton from "./blueButton";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Sheet() {
   const { setOpen, Open } = useContext(globalContext)
@@ -23,9 +24,7 @@ export default function Sheet() {
   return (
     <View style={styles.container}>
       <View style={styles.closeButton}>
-        <TouchableOpacity>
-          <Text style={styles.closeButtonText} onPress={closeSheet} >X</Text>
-        </TouchableOpacity>
+        <Ionicons name="close" size={30} onPress={closeSheet} />
       </View>
       <View style={styles.header}>
         <Image source={user?.profileImage} alt="CP" style={styles.avatar}/>
@@ -41,12 +40,12 @@ export default function Sheet() {
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
     left: 0,
-    width: "100%",
+    width: "60%",
+    height:"65%",
+    borderTopRightRadius:20,
     backgroundColor: "white",
     elevation: 5,
-    padding: 10,
   },
   header: {
     justifyContent: "center",
@@ -73,9 +72,32 @@ const styles = StyleSheet.create({
   },
   closeButtonText:{
     fontSize: 26,
-  },btn:{
+  }
+  ,btn:{
     flex :1,
-    justifyContent:"center",
-    alignItems:"center"
+    justifyContent:"flex-end",
+padding:10,
+marginBottom:30,
   }
 });
+
+
+// style karna he 
+// overlay: {
+//   flex: 1,
+//   justifyContent: "flex-end",
+//   backgroundColor: "rgba(0, 0, 0, 0.6)",
+// },
+// modalContainer: {
+//   backgroundColor: "#fff",
+//   padding: 20,
+//   borderTopLeftRadius: 20,
+//   borderTopRightRadius: 20,
+//   minHeight: "50%",
+//   alignItems: "center",
+//   shadowColor: "#000",
+//   shadowOffset: { width: 0, height: -2 },
+//   shadowOpacity: 0.2,
+//   shadowRadius: 10,
+//   elevation: 5,
+// },
