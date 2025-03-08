@@ -35,25 +35,25 @@ const UserDashboard = () => {
 
   const handleSearchRides = async () => {
     setModalVisible(true)
-    // const areaList = {
-    //   userID: user._id,
-    //   from: {
-    //     latitude: initialLocation?.latitude,
-    //     longitude: initialLocation?.longitude,
-    //   },
-    //   to: {
-    //     latitude: destination?.latitude,
-    //     longitude: destination?.longitude,
-    //   },
-    // };
-    // console.log("area list", areaList);
-    // try {
-    //   const response = await axios.post(AppRoutes.UserJourney, areaList);
-    //   console.log("finally", response.data);
-    //   router.push("/pages/searchedRides");
-    // } catch (error: any) {
-    //   console.log(error.message);
-    // }
+    const areaList = {
+      userID: user._id,
+      from: {
+        latitude: initialLocation?.latitude,
+        longitude: initialLocation?.longitude,
+      },
+      to: {
+        latitude: destination?.latitude,
+        longitude: destination?.longitude,
+      },
+    };
+    console.log("area list", areaList);
+    try {
+      const response = await axios.post(AppRoutes.UserJourney, areaList);
+      console.log("finally", response.data);
+      router.push("/pages/searchedRides");
+    } catch (error: any) {
+      console.log(error.message);
+    }
   };
   
   
