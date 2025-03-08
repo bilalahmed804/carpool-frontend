@@ -164,6 +164,7 @@ const DriverDashboard = () => {
           onPress={closeSheet}
           color={"#5F9EE0"}
         />
+      </View>
 
       {Open && <Sheet />}
       <View style={styles.rideContainer}>
@@ -234,7 +235,6 @@ const DriverDashboard = () => {
             />
           </View>
           <BlueButton text="Add Ride" onPress={handleAddRide} />
-        </View>
         <Modal visible={modalVisible} transparent animationType="slide">
           <View style={styles.overlay}>
             <View style={styles.modalContainer}>
