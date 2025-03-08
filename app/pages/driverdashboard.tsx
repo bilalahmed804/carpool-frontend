@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityIndicator } from "react-native";
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityIndicator, ToastAndroid } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
@@ -23,6 +23,40 @@ interface UserData {
     longitude: string;
   };
 }
+
+const getIntermediatePoints = (start: any, end: any, numPoints = 4) => {
+  let points = [];
+
+  for (let i = 1; i <= numPoints; i++) {
+    const fraction = i / (numPoints + 1);
+
+    const lat = start.latitude + fraction * (end.latitude - start.latitude);
+    const lng = start.longitude + fraction * (end.longitude - start.longitude);
+
+    points.push({ latitude: lat, longitude: lng });
+  }
+console.log("points",points);
+
+  return points;
+};
+
+const checkLocationValidity = (details: GooglePlaceDetail | null) => {
+  const country = details?.address_components?.find((comp) =>
+    comp.types.includes("country")
+  )?.short_name;
+  console.log("country", country);
+  
+  return country === "PK"; 
+};
+
+const checkIfOutOfKarachi = (details: GooglePlaceDetail | null) => {
+  const city = details?.address_components?.find((comp) =>
+    comp.types.includes("locality")
+  )?.long_name;
+  console.log("city", city);
+  
+  return city !== "Karachi"; 
+};
 const DriverDashboard = () => {
   const [driverInitialLocation, setDriverInitialLocation] = useState<{
     latitude: number;
@@ -37,7 +71,7 @@ const DriverDashboard = () => {
   const { setOpen, Open } = useContext(globalContext);
   const { user } = useContext(AuthContext);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +114,9 @@ const DriverDashboard = () => {
   ];
 
   const handleAddRide =async() =>{
+      
+    getIntermediatePoints(driverInitialLocation, driverDestination, 4);
+      
     setModalVisible(true);
     const rideData = {
       userID: user._id,
@@ -130,45 +167,52 @@ const DriverDashboard = () => {
       {Open && <Sheet />}
 
       <View style={styles.rideContainer}>
-        <AutoComplete
-          onPress={(data: any, details: GooglePlaceDetail | null) => {
-            if (details?.geometry?.location) {
-              const initialCordinate = details?.geometry?.location;
-              setDriverInitialLocation({
-                latitude: initialCordinate.lat,
-                longitude: initialCordinate.lng,
-              });
-              console.log(
-                "data des",
-                data.description,
-                details?.geometry?.location
-              );
-            } else {
-              console.log("no location found");
-            }
-          }}
-          text="Enter Initial Location"
-        />
+         <AutoComplete
+  onPress={(data: any, details: GooglePlaceDetail | null) => {
+    if (!checkLocationValidity(details)) {
+      ToastAndroid.show("Only locations within Pakistan are allowed.", ToastAndroid.LONG);
+      return;
+    }
 
-        <AutoComplete
-          onPress={(data: any, details: GooglePlaceDetail | null) => {
-            if (details?.geometry?.location) {
-              const initialCordinate = details?.geometry?.location;
-              setDriverDestination({
-                latitude: initialCordinate.lat,
-                longitude: initialCordinate.lng,
-              });
-              console.log(
-                "data des",
-                data.description,
-                details?.geometry?.location
-              );
-            } else {
-              console.log("no location found");
-            }
-          }}
-          text="Destination"
-        />
+    if (details?.geometry?.location) {
+      const initialCordinate = details.geometry.location;
+      setDriverInitialLocation({
+        latitude: initialCordinate.lat,
+        longitude: initialCordinate.lng,
+      });
+      console.log("data des", data.description, details.geometry.location);
+    } else {
+      console.log("no location found");
+    }
+  }}
+  text="Enter Initial Location"
+/>
+
+<AutoComplete
+  onPress={(data: any, details: GooglePlaceDetail | null) => {
+    if (!checkLocationValidity(details)) {
+      ToastAndroid.show("Only locations within Pakistan are allowed.", ToastAndroid.LONG);
+      return;
+    }
+
+    if (details?.geometry?.location) {
+      const initialCordinate = details.geometry.location;
+      setDriverDestination({
+        latitude: initialCordinate.lat,
+        longitude: initialCordinate.lng,
+      });
+
+      if (checkIfOutOfKarachi(details)) {
+        ToastAndroid.show("Maximum fare should be in thousands for out-of-Karachi trips.", ToastAndroid.LONG);
+      }
+
+      console.log("data des", data.description, details.geometry.location);
+    } else {
+      console.log("no location found");
+    }
+  }}
+  text="Destination"
+/>
 
         <View style={styles.container2}>
           <TextInput
