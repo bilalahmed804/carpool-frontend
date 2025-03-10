@@ -33,6 +33,7 @@ const UserDashboard = () => {
   const [dropLocation, setDropLocation] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
   const [userData, setUserData] = useState([]);
   const router = useRouter();
@@ -71,6 +72,18 @@ const UserDashboard = () => {
       console.log("error in adding ride from user Dashboard==>", error.message);
     }
   };
+
+  const collectDriverDetails = async (userID: any) => {
+    try {
+      console.log(userID)
+      const response = await axios.post(AppRoutes.getDynamicDriver, {id: userID});
+      console.log("driverDetail", response.data.data);
+      setSelectedDriver(response.data.data);
+      setModalOpen(true);
+    } catch (error: any) {
+      console.log("error in collecting driver details==>", error.message);
+    }
+  }
 
   // const DriversAndJourney = [...availableDrivers, ...journeyExpense];
   // console.log("DriversAndJourney", DriversAndJourney);
@@ -191,24 +204,24 @@ const UserDashboard = () => {
               <Ionicons size={30} name="close" onPress={closeModal} />
             </TouchableOpacity>
           </View>
+          {selectedDriver.map((data: any, index: number) => (
+          <View key={index}>
           <View style={styles.header}>
             <Image
-              source={{
-                uri: "http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740661676/Ride_Sharing/Drivers/nyabkfscagusux11fxl8.jpg",
-              }}
+              source={{uri : data.profileImage}}
               alt="CP"
               style={styles.avatar}
             />
           </View>
           <View style={styles.infoContainer}>
-            <Text style={styles.title}>Name</Text>
-            <Text style={styles.nameStyle}>Gender</Text>
-            <Text style={styles.nameStyle}>Vehicle</Text>
-            <Text style={styles.nameStyle}>Vehicle No.</Text>
-            <Text style={styles.nameStyle}>Available Seats</Text>
-            <Text style={styles.nameStyle}>Routes</Text>
-            <Text style={styles.nameStyle}>Charges</Text>
+            <Text style={styles.title}>{data.name}</Text>
+            <Text style={styles.nameStyle}>{data.gender}</Text>
+            <Text style={styles.nameStyle}>{data.vehicleCategory}</Text>
+            <Text style={styles.nameStyle}>Vehicle No : {data.vehicleNo}</Text>
+            <Text style={styles.nameStyle}>License No : {data.licenseNo}</Text>
           </View>
+          </View>
+          ))}
           <View style={styles.btn}>
             <GreenButton onPress={closeModal} text="call" />
             <GreenButton onPress={closeModal} text="whatsapp" />
@@ -237,7 +250,7 @@ const UserDashboard = () => {
                     Fare Per Seat : {data.farePerSeat}
                   </Text>
                 </View>
-                <GreenButton text="Details" onPress={setModalOpen} />
+                <GreenButton text="Details" onPress={() => collectDriverDetails(data.userID)}/>
               </View>
             ))}
           </View>
