@@ -15,12 +15,18 @@ function Index() {
     email: "",
     password: "",
   });
+  const [error, setError] = useState<{ [key: string]: string }>({});
 
   const handleChange = (key: any, value: any) => {
     setFormData({ ...formData, [key]: value });
   };
 
   const handleSubmit = async () => {
+    const newErrors: { [key: string]: string } = {}
+    setError(newErrors)
+    if(!formData.email) newErrors.email = "Email is required";
+    if(!formData.password) newErrors.password = "password is required";
+
     const obj = {
       email : formData.email,
       password : formData.password
@@ -65,6 +71,7 @@ function Index() {
           onChangeText={(text) => handleChange("email", text)}
           keyboardType="email-address"
         />
+        {error.email && <Text style={globalStyle.errorThrow}>{error.email}</Text>}
         </View>
         <View style={globalStyle.inputContainer}>
         <Text style={globalStyle.label}>Password</Text>
@@ -75,6 +82,7 @@ function Index() {
           onChangeText={(text) => handleChange("password", text)}
           secureTextEntry={true}
           />
+            {error.password && <Text style={globalStyle.errorThrow}>{error.password}</Text>}
         </View>
       <GreenButton onPress={handleSubmit} text="submit" />
       <Text style={styles.link}>
