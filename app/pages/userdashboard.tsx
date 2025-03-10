@@ -19,6 +19,7 @@ import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import axios from "axios";
 import { AuthContext } from "@/context/authContext";
 import { io } from "socket.io-client";
+import BlueButton from "@/components/blueButton";
 
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState<{
@@ -128,7 +129,7 @@ const UserDashboard = () => {
 
   return (
     <>
-      <View style={styles.container}>
+      <View style={styles.containeruser}>
         <MapView
           provider={PROVIDER_GOOGLE}
           style={StyleSheet.absoluteFillObject}
@@ -139,18 +140,15 @@ const UserDashboard = () => {
             longitudeDelta: 0.05,
           }}
         />
-        <View style={styles.navbar}>
-          <Ionicons
-            name="menu"
-            size={30}
-            color="#4CAF50"
-            onPress={closeSheet}
-          />
-        </View>
-
+        <View style={styles.navbaruser}>
+      <TouchableOpacity onPress={closeSheet} style={styles.iconContaineruser}>
+        <Ionicons name="menu" size={30} color="#5F9EE0" />
+      </TouchableOpacity>
+    </View>
+     
         {Open && <Sheet />}
 
-        <View style={styles.rideContainer}>
+        <View style={styles.rideContaineruser}>
           <AutoComplete
             onPress={(data: any, details: GooglePlaceDetail | null) => {
               setPickupLocation(data?.description);
@@ -193,7 +191,7 @@ const UserDashboard = () => {
             text="Enter Destination"
           />
 
-          <GreenButton onPress={handleSearchRides} text="search Ride" />
+          <BlueButton onPress={handleSearchRides} text="search Ride" />
         </View>
       </View>
 
@@ -231,14 +229,29 @@ const UserDashboard = () => {
       )}
 
       <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.overlay}>
-          <View style={styles.modalContainer}>
+        <View style={styles.overlayuser}>
+          <View style={styles.modalContaineruser}>
             <TouchableOpacity
               onPress={() => setModalVisible(false)}
-              style={styles.closeButton}
+              style={styles.closeButtonuser}
             >
               <Ionicons name="close" size={30} color="#333" />
             </TouchableOpacity>
+            <Text style={styles.messageuser}>My Route:{} </Text>
+            <View style={styles.carduser}>
+              <Image
+                source={{
+                  uri: "http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740661676/Ride_Sharing/Drivers/nyabkfscagusux11fxl8.jpg",
+                }}
+                style={styles.driverImageuser}
+              />
+              <View style={styles.infouser}>
+                <Text style={styles.nameuser}>name</Text>
+                <Text style={styles.fareuser}>fare</Text>
+                <Text style={styles.vehicleuser}>Vehicle</Text>
+              </View>
+              <BlueButton text="request ride" onPress={handleRequest} />
+            </View>
             <Text style={styles.message}>My Route:{} </Text>
             {journeyExpense.map((data: any, index: number) => (
               <View key={index} style={styles.card}>
@@ -262,43 +275,58 @@ const UserDashboard = () => {
 
 export default UserDashboard;
 const styles = StyleSheet.create({
-  container: {
+  containeruser: {
     flex: 1,
   },
-  navbar: {
+  navbaruser: {
+    padding: 10,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "transparent",
-    padding: 2,
-    color: "blue",
   },
-  rideContainer: {
+  iconContaineruser: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  rideContaineruser: {
     position: "absolute",
-    borderColor: "#4CAF50",
+    borderColor: "#5F9EE0",
     borderWidth: 2,
     bottom: 2,
     left: 2,
     right: 2,
     backgroundColor: "white",
-    padding: 4,
-    borderRadius: 10,
+    padding: 6,
+    borderRadius: 12,
   },
-  inputstyle: {
+  inputstyleuser: {
     margin: 2,
+    borderWidth: 1,
+    borderColor: "#5F9EE0",
+    borderRadius: 6,
+    padding: 8,
+    backgroundColor: "#F0F8FF",
   },
-  overlay: {
+  overlayuser: {
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
-  modalContainer: {
-    backgroundColor: "#fff",
-    padding: 6,
-    gap: 4,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
-    minHeight: "95%",
+  modalContaineruser: {
+    backgroundColor: "#FFF",
+    padding: 10,
+    gap: 6,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    minHeight: "90%",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
@@ -306,92 +334,76 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 5,
   },
-  closeButton: {
+  closeButtonuser: {
     alignSelf: "flex-end",
-    padding: 5,
+    padding: 8,
   },
-  message: {
+  messageuser: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 15,
     color: "#333",
   },
-  card: {
+  carduser: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 10,
-    backgroundColor: "#f8f9fa",
-    borderRadius: 6,
+    padding: 12,
+    backgroundColor: "#E3F2FD",
+    borderRadius: 10,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 5,
     elevation: 3,
     marginTop: 10,
   },
-  driverImage: {
+  driverImageuser: {
     width: 60,
     height: 60,
     borderRadius: 30,
     marginRight: 15,
+    borderWidth: 2,
+    borderColor: "#5F9EE0",
   },
-  info: {
+  infouser: {
     flex: 1,
   },
-  name: {
+  nameuser: {
     fontSize: 18,
     fontWeight: "bold",
     color: "#222",
   },
-  fare: {
+  fareuser: {
     fontSize: 16,
-    color: "#555",
+    color: "#5F9EE0",
+    fontWeight: "500",
   },
-  vehicle: {
+  vehicleuser: {
     fontSize: 14,
     color: "#777",
   },
-  popupContainer: {
-    flex: 1,
-    marginHorizontal: "auto",
-    position: "absolute",
-    borderRadius: 10,
-    top: "20%",
-    width: "90%",
-    backgroundColor: "white",
-    elevation: 6,
-    zIndex: 1000,
-    padding: 10,
-  },
-  header: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 100,
-  },
-  infoContainer: {
-    marginVertical: 10,
-    gap: 4,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  nameStyle: {
-    fontSize: 16,
-    textAlign: "center",
-  },
-  btn: {
-    flex: 1,
+  buttonContainer: {
     flexDirection: "row",
-    justifyContent: "center",
-    gap: 4,
+    justifyContent: "space-between",
+    marginTop: 15,
   },
-  closeButtonText: {
-    fontSize: 26,
+  buttonAccept: {
+    backgroundColor: "#5F9EE0",
+    padding: 12,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  buttonReject: {
+    backgroundColor: "#dc3545",
+    padding: 12,
+    borderRadius: 8,
+    flex: 1,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

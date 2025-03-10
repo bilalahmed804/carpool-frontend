@@ -2,11 +2,12 @@ import {useRouter } from "expo-router";
 import React, { useContext, useState } from "react";
 import GreenButton from "../components/greenButton";
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { View, Text, TextInput, StyleSheet, Image, ScrollView, Alert } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, ScrollView, Alert, TouchableOpacity } from "react-native";
 import globalStyle, { AppRoutes } from "@/constant/constant";
 import axios from "axios"
 import { AuthContext } from "@/context/authContext";
 import RoleBasedNavigation from "@/components/roleBasedNavigation";
+import { Ionicons } from "@expo/vector-icons";
 
 function Index() {
   const { user, setUser } = useContext(AuthContext)
@@ -16,6 +17,7 @@ function Index() {
     password: "",
   });
   const [error, setError] = useState<{ [key: string]: string }>({});
+  const [isPasswordVisible, setPasswordVisible] = useState(false);
 
   const handleChange = (key: any, value: any) => {
     setFormData({ ...formData, [key]: value });
@@ -57,31 +59,46 @@ function Index() {
         style={styles.logo}
         source={require("../assets/images/carpool.png")}
       />
+      
       <Text style={styles.title}>Welcome To Carpool</Text>
       <Text style={styles.description}>
         Join our community to share rides, save costs, and make your journey
         more enjoyable!
       </Text>
       <View style={globalStyle.inputContainer}>
-        <Text style={globalStyle.label}>Email</Text>
+        <Text style={globalStyle.labeld}>Email</Text>
+        <View style={globalStyle.passwordWrapper}>
         <TextInput
-          style={globalStyle.input}
-          placeholder="user@gmail.com"
+          style={globalStyle.inputuser}
+          placeholder="example@gmail.com"
           value={formData.email}
           onChangeText={(text) => handleChange("email", text)}
           keyboardType="email-address"
-        />
+          />
+          </View>
         {error.email && <Text style={globalStyle.errorThrow}>{error.email}</Text>}
         </View>
         <View style={globalStyle.inputContainer}>
-        <Text style={globalStyle.label}>Password</Text>
+        <Text style={globalStyle.labeld}>Password</Text>
+        <View style={globalStyle.passwordWrapper}>
         <TextInput
-          style={globalStyle.input}
-          placeholder="......"
+          style={globalStyle.inputuser}
+          placeholder="* * * * * * *"
           value={formData.password}
           onChangeText={(text) => handleChange("password", text)}
-          secureTextEntry={true}
+          secureTextEntry={!isPasswordVisible} 
+        />
+        <TouchableOpacity
+          onPress={() => setPasswordVisible(!isPasswordVisible)}
+          style={globalStyle.eyeIcon}
+        >
+          <Ionicons
+            name={isPasswordVisible ? "eye" : "eye-off"}
+            size={24}
+            color="#777"
           />
+        </TouchableOpacity>
+      </View>
             {error.password && <Text style={globalStyle.errorThrow}>{error.password}</Text>}
         </View>
       <GreenButton onPress={handleSubmit} text="submit" />
@@ -115,13 +132,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 10,
-    color: "#333",
+    color: "#4CAF50",
   },
   description: {
     fontSize: 16,
     textAlign: "center",
     marginBottom: 30,
-    color: "#666",
+    color: "#4CAF50",
   },
   btn: {
     marginVertical: 4,
@@ -129,12 +146,12 @@ const styles = StyleSheet.create({
   link: {
     fontSize: 16,
     marginHorizontal: "auto",
-    marginVertical: 12,
+    marginVertical: 18,
     fontWeight: "900",
   },
 
   link1: {
-    color: "#5F9EE0",
+        color: "#4CAF50",
   },
 });
 

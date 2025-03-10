@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityIndicator, ToastAndroid } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
-import BlueButton from "@/components/blueButton";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
@@ -11,8 +10,8 @@ import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import axios from "axios";
 import { AuthContext } from "@/context/authContext";
 import { Modal } from "react-native";
-import RoutePolyline from "@/components/pollyline";
 import { io } from "socket.io-client";
+import GreenButton from "@/components/greenButton";
 
 interface UserData {
   name: string;
@@ -169,14 +168,11 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
           longitudeDelta: 0.05,
         }}
       />
-      <View style={globalStyle.navbar}>
-        <Ionicons
-          name="menu"
-          size={40}
-          onPress={closeSheet}
-          color={"#5F9EE0"}
-        />
-      </View>
+     <View style={globalStyle.navbar}>
+           <TouchableOpacity onPress={closeSheet} style={globalStyle.iconContainer}>
+             <Ionicons name="menu" size={30} color="#4CAF50" />
+           </TouchableOpacity>
+         </View>
 
       {Open && <Sheet />}
       <View style={globalStyle.rideContainer}>
@@ -256,7 +252,7 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
               onChangeText={setSeats}
             />
           </View>
-          <BlueButton text="Add Ride" onPress={handleAddRide} />
+          <GreenButton text="Add Ride" onPress={handleAddRide} />
         <Modal visible={modalVisible} transparent animationType="slide">
           <View style={globalStyle.overlayd}>
             <View style={globalStyle.modalContainerd}>
@@ -274,7 +270,7 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
                     {driverData.DestinationLocation}
                   </Text>
                   <TouchableOpacity
-                    onPress={onClose} //temprary on close
+                    onPress={onClose}
                   >
                     <View style={globalStyle.buttond}>
                       <Text style={globalStyle.buttonTextd}>Cancel My Ride</Text>

@@ -8,10 +8,7 @@ import { globalContext } from "@/context/globalContext";
 function UserImage (){
   
   const {userprofileImage , setUserProfileImage}= useContext(globalContext)
-  
-  const formData = { profileImage: userprofileImage };
-  const newErrors = { profileImage: "" };
-  if(!formData.profileImage) newErrors.profileImage = "Profile Image is required";
+ 
   
     const pickProfileImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -64,7 +61,6 @@ function UserImage (){
 
         <PickerImage onPress={pickProfileImage} text="Profile Image"/>
         {userprofileImage  && <Image source={{ uri: userprofileImage || "" }} style={globalStyle.image} />}
-        {newErrors.profileImage && <Text style={globalStyle.errorThrow}>{newErrors.profileImage}</Text>}
         </View>
     )
 }
