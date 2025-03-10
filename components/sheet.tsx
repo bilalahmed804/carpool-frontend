@@ -1,103 +1,127 @@
 import { AuthContext } from "@/context/authContext";
 import { globalContext } from "@/context/globalContext";
-import React, { useContext, useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
-import BlueButton from "./blueButton";
+import React, { useContext, useEffect, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function Sheet() {
-  const { setOpen, Open } = useContext(globalContext)
-  const { user, setUser } = useContext(AuthContext)
-  const router = useRouter()
-  
+  const { setOpen, Open } = useContext(globalContext);
+  const { user, setUser } = useContext(AuthContext);
+  const router = useRouter();
+
+  const slideAnim = useRef(new Animated.Value(-250)).current; 
+
+  useEffect(() => {
+    if (Open) {
+      Animated.timing(slideAnim, {
+        toValue: 0, 
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: -250,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [Open]);
+
   const handleLogout = async () => {
-    await AsyncStorage.removeItem("token")
-    setUser(null)
-    router.push("/")
-  }
+    await AsyncStorage.removeItem("token");
+    setUser(null);
+    router.push("/");
+  };
+
   const closeSheet = () => {
-    setOpen(!Open);
+    setOpen(false);
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.closeButton}>
-        <Ionicons name="close" size={30} onPress={closeSheet} />
-      </View>
+    <Animated.View style={[styles.container, { transform: [{ translateX: slideAnim }] }]}>
+      <TouchableOpacity style={styles.closeButton} onPress={closeSheet}>
+        <Ionicons name="close" size={28} color="#333" />
+      </TouchableOpacity>
+
       <View style={styles.header}>
-        <Image source={user?.profileImage} alt="CP" style={styles.avatar}/>
+        <Image 
+          source={{ uri: user?.profileImage || "./assets/default-avatar.png" }}
+          style={styles.avatar}
+        />
+        <Text style={styles.title}>{user?.name || "Guest User"}</Text>
+        <Text style={styles.email}>{user?.email || "No email available"}</Text>
       </View>
-        <Text style={styles.title}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
-        <View style={styles.btn}>
-      <BlueButton onPress={handleLogout} text="logout" />
-        </View>
-    </View>
+      <TouchableOpacity style={styles.btn}
+          onPress={handleLogout}>
+                    <View style={styles.button}>
+                      <Text style={styles.title}>Logout</Text>
+                    </View>
+                  </TouchableOpacity>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    position: "absolute",
     left: 0,
-    width: "60%",
-    height:"65%",
-    borderTopRightRadius:20,
-    backgroundColor: "white",
-    elevation: 5,
-  },
-  header: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  avatar:{
-    width: 44,
-    height: 44,
-    borderRadius: 100
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center"
-  },
-  email:{
-    fontSize: 12,
-    fontWeight:"light",
-    textAlign: "center"
+    top: 0,
+    width: "65%",
+    height: "100%",
+    backgroundColor: "#fff",
+    borderTopRightRadius: 20,
+    borderBottomRightRadius: 20,
+    padding: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    zIndex: 1000,
+    elevation: 8,
   },
   closeButton: {
-    alignItems :"flex-end",
+    position: "absolute",
+    right: 10,
+    top: 10,
+    padding: 5,
+    borderRadius: 20,
+    backgroundColor: "#f2f2f2",
   },
-  closeButtonText:{
-    fontSize: 26,
-  }
-  ,btn:{
-    flex :1,
-    justifyContent:"flex-end",
-padding:10,
-marginBottom:30,
-  }
+  header: {
+    marginTop: 50,
+    alignItems: "center",
+  },
+  avatar: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2,
+    borderColor: "lightgray",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 8,
+  },
+  email: {
+    fontSize: 14,
+    color: "#777",
+    marginTop: 4,
+  },
+  button: {
+    backgroundColor: "lightgray",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  btn: {
+    position: "absolute",
+    bottom: 30,
+    left: 20,
+    width: "100%",
+    paddingHorizontal: 10,
+  },
 });
-
-
-// style karna he 
-// overlay: {
-//   flex: 1,
-//   justifyContent: "flex-end",
-//   backgroundColor: "rgba(0, 0, 0, 0.6)",
-// },
-// modalContainer: {
-//   backgroundColor: "#fff",
-//   padding: 20,
-//   borderTopLeftRadius: 20,
-//   borderTopRightRadius: 20,
-//   minHeight: "50%",
-//   alignItems: "center",
-//   shadowColor: "#000",
-//   shadowOffset: { width: 0, height: -2 },
-//   shadowOpacity: 0.2,
-//   shadowRadius: 10,
-//   elevation: 5,
-// },
