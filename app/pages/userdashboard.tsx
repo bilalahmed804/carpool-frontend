@@ -1,5 +1,12 @@
 import React, { useContext, useState } from "react";
-import { View,StyleSheet,Modal,Image,TouchableOpacity,Text, ScrollView,} from "react-native";
+import {
+  View,
+  StyleSheet,
+  Modal,
+  Image,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
@@ -22,19 +29,25 @@ const UserDashboard = () => {
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [pickupLocation, setPickupLocation ] = useState("");
-  const [dropLocation, setDropLocation ] = useState("");
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [dropLocation, setDropLocation] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [journeyExpense, setJourneyExpense] = useState([]);
+  const [userData, setUserData] = useState([]);
   const router = useRouter();
-  const { setOpen, Open } = useContext(globalContext);
+  const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext);
 
   const closeSheet = () => {
     setOpen(!Open);
   };
 
+  const closeModal = () => {
+    setModalOpen(!modalOpen);
+  };
+
   const handleSearchRides = async () => {
-    setModalVisible(true)
     const areaList = {
       userID: user._id,
       from: {
@@ -49,14 +62,26 @@ const UserDashboard = () => {
     console.log("area list", areaList);
     try {
       const response = await axios.post(AppRoutes.UserJourney, areaList);
-      console.log("finally", response.data);
-      router.push("/pages/searchedRides");
+      console.log("finally", response.data.data);
+      setAvailableDrivers(response.data.data.matchedRides);
+      setJourneyExpense(response.data.data.rideExpense);
+      setUserData(response.data.data.userArray);
+      setModalVisible(true);
     } catch (error: any) {
-      console.log(error.message);
+      console.log("error in adding ride from user Dashboard==>", error.message);
     }
   };
-  
-  
+
+  // const DriversAndJourney = [...availableDrivers, ...journeyExpense];
+  // console.log("DriversAndJourney", DriversAndJourney);
+
+  // const mergedData = DriversAndJourney.reduce((acc: any[], item:any) => {
+  //   const { ...filteredItem } = item
+  //   acc.push(filteredItem)
+  //   return acc
+  // }, [])
+
+  // console.log("filteredItem", mergedData);
   // const handleRequest=()=>{
   //   const socket = io(BASE_URL)
 
@@ -68,24 +93,26 @@ const UserDashboard = () => {
 
   // }
   const handleRequest = () => {
-      const socket = io(BASE_URL)
-      // socket.on("data", (payload)=>{
-      //   console.log(payload);
-      // })
-      const userData = {
-        "name": user.name,
-        "picture": user.picture,
-        "pickupLocationCoor": [initialLocation?.latitude, initialLocation?.longitude] ,
-        "dropLocationCoor": [destination?.latitude, destination?.longitude],
-        "pickupLocation": pickupLocation,
-        "dropLocation": dropLocation,
-        "userID": user._id
-      }
-    
-      socket.emit("userData", userData)
-    }
+    const socket = io(BASE_URL);
+    // socket.on("data", (payload)=>{
+    //   console.log(payload);
+    // })
+    const userData = {
+      name: user.name,
+      picture: user.picture,
+      pickupLocationCoor: [
+        initialLocation?.latitude,
+        initialLocation?.longitude,
+      ],
+      dropLocationCoor: [destination?.latitude, destination?.longitude],
+      pickupLocation: pickupLocation,
+      dropLocation: dropLocation,
+      userID: user._id,
+    };
 
-    
+    socket.emit("userData", userData);
+  };
+
   return (
     <>
       <View style={styles.container}>
@@ -113,7 +140,7 @@ const UserDashboard = () => {
         <View style={styles.rideContainer}>
           <AutoComplete
             onPress={(data: any, details: GooglePlaceDetail | null) => {
-              setPickupLocation(data?.description)
+              setPickupLocation(data?.description);
               if (details?.geometry?.location) {
                 const initialCordinate = details?.geometry?.location;
                 setInitialLocation({
@@ -134,7 +161,7 @@ const UserDashboard = () => {
 
           <AutoComplete
             onPress={(data: any, details: GooglePlaceDetail | null) => {
-              setDropLocation(data?.description) 
+              setDropLocation(data?.description);
               if (details?.geometry?.location) {
                 const initialCordinate = details?.geometry?.location;
                 setDestination({
@@ -157,6 +184,38 @@ const UserDashboard = () => {
         </View>
       </View>
 
+      {modalOpen && (
+        <View style={styles.popupContainer}>
+          <View style={styles.closeButton}>
+            <TouchableOpacity>
+              <Ionicons size={30} name="close" onPress={closeModal} />
+            </TouchableOpacity>
+          </View>
+          <View style={styles.header}>
+            <Image
+              source={{
+                uri: "http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740661676/Ride_Sharing/Drivers/nyabkfscagusux11fxl8.jpg",
+              }}
+              alt="CP"
+              style={styles.avatar}
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.title}>Name</Text>
+            <Text style={styles.nameStyle}>Gender</Text>
+            <Text style={styles.nameStyle}>Vehicle</Text>
+            <Text style={styles.nameStyle}>Vehicle No.</Text>
+            <Text style={styles.nameStyle}>Available Seats</Text>
+            <Text style={styles.nameStyle}>Routes</Text>
+            <Text style={styles.nameStyle}>Charges</Text>
+          </View>
+          <View style={styles.btn}>
+            <GreenButton onPress={closeModal} text="call" />
+            <GreenButton onPress={closeModal} text="whatsapp" />
+            <GreenButton onPress={handleRequest} text="request ride" />
+          </View>
+        </View>
+      )}
 
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.overlay}>
@@ -168,20 +227,19 @@ const UserDashboard = () => {
               <Ionicons name="close" size={30} color="#333" />
             </TouchableOpacity>
             <Text style={styles.message}>My Route:{} </Text>
-            <View style={styles.card}>
-              <Image
-                source={{
-                  uri: "http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740661676/Ride_Sharing/Drivers/nyabkfscagusux11fxl8.jpg",
-                }}
-                style={styles.driverImage}
-              />
-              <View style={styles.info}>
-                <Text style={styles.name}>name</Text>
-                <Text style={styles.fare}>fare</Text>
-                <Text style={styles.vehicle}>Vehicle</Text>
+            {journeyExpense.map((data: any, index: number) => (
+              <View key={index} style={styles.card}>
+                <View style={styles.info}>
+                  <Text style={styles.name}>
+                    Available Seats : {data.availableSeats}
+                  </Text>
+                  <Text style={styles.fare}>
+                    Fare Per Seat : {data.farePerSeat}
+                  </Text>
+                </View>
+                <GreenButton text="Details" onPress={setModalOpen} />
               </View>
-              <GreenButton text="request ride" onPress={handleRequest} />
-            </View>
+            ))}
           </View>
         </View>
       </Modal>
@@ -278,5 +336,49 @@ const styles = StyleSheet.create({
   vehicle: {
     fontSize: 14,
     color: "#777",
+  },
+  popupContainer: {
+    flex: 1,
+    marginHorizontal: "auto",
+    position: "absolute",
+    borderRadius: 10,
+    top: "20%",
+    width: "90%",
+    backgroundColor: "white",
+    elevation: 6,
+    zIndex: 1000,
+    padding: 10,
+  },
+  header: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 100,
+  },
+  infoContainer: {
+    marginVertical: 10,
+    gap: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  nameStyle: {
+    fontSize: 16,
+    textAlign: "center",
+  },
+  btn: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 4,
+  },
+  closeButtonText: {
+    fontSize: 26,
   },
 });
