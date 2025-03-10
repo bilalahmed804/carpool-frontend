@@ -3,7 +3,7 @@ import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityInd
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
-import globalStyle, { AppRoutes } from "@/constant/constant";
+import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
@@ -12,6 +12,7 @@ import axios from "axios";
 import { AuthContext } from "@/context/authContext";
 import { Modal } from "react-native";
 import RoutePolyline from "@/components/pollyline";
+import { io } from "socket.io-client";
 
 interface UserData {
   name: string;
@@ -64,7 +65,10 @@ const DriverDashboard = () => {
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pickupAreaName , setPickupAreaName] = useState("");
+  const [dropAreaName , setDropAreaName] = useState("");
 
+console.log("pickupAreaName", pickupAreaName, dropAreaName);
 
   useEffect(() => {
     setTimeout(() => {
@@ -100,6 +104,7 @@ const DriverDashboard = () => {
   };
 
   const handleAddRide = async () => {
+    const socket = io(BASE_URL);
     if (!driverInitialLocation || !driverDestination) {
       ToastAndroid.show("Please select both locations.", ToastAndroid.LONG);
       return;
@@ -121,22 +126,34 @@ const DriverDashboard = () => {
         ...points,
       ],
     };
-  
+    const rideDataSend = {
+      "userID": user._id,
+      "availableSeats": seats,
+      "status": "pending",
+      "farePerSeat": fare,
+      "pickupLocationCoor": [driverInitialLocation.latitude, driverInitialLocation.longitude],
+      "dropLocationCoor": [driverDestination.latitude, driverDestination.longitude],
+      "pickupLocation": driverInitialLocation,
+      "dropLocation": driverDestination
+    };
+    
+    socket.emit("driverData", rideDataSend);
+
     console.log("rideData", rideData);
   
-    try {
-      const response = await axios.post(AppRoutes.DriverJourney, rideData);
-      ToastAndroid.show("Ride data posted successfully!", ToastAndroid.LONG);
-      console.log("Response:", response.data);
-    } catch (error) {
-      console.error("Error posting ride data:", error);
+    // try {
+    //   const response = await axios.post(AppRoutes.DriverJourney, rideData);
+    //   ToastAndroid.show("Ride data posted successfully!", ToastAndroid.LONG);
+    //   console.log("Response:", response.data);
+    // } catch (error) {
+    //   console.error("Error posting ride data:", error);
       
-      if (axios.isAxiosError(error) && error.response) {
-        ToastAndroid.show(`Error: ${error.response.data.message || "Something went wrong!"}`, ToastAndroid.LONG);
-      } else {
-        ToastAndroid.show("Network error! Please try again.", ToastAndroid.LONG);
-      }
-    }
+    //   if (axios.isAxiosError(error) && error.response) {
+    //     ToastAndroid.show(`Error: ${error.response.data.message || "Something went wrong!"}`, ToastAndroid.LONG);
+    //   } else {
+    //     ToastAndroid.show("Network error! Please try again.", ToastAndroid.LONG);
+    //   }
+    // }
   };
   
 
@@ -174,7 +191,10 @@ const DriverDashboard = () => {
     if (!isInKarachi) {
       ToastAndroid.show("Maximum fare should be in thousands for out-of-Karachi trips.", ToastAndroid.LONG);
     }
-    
+  
+    if (data?.description) {
+      setPickupAreaName(data.description)
+    }
     if (details?.geometry?.location) {
       const initialCordinate = details.geometry.location;
       setDriverInitialLocation({
@@ -200,7 +220,8 @@ const DriverDashboard = () => {
     if (!isInKarachi) {
       ToastAndroid.show("Maximum fare should be in thousands for out-of-Karachi trips.", ToastAndroid.LONG);
     }
-    
+    if(data?.description){
+      setDropAreaName(data.description)}
     if (details?.geometry?.location) {
       const initialCordinate = details.geometry.location;
       setDriverDestination({

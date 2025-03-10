@@ -15,7 +15,7 @@ const globalStyle = StyleSheet.create({
         fontFamily: "sans-serif",
     },
     container: {
-        padding: 20,
+        padding: 15,
         backgroundColor :"white"
     },
     inputContainer: {
@@ -26,6 +26,11 @@ const globalStyle = StyleSheet.create({
         borderColor: '#ccc',
         borderRadius: 8,
         padding: 10,
+    },
+    errorThrow:{
+        color: "red",
+        fontSize: 12,
+        fontWeight: "bold",
     },
     label: {
         fontSize: 14,

@@ -28,8 +28,6 @@ function DriverRegister(){
  
   const handleChange = (key:any, value:any) => {
     setFormData({ ...formData, [key]: value });
-    
-    
   }
   const handleSubmit =async () => {
       const newErrors: { [key: string]: string } = {}
@@ -64,7 +62,6 @@ function DriverRegister(){
       role: "driver",
     };
     console.log("obj", obj);
-    router.push("/pages/driverdashboard")
     try {
       const res = await axios.post(AppRoutes.signupRider, obj);
       if (res && res.data) {
@@ -97,7 +94,7 @@ function DriverRegister(){
       value={formData.name}
       onChangeText={(text) => handleChange('name', text)}
     />
-    {error.name && <Text>{error.name}</Text>}
+    {error.name && <Text style={globalStyle.errorThrow}>{error.name}</Text>}
   </View>
 
   <View style={globalStyle.inputContainer}>
@@ -110,7 +107,7 @@ function DriverRegister(){
       keyboardType="email-address"
       autoCapitalize="none"
       />
-      {error.email && <Text>{error.email}</Text>}
+      {error.email && <Text style={globalStyle.errorThrow}>{error.email}</Text>}
   </View>
 
   <View style={globalStyle.inputContainer}>
@@ -122,7 +119,7 @@ function DriverRegister(){
       onChangeText={(text) => handleChange('password', text)}
       secureTextEntry
       />
-      {error.password && <Text>{error.password}</Text>}
+      {error.password && <Text style={globalStyle.errorThrow}>{error.password}</Text>}
   </View>
 
   <View style={globalStyle.inputContainer}>
@@ -135,7 +132,7 @@ function DriverRegister(){
       keyboardType="numeric"
       maxLength={11}
       />
-      {error.contact && <Text>{error.contact}</Text>}
+      {error.contact && <Text style={globalStyle.errorThrow}>{error.contact}</Text>}
   </View>
 
   <View style={globalStyle.inputContainer}>
@@ -148,7 +145,7 @@ function DriverRegister(){
       keyboardType="numeric"
       maxLength={13}
       />
-      {error.cnic && <Text>{error.cnic}</Text>}
+      {error.cnic && <Text style={globalStyle.errorThrow}>{error.cnic}</Text>}
   </View>
 
   
@@ -161,7 +158,7 @@ function DriverRegister(){
       value={formData.address}
       onChangeText={(text) => handleChange('address', text)}
       />
-      {error.address && <Text>{error.address}</Text>}
+      {error.address && <Text style={globalStyle.errorThrow}>{error.address}</Text>}
   </View>
 <View>
 
@@ -176,7 +173,7 @@ function DriverRegister(){
         <Picker.Item label="Female" value="female" />
         <Picker.Item label="Male" value="male" />
       </Picker>
-      {error.gender && <Text>{error.gender}</Text>}
+      {error.gender && <Text style={globalStyle.errorThrow}>{error.gender}</Text>}
 
   <Text style={globalStyle.label}>Vehicle Type</Text>
   <Picker
@@ -189,7 +186,7 @@ function DriverRegister(){
         <Picker.Item label="Car" value="Car" />
         <Picker.Item label="Rickshaw" value="Rickshaw" />
       </Picker>
-      {error.vehicleCategory && <Text>{error.vehicleCategory}</Text>}
+      {error.vehicleCategory && <Text style={globalStyle.errorThrow}>{error.vehicleCategory}</Text>}
         </View>
   </View>
     
@@ -204,7 +201,7 @@ function DriverRegister(){
       onChangeText={(text) => handleChange('licenseNumber', text)}
       autoCapitalize="characters"
       />
-      {error.licenseNumber && <Text>{error.licenseNumber}</Text>}
+      {error.licenseNumber && <Text style={globalStyle.errorThrow}>{error.licenseNumber}</Text>}
   </View>
 
   <View style={globalStyle.inputContainer}>
@@ -216,7 +213,7 @@ function DriverRegister(){
       onChangeText={(text) => handleChange('vehicleNumber', text)}
       autoCapitalize="characters"
       />
-      {error.vehicleNumber && <Text>{error.vehicleNumber}</Text>}
+      {error.vehicleNumber && <Text style={globalStyle.errorThrow}>{error.vehicleNumber}</Text>}
   </View>  
             <GreenButton onPress={handleSubmit}  text='Submit'/>
 </View>
