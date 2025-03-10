@@ -1,5 +1,12 @@
 import React, { useContext, useState } from "react";
-import { View,StyleSheet,Modal,Image,TouchableOpacity,Text, ScrollView,} from "react-native";
+import {
+  View,
+  StyleSheet,
+  Modal,
+  Image,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
@@ -23,41 +30,72 @@ const UserDashboard = () => {
     latitude: number;
     longitude: number;
   } | null>(null);
-  const [pickupLocation, setPickupLocation ] = useState("");
-  const [dropLocation, setDropLocation ] = useState("");
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [dropLocation, setDropLocation] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [availableDrivers, setAvailableDrivers] = useState([]);
+  const [selectedDriver, setSelectedDriver] = useState([]);
+  const [journeyExpense, setJourneyExpense] = useState([]);
+  const [userData, setUserData] = useState([]);
   const router = useRouter();
-  const { setOpen, Open } = useContext(globalContext);
+  const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext);
 
   const closeSheet = () => {
     setOpen(!Open);
   };
 
-  const handleSearchRides = async () => {
-    setModalVisible(true)
-    // const areaList = {
-    //   userID: user._id,
-    //   from: {
-    //     latitude: initialLocation?.latitude,
-    //     longitude: initialLocation?.longitude,
-    //   },
-    //   to: {
-    //     latitude: destination?.latitude,
-    //     longitude: destination?.longitude,
-    //   },
-    // };
-    // console.log("area list", areaList);
-    // try {
-    //   const response = await axios.post(AppRoutes.UserJourney, areaList);
-    //   console.log("finally", response.data);
-    //   router.push("/pages/searchedRides");
-    // } catch (error: any) {
-    //   console.log(error.message);
-    // }
+  const closeModal = () => {
+    setModalOpen(!modalOpen);
   };
-  
-  
+
+  const handleSearchRides = async () => {
+    const areaList = {
+      userID: user._id,
+      from: {
+        latitude: initialLocation?.latitude,
+        longitude: initialLocation?.longitude,
+      },
+      to: {
+        latitude: destination?.latitude,
+        longitude: destination?.longitude,
+      },
+    };
+    console.log("area list", areaList);
+    try {
+      const response = await axios.post(AppRoutes.UserJourney, areaList);
+      console.log("finally", response.data.data);
+      setAvailableDrivers(response.data.data.matchedRides);
+      setJourneyExpense(response.data.data.rideExpense);
+      setUserData(response.data.data.userArray);
+      setModalVisible(true);
+    } catch (error: any) {
+      console.log("error in adding ride from user Dashboard==>", error.message);
+    }
+  };
+
+  const collectDriverDetails = async (userID: any) => {
+    try {
+      console.log(userID)
+      const response = await axios.post(AppRoutes.getDynamicDriver, {id: userID});
+      console.log("driverDetail", response.data.data);
+      setSelectedDriver(response.data.data);
+      setModalOpen(true);
+    } catch (error: any) {
+      console.log("error in collecting driver details==>", error.message);
+    }
+  }
+
+  // const DriversAndJourney = [...availableDrivers, ...journeyExpense];
+  // console.log("DriversAndJourney", DriversAndJourney);
+
+  // const mergedData = DriversAndJourney.reduce((acc: any[], item:any) => {
+  //   const { ...filteredItem } = item
+  //   acc.push(filteredItem)
+  //   return acc
+  // }, [])
+
+  // console.log("filteredItem", mergedData);
   // const handleRequest=()=>{
   //   const socket = io(BASE_URL)
 
@@ -69,24 +107,26 @@ const UserDashboard = () => {
 
   // }
   const handleRequest = () => {
-      const socket = io(BASE_URL)
-      // socket.on("data", (payload)=>{
-      //   console.log(payload);
-      // })
-      const userData = {
-        "name": user.name,
-        "picture": user.picture,
-        "pickupLocationCoor": [initialLocation?.latitude, initialLocation?.longitude] ,
-        "dropLocationCoor": [destination?.latitude, destination?.longitude],
-        "pickupLocation": pickupLocation,
-        "dropLocation": dropLocation,
-        "userID": user._id
-      }
-    
-      socket.emit("userData", userData)
-    }
+    const socket = io(BASE_URL);
+    // socket.on("data", (payload)=>{
+    //   console.log(payload);
+    // })
+    const userData = {
+      name: user.name,
+      picture: user.picture,
+      pickupLocationCoor: [
+        initialLocation?.latitude,
+        initialLocation?.longitude,
+      ],
+      dropLocationCoor: [destination?.latitude, destination?.longitude],
+      pickupLocation: pickupLocation,
+      dropLocation: dropLocation,
+      userID: user._id,
+    };
 
-    
+    socket.emit("userData", userData);
+  };
+
   return (
     <>
       <View style={styles.containeruser}>
@@ -111,7 +151,7 @@ const UserDashboard = () => {
         <View style={styles.rideContaineruser}>
           <AutoComplete
             onPress={(data: any, details: GooglePlaceDetail | null) => {
-              setPickupLocation(data?.description)
+              setPickupLocation(data?.description);
               if (details?.geometry?.location) {
                 const initialCordinate = details?.geometry?.location;
                 setInitialLocation({
@@ -132,7 +172,7 @@ const UserDashboard = () => {
 
           <AutoComplete
             onPress={(data: any, details: GooglePlaceDetail | null) => {
-              setDropLocation(data?.description) 
+              setDropLocation(data?.description);
               if (details?.geometry?.location) {
                 const initialCordinate = details?.geometry?.location;
                 setDestination({
@@ -155,6 +195,38 @@ const UserDashboard = () => {
         </View>
       </View>
 
+      {modalOpen && (
+        <View style={styles.popupContainer}>
+          <View style={styles.closeButton}>
+            <TouchableOpacity>
+              <Ionicons size={30} name="close" onPress={closeModal} />
+            </TouchableOpacity>
+          </View>
+          {selectedDriver.map((data: any, index: number) => (
+          <View key={index}>
+          <View style={styles.header}>
+            <Image
+              source={{uri : data.profileImage}}
+              alt="CP"
+              style={styles.avatar}
+            />
+          </View>
+          <View style={styles.infoContainer}>
+            <Text style={styles.title}>{data.name}</Text>
+            <Text style={styles.nameStyle}>{data.gender}</Text>
+            <Text style={styles.nameStyle}>{data.vehicleCategory}</Text>
+            <Text style={styles.nameStyle}>Vehicle No : {data.vehicleNo}</Text>
+            <Text style={styles.nameStyle}>License No : {data.licenseNo}</Text>
+          </View>
+          </View>
+          ))}
+          <View style={styles.btn}>
+            <GreenButton onPress={closeModal} text="call" />
+            <GreenButton onPress={closeModal} text="whatsapp" />
+            <GreenButton onPress={handleRequest} text="request ride" />
+          </View>
+        </View>
+      )}
 
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.overlayuser}>
@@ -180,6 +252,20 @@ const UserDashboard = () => {
               </View>
               <BlueButton text="request ride" onPress={handleRequest} />
             </View>
+            <Text style={styles.message}>My Route:{} </Text>
+            {journeyExpense.map((data: any, index: number) => (
+              <View key={index} style={styles.card}>
+                <View style={styles.info}>
+                  <Text style={styles.name}>
+                    Available Seats : {data.availableSeats}
+                  </Text>
+                  <Text style={styles.fare}>
+                    Fare Per Seat : {data.farePerSeat}
+                  </Text>
+                </View>
+                <GreenButton text="Details" onPress={() => collectDriverDetails(data.userID)}/>
+              </View>
+            ))}
           </View>
         </View>
       </Modal>

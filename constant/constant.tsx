@@ -360,7 +360,7 @@ const globalStyle = StyleSheet.create({
 })
 
 export default globalStyle;
-const devURL = "http://192.168.5.230:4000";
+const devURL = "http://192.168.2.132:4000";
 // const prodURL = "https://carpool-backend-staging.up.railway.app";
 
 
@@ -371,6 +371,7 @@ export const AppRoutes = {
   login: BASE_URL + "/user/login",
   getAllUser: BASE_URL + "/user/allUsers",
   getCurrentUser: BASE_URL + "/user/currentUser",
+  getDynamicDriver: BASE_URL + "/user/getDynamicDriver",
   UserJourney : BASE_URL + "/rides/user",
   DriverJourney : BASE_URL + '/rides/rider',
   areaCordinate : BASE_URL + "/location/getLocations"

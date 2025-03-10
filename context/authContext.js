@@ -7,12 +7,12 @@ export const AuthContext = createContext();
 
 function AuthContextProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(AsyncStorage.getItem("token") || null );
+  // const [token, setToken] = useState(AsyncStorage.getItem("token") || null );
   
   useEffect(()=> {
     const getCurrentUserInfo = async () => {
       try {
-        const token = await AsyncStorage.getItem("token")
+        const token = await AsyncStorage.getItem("token" || null)
         const response = await axios.get(AppRoutes.getCurrentUser, {
           headers : { Authorization : `Bearer ${token}`}
         })
