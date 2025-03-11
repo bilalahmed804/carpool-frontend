@@ -61,7 +61,6 @@ function UserRegister() {
     // let data = { ...formData, role: "user" , profileImage : userprofileImage};
     console.log("all data", obj);
     console.log("userImage", userprofileImage);
-    // router.push("/pages/userdashboard")
     try {
       const res = await axios.post(AppRoutes.signupUser, obj);
       const data = res.data?.data
@@ -90,7 +89,7 @@ function UserRegister() {
             value={formData.name}
             onChangeText={(text) => handleChange('name', text)}
           />
-          {error.name && <Text>{error.name}</Text>}
+          {error.name && <Text style={globalStyle.errorThrow}>{error.name}</Text>}
         </View>
         <View style={globalStyle.inputContainer}>
           <Text style={globalStyle.label}>Email</Text>
@@ -102,7 +101,7 @@ function UserRegister() {
             keyboardType="email-address"
             autoCapitalize="none"
           />
-          {error.email && <Text>{error.email}</Text>}
+          {error.email && <Text style={globalStyle.errorThrow}>{error.email}</Text>}
         </View>
 
         <View style={globalStyle.inputContainer}>
@@ -114,7 +113,7 @@ function UserRegister() {
             onChangeText={(text) => handleChange('password', text)}
             secureTextEntry
           />
-          {error.password && <Text>{error.password}</Text>}
+          {error.password && <Text style={globalStyle.errorThrow}>{error.password}</Text>}
         </View>
 
         <View style={globalStyle.inputContainer}>
@@ -127,7 +126,7 @@ function UserRegister() {
             keyboardType="numeric"
             // maxLength={11}
           />
-          {error.phoneNumber && <Text>{error.phoneNumber}</Text>}
+          {error.phoneNumber && <Text style={globalStyle.errorThrow}>{error.phoneNumber}</Text>}
         </View>
 
         <View style={globalStyle.inputContainer}>
@@ -140,7 +139,7 @@ function UserRegister() {
             keyboardType="numeric"
             // maxLength={13}
           />
-          {error.nicNo && <Text>{error.nicNo}</Text>}
+          {error.nicNo && <Text style={globalStyle.errorThrow}>{error.nicNo}</Text>}
         </View>
         <View style={globalStyle.inputContainer}>
           <Text style={globalStyle.label}>Address</Text>
@@ -150,7 +149,7 @@ function UserRegister() {
             value={formData.address}
             onChangeText={(text) => handleChange('address', text)}
           />
-          {error.address && <Text>{error.address}</Text>}
+          {error.address && <Text style={globalStyle.errorThrow}>{error.address}</Text>}
         </View>
         <View style={globalStyle.inputContainer}>
           <Text style={globalStyle.label}>Select Gender</Text>
@@ -163,7 +162,7 @@ function UserRegister() {
             <Picker.Item label="Female" value="female" />
             <Picker.Item label="Male" value="male" />
           </Picker>
-          {error.gender && <Text>{error.gender}</Text>}
+          {error.gender && <Text style={globalStyle.errorThrow}>{error.gender}</Text>}
 
         </View>
         

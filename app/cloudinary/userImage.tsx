@@ -1,13 +1,15 @@
 import { useContext } from "react";
 import PickerImage from "../../components/pickerImage";
 import * as ImagePicker from "expo-image-picker";
-import { Image, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import globalStyle from "@/constant/constant";
 import { globalContext } from "@/context/globalContext";
 
 function UserImage (){
-    const {userprofileImage , setUserProfileImage}= useContext(globalContext)
-
+  
+  const {userprofileImage , setUserProfileImage}= useContext(globalContext)
+ 
+  
     const pickProfileImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -15,7 +17,6 @@ function UserImage (){
           aspect: [4, 4],
           quality: 1,
         });
-    
         if (!result.canceled && result.assets.length > 0) {
           const uploadUrl = await uploadImageToCloudinary(result.assets[0]);
         }
