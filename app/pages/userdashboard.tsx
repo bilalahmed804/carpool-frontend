@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,6 +14,8 @@ import { AuthContext } from "@/context/authContext";
 import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
 
+  const socket = io(BASE_URL);
+
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
   const [destination, setDestination] = useState<{latitude: number;longitude: number;} | null>(null);
@@ -22,9 +24,20 @@ const UserDashboard = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
+  const [socketUserData, setSocketUserData] = useState({});
+  const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const router = useRouter();
   const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext);
+
+  useEffect(() => { 
+    socket.on("connect", () => setisSocketConnected(true));
+    socket.emit("userData", socketUserData)
+    socket.on("disconnect", () => setisSocketConnected(false));
+    return () => {
+      // socket.disconnect()
+    }
+  },[])
 
   const closeSheet = () => {
     setOpen(!Open);
@@ -67,10 +80,6 @@ const UserDashboard = () => {
 
 
   const handleSocketRequest = () => {
-    const socket = io(BASE_URL);
-    // socket.on("data", (payload)=>{
-    //   console.log(payload);
-    // })
     const userData = {
       name: user.name,
       picture: user.picture,
@@ -83,7 +92,7 @@ const UserDashboard = () => {
       dropLocation: dropLocation,
       userID: user._id,
     };
-    socket.emit("userData", userData);
+    setSocketUserData(userData);
   };
 
   return (
