@@ -157,7 +157,7 @@ const UserDashboard = () => {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.overlay1}>        
         <View style={styles.popupContainer}>
-          <View style={styles.closeButton}>
+          <View style={styles.closeButtonuser}>
             <TouchableOpacity>
               <Ionicons size={30} name="close" onPress={() => setModalVisible(false)} />
             </TouchableOpacity>
@@ -190,22 +190,22 @@ const UserDashboard = () => {
         </Modal>
 
       {modalOpen && 
-        <View style={styles.overlay}>
+        <View style={styles.overlay1}>
           <View style={styles.modalContainer}>
             <TouchableOpacity
               onPress={() => setModalOpen(false)}
-              style={styles.closeButton}
+              style={styles.closeButtonuser}
             >
               <Ionicons name="close" size={30} color="#333" />
             </TouchableOpacity>
-            <Text style={styles.message}>My Route:{} </Text>
+            <Text style={styles.messageuser}>My Route:{} </Text>
             {journeyExpense.map((data: any, index: number) => (
-              <View key={index} style={styles.card}>
-                <View style={styles.info}>
-                  <Text style={styles.name}>
+              <View key={index} style={styles.carduser}>
+                <View style={styles.infouser}>
+                  <Text style={styles.nameuser}>
                     Available Seats : {data.availableSeats}
                   </Text>
-                  <Text style={styles.fare}>
+                  <Text style={styles.fareuser}>
                     Fare Per Seat : {data.farePerSeat}
                   </Text>
                 </View>
@@ -345,6 +345,11 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     padding: 10
   },
+  btn: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+  },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -365,9 +370,33 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
   },
+  header: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  avatar: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+  },
+  infoContainer: {
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 10,
+    marginBottom: 10,
+  },
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  nameStyle: {
+    fontSize: 16,
+    color: "#555",
   },
 });
