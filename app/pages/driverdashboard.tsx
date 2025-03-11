@@ -3,7 +3,7 @@ import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityInd
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import BlueButton from "@/components/blueButton";
-import globalStyle, { AppRoutes } from "@/constant/constant";
+import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
@@ -12,6 +12,7 @@ import axios from "axios";
 import { AuthContext } from "@/context/authContext";
 import { Modal } from "react-native";
 import RoutePolyline from "@/components/pollyline";
+import { io } from "socket.io-client";
 
 interface UserData {
   name: string;
@@ -57,14 +58,8 @@ const checkIfOutOfKarachi = (details: GooglePlaceDetail | null) => {
   return city !== "Karachi"; 
 };
 const DriverDashboard = () => {
-  const [driverInitialLocation, setDriverInitialLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [driverDestination, setDriverDestination] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [driverInitialLocation, setDriverInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
+  const [driverDestination, setDriverDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [fare, setFare] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
@@ -89,6 +84,9 @@ const DriverDashboard = () => {
     }, 5000);
   }, []);
 
+  const socket = io(BASE_URL)
+  socket.on("userDataToDriver", (userData)=> console.log(userData))
+  
   const driverData = {
     name: "Ali Khan",
     profilePic:
@@ -124,14 +122,8 @@ const DriverDashboard = () => {
       status: "pending",
       farePerSeat: fare,
       routes: [
-        {
-          latitude: driverInitialLocation?.latitude,
-          longitude: driverInitialLocation?.longitude,
-        },
-        {
-          latitude: driverDestination?.latitude,
-          longitude: driverDestination?.longitude,
-        },
+        {latitude: driverInitialLocation?.latitude,longitude: driverInitialLocation?.longitude,},
+        {latitude: driverDestination?.latitude,longitude: driverDestination?.longitude,},
       ],
     };
     console.log("rideDAta", rideData);

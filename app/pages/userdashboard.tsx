@@ -1,12 +1,5 @@
 import React, { useContext, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Modal,
-  Image,
-  TouchableOpacity,
-  Text,
-} from "react-native";
+import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
@@ -21,21 +14,13 @@ import { AuthContext } from "@/context/authContext";
 import { io } from "socket.io-client";
 
 const UserDashboard = () => {
-  const [initialLocation, setInitialLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [destination, setDestination] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [initialLocation, setInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
+  const [destination, setDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropLocation, setDropLocation] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [availableDrivers, setAvailableDrivers] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
-  const [userData, setUserData] = useState([]);
   const router = useRouter();
   const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext);
@@ -51,23 +36,15 @@ const UserDashboard = () => {
   const handleSearchRides = async () => {
     const areaList = {
       userID: user._id,
-      from: {
-        latitude: initialLocation?.latitude,
-        longitude: initialLocation?.longitude,
-      },
-      to: {
-        latitude: destination?.latitude,
-        longitude: destination?.longitude,
-      },
+      from: {latitude: initialLocation?.latitude,longitude: initialLocation?.longitude,},
+      to: {latitude: destination?.latitude,longitude: destination?.longitude,},
     };
     console.log("area list", areaList);
     try {
       const response = await axios.post(AppRoutes.UserJourney, areaList);
       console.log("finally", response.data.data);
-      setAvailableDrivers(response.data.data.matchedRides);
       setJourneyExpense(response.data.data.rideExpense);
-      setUserData(response.data.data.userArray);
-      setModalVisible(true);
+      setModalOpen(true);
     } catch (error: any) {
       console.log("error in adding ride from user Dashboard==>", error.message);
     }
@@ -79,33 +56,16 @@ const UserDashboard = () => {
       const response = await axios.post(AppRoutes.getDynamicDriver, {id: userID});
       console.log("driverDetail", response.data.data);
       setSelectedDriver(response.data.data);
-      setModalOpen(true);
+      setModalVisible(true);
     } catch (error: any) {
       console.log("error in collecting driver details==>", error.message);
     }
   }
 
-  // const DriversAndJourney = [...availableDrivers, ...journeyExpense];
-  // console.log("DriversAndJourney", DriversAndJourney);
+ 
 
-  // const mergedData = DriversAndJourney.reduce((acc: any[], item:any) => {
-  //   const { ...filteredItem } = item
-  //   acc.push(filteredItem)
-  //   return acc
-  // }, [])
 
-  // console.log("filteredItem", mergedData);
-  // const handleRequest=()=>{
-  //   const socket = io(BASE_URL)
-
-  // const userData = {
-  //   "name" : "abc",
-  // }
-
-  // socket.emit("userData", userData)
-
-  // }
-  const handleRequest = () => {
+  const handleSocketRequest = () => {
     const socket = io(BASE_URL);
     // socket.on("data", (payload)=>{
     //   console.log(payload);
@@ -122,7 +82,6 @@ const UserDashboard = () => {
       dropLocation: dropLocation,
       userID: user._id,
     };
-
     socket.emit("userData", userData);
   };
 
@@ -197,11 +156,12 @@ const UserDashboard = () => {
         </View>
       </View>
 
-      {modalOpen && (
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.overlay1}>        
         <View style={styles.popupContainer}>
           <View style={styles.closeButton}>
             <TouchableOpacity>
-              <Ionicons size={30} name="close" onPress={closeModal} />
+              <Ionicons size={30} name="close" onPress={() => setModalVisible(false)} />
             </TouchableOpacity>
           </View>
           {selectedDriver.map((data: any, index: number) => (
@@ -225,16 +185,17 @@ const UserDashboard = () => {
           <View style={styles.btn}>
             <GreenButton onPress={closeModal} text="call" />
             <GreenButton onPress={closeModal} text="whatsapp" />
-            <GreenButton onPress={handleRequest} text="request ride" />
+            <GreenButton onPress={handleSocketRequest} text="request ride" />
           </View>
         </View>
-      )}
+        </View>
+        </Modal>
 
-      <Modal visible={modalVisible} transparent animationType="slide">
+      {modalOpen && 
         <View style={styles.overlay}>
           <View style={styles.modalContainer}>
             <TouchableOpacity
-              onPress={() => setModalVisible(false)}
+              onPress={() => setModalOpen(false)}
               style={styles.closeButton}
             >
               <Ionicons name="close" size={30} color="#333" />
@@ -255,7 +216,7 @@ const UserDashboard = () => {
             ))}
           </View>
         </View>
-      </Modal>
+        }
     </>
   );
 };
@@ -291,6 +252,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.6)",
+  },
+  overlay1: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   modalContainer: {
     backgroundColor: "#fff",
@@ -352,11 +319,11 @@ const styles = StyleSheet.create({
   },
   popupContainer: {
     flex: 1,
-    marginHorizontal: "auto",
+    justifyContent: "center",
+    alignItems: "center",
     position: "absolute",
     borderRadius: 10,
     top: "20%",
-    width: "90%",
     backgroundColor: "white",
     elevation: 6,
     zIndex: 1000,
