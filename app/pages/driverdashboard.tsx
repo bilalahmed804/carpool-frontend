@@ -48,14 +48,8 @@ const validateLocation = (details: GooglePlaceDetail | null) => {
 };
 
 const DriverDashboard = () => {
-  const [driverInitialLocation, setDriverInitialLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [driverDestination, setDriverDestination] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [driverInitialLocation, setDriverInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
+  const [driverDestination, setDriverDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [fare, setFare] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
@@ -84,6 +78,9 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
     }, 5000);
   }, []);
 
+  const socket = io(BASE_URL)
+  socket.on("userDataToDriver", (userData)=> console.log(userData))
+  
   const driverData = {
     name: "Ali Khan",
     profilePic:

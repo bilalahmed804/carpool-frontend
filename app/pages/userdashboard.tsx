@@ -1,12 +1,5 @@
 import React, { useContext, useState } from "react";
-import {
-  View,
-  StyleSheet,
-  Modal,
-  Image,
-  TouchableOpacity,
-  Text,
-} from "react-native";
+import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
@@ -22,21 +15,13 @@ import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
 
 const UserDashboard = () => {
-  const [initialLocation, setInitialLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [destination, setDestination] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [initialLocation, setInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
+  const [destination, setDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropLocation, setDropLocation] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
-  const [availableDrivers, setAvailableDrivers] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
-  const [userData, setUserData] = useState([]);
   const router = useRouter();
   const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext);
@@ -52,23 +37,15 @@ const UserDashboard = () => {
   const handleSearchRides = async () => {
     const areaList = {
       userID: user._id,
-      from: {
-        latitude: initialLocation?.latitude,
-        longitude: initialLocation?.longitude,
-      },
-      to: {
-        latitude: destination?.latitude,
-        longitude: destination?.longitude,
-      },
+      from: {latitude: initialLocation?.latitude,longitude: initialLocation?.longitude,},
+      to: {latitude: destination?.latitude,longitude: destination?.longitude,},
     };
     console.log("area list", areaList);
     try {
       const response = await axios.post(AppRoutes.UserJourney, areaList);
       console.log("finally", response.data.data);
-      setAvailableDrivers(response.data.data.matchedRides);
       setJourneyExpense(response.data.data.rideExpense);
-      setUserData(response.data.data.userArray);
-      setModalVisible(true);
+      setModalOpen(true);
     } catch (error: any) {
       console.log("error in adding ride from user Dashboard==>", error.message);
     }
@@ -80,33 +57,16 @@ const UserDashboard = () => {
       const response = await axios.post(AppRoutes.getDynamicDriver, {id: userID});
       console.log("driverDetail", response.data.data);
       setSelectedDriver(response.data.data);
-      setModalOpen(true);
+      setModalVisible(true);
     } catch (error: any) {
       console.log("error in collecting driver details==>", error.message);
     }
   }
 
-  // const DriversAndJourney = [...availableDrivers, ...journeyExpense];
-  // console.log("DriversAndJourney", DriversAndJourney);
+ 
 
-  // const mergedData = DriversAndJourney.reduce((acc: any[], item:any) => {
-  //   const { ...filteredItem } = item
-  //   acc.push(filteredItem)
-  //   return acc
-  // }, [])
 
-  // console.log("filteredItem", mergedData);
-  // const handleRequest=()=>{
-  //   const socket = io(BASE_URL)
-
-  // const userData = {
-  //   "name" : "abc",
-  // }
-
-  // socket.emit("userData", userData)
-
-  // }
-  const handleRequest = () => {
+  const handleSocketRequest = () => {
     const socket = io(BASE_URL);
     // socket.on("data", (payload)=>{
     //   console.log(payload);
@@ -123,7 +83,6 @@ const UserDashboard = () => {
       dropLocation: dropLocation,
       userID: user._id,
     };
-
     socket.emit("userData", userData);
   };
 
@@ -195,11 +154,12 @@ const UserDashboard = () => {
         </View>
       </View>
 
-      {modalOpen && (
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.overlay1}>        
         <View style={styles.popupContainer}>
           <View style={styles.closeButton}>
             <TouchableOpacity>
-              <Ionicons size={30} name="close" onPress={closeModal} />
+              <Ionicons size={30} name="close" onPress={() => setModalVisible(false)} />
             </TouchableOpacity>
           </View>
           {selectedDriver.map((data: any, index: number) => (
@@ -223,35 +183,21 @@ const UserDashboard = () => {
           <View style={styles.btn}>
             <GreenButton onPress={closeModal} text="call" />
             <GreenButton onPress={closeModal} text="whatsapp" />
-            <GreenButton onPress={handleRequest} text="request ride" />
+            <GreenButton onPress={handleSocketRequest} text="request ride" />
           </View>
         </View>
-      )}
+        </View>
+        </Modal>
 
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View style={styles.overlayuser}>
-          <View style={styles.modalContaineruser}>
+      {modalOpen && 
+        <View style={styles.overlay}>
+          <View style={styles.modalContainer}>
             <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.closeButtonuser}
+              onPress={() => setModalOpen(false)}
+              style={styles.closeButton}
             >
               <Ionicons name="close" size={30} color="#333" />
             </TouchableOpacity>
-            <Text style={styles.messageuser}>My Route:{} </Text>
-            <View style={styles.carduser}>
-              <Image
-                source={{
-                  uri: "http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740661676/Ride_Sharing/Drivers/nyabkfscagusux11fxl8.jpg",
-                }}
-                style={styles.driverImageuser}
-              />
-              <View style={styles.infouser}>
-                <Text style={styles.nameuser}>name</Text>
-                <Text style={styles.fareuser}>fare</Text>
-                <Text style={styles.vehicleuser}>Vehicle</Text>
-              </View>
-              <BlueButton text="request ride" onPress={handleRequest} />
-            </View>
             <Text style={styles.message}>My Route:{} </Text>
             {journeyExpense.map((data: any, index: number) => (
               <View key={index} style={styles.card}>
@@ -268,7 +214,7 @@ const UserDashboard = () => {
             ))}
           </View>
         </View>
-      </Modal>
+        }
     </>
   );
 };
@@ -320,13 +266,19 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
-  modalContaineruser: {
-    backgroundColor: "#FFF",
-    padding: 10,
-    gap: 6,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    minHeight: "90%",
+  overlay1: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  modalContainer: {
+    backgroundColor: "#fff",
+    padding: 6,
+    gap: 4,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+    minHeight: "95%",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
@@ -380,6 +332,18 @@ const styles = StyleSheet.create({
   vehicleuser: {
     fontSize: 14,
     color: "#777",
+  },
+  popupContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    borderRadius: 10,
+    top: "20%",
+    backgroundColor: "white",
+    elevation: 6,
+    zIndex: 1000,
+    padding: 10
   },
   buttonContainer: {
     flexDirection: "row",
