@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityIndicator, ToastAndroid } from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
@@ -12,6 +12,8 @@ import { AuthContext } from "@/context/authContext";
 import { Modal } from "react-native";
 import { io } from "socket.io-client";
 import GreenButton from "@/components/greenButton";
+import * as Location from 'expo-location';
+
 
 interface UserData {
   name: string;
@@ -60,6 +62,9 @@ const DriverDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [pickupAreaName , setPickupAreaName] = useState("");
   const [dropAreaName , setDropAreaName] = useState("");
+    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+
+const mapRef = useRef<MapView | null>(null);
 
 console.log("pickupAreaName", pickupAreaName, dropAreaName);
 
@@ -98,6 +103,25 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
   const closeSheet = () => {
     setOpen(!Open);
   };
+   const goToCurrentLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      console.log("status", status);
+      
+      if (status !== 'granted') {
+        alert('Location permission denied!');
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location)
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+      }
+    }
 
   const handleAddRide = async () => {
     const socket = io(BASE_URL);
@@ -137,38 +161,46 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
 
     console.log("rideData", rideData);
   
-    // try {
-    //   const response = await axios.post(AppRoutes.DriverJourney, rideData);
-    //   ToastAndroid.show("Ride data posted successfully!", ToastAndroid.LONG);
-    //   console.log("Response:", response.data);
-    // } catch (error) {
-    //   console.error("Error posting ride data:", error);
+    try {
+      const response = await axios.post(AppRoutes.DriverJourney, rideData);
+      ToastAndroid.show("Ride data posted successfully!", ToastAndroid.LONG);
+      console.log("Response:", response.data);
+    } catch (error) {
+      console.error("Error posting ride data:", error);
       
-    //   if (axios.isAxiosError(error) && error.response) {
-    //     ToastAndroid.show(`Error: ${error.response.data.message || "Something went wrong!"}`, ToastAndroid.LONG);
-    //   } else {
-    //     ToastAndroid.show("Network error! Please try again.", ToastAndroid.LONG);
-    //   }
-    // }
+      if (axios.isAxiosError(error) && error.response) {
+        ToastAndroid.show(`Error: ${error.response.data.message || "Something went wrong!"}`, ToastAndroid.LONG);
+      } else {
+        ToastAndroid.show("Network error! Please try again.", ToastAndroid.LONG);
+      }
+    }
   };
   
 
   return (
     <View style={globalStyle.containerd}>
-      <MapView
+    <MapView
+        ref={mapRef}
         provider={PROVIDER_GOOGLE}
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={{
-          latitude: 24.8607,
-          longitude: 67.0011,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-      />
-     <View style={globalStyle.navbar}>
-           <TouchableOpacity onPress={closeSheet} style={globalStyle.iconContainer}>
-             <Ionicons name="menu" size={30} color="#4CAF50" />
-           </TouchableOpacity>
+        showsUserLocation={true}
+          showsMyLocationButton={true}
+          mapType="terrain"
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={{
+            latitude: 24.8607,
+            longitude: 67.0011,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+        >
+       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
+
+        </MapView>
+        <TouchableOpacity onPress={goToCurrentLocation} />
+        <View style={globalStyle.navbaruser}>
+      <TouchableOpacity onPress={closeSheet} style={globalStyle.iconContaineruser}>
+        <Ionicons name="menu" size={30} color="#5F9EE0" />
+      </TouchableOpacity>
          </View>
 
       {Open && <Sheet />}
