@@ -124,7 +124,6 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
     }
 
   const handleAddRide = async () => {
-    const socket = io(BASE_URL);
     if (!driverInitialLocation || !driverDestination) {
       ToastAndroid.show("Please select both locations.", ToastAndroid.LONG);
       return;
@@ -156,9 +155,7 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
       "pickupLocation": driverInitialLocation,
       "dropLocation": driverDestination
     };
-    
     socket.emit("driverData", rideDataSend);
-
     console.log("rideData", rideData);
   
     try {
