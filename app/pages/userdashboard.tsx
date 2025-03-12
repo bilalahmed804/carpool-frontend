@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useRef, useState } from "react";
 import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { EvilIcons, Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
@@ -13,6 +13,7 @@ import axios from "axios";
 import { AuthContext } from "@/context/authContext";
 import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
+import * as Location from 'expo-location';
 
   const socket = io(BASE_URL);
 
@@ -24,11 +25,13 @@ const UserDashboard = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [socketUserData, setSocketUserData] = useState({});
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const router = useRouter();
   const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext);
+  const mapRef = useRef<MapView>(null);
 
   useEffect(() => { 
     socket.on("connect", () => setisSocketConnected(true));
@@ -46,6 +49,26 @@ const UserDashboard = () => {
   const closeModal = () => {
     setModalOpen(!modalOpen);
   };
+
+  const goToCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    console.log("status", status);
+    
+    if (status !== 'granted') {
+      alert('Location permission denied!');
+      return;
+    }
+    let location = await Location.getCurrentPositionAsync({});
+    setLocation(location)
+    if (mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      });
+    }
+  }
 
   const handleSearchRides = async () => {
     const areaList = {
@@ -99,7 +122,11 @@ const UserDashboard = () => {
     <>
       <View style={styles.containeruser}>
         <MapView
-          provider={PROVIDER_GOOGLE}
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE}
+        showsUserLocation={true}
+          showsMyLocationButton={true}
+          mapType="terrain"
           style={StyleSheet.absoluteFillObject}
           initialRegion={{
             latitude: 24.8607,
@@ -107,12 +134,17 @@ const UserDashboard = () => {
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           }}
-        />
+        >
+       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
+
+        </MapView>
+        <TouchableOpacity onPress={goToCurrentLocation} />
         <View style={styles.navbaruser}>
       <TouchableOpacity onPress={closeSheet} style={styles.iconContaineruser}>
         <Ionicons name="menu" size={30} color="#5F9EE0" />
       </TouchableOpacity>
     </View>
+   
      
         {Open && <Sheet />}
 
@@ -393,6 +425,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     borderRadius: 10,
     marginBottom: 10,
+  },
+  locationButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#5F9EE0',
+    padding: 10,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   buttonText: {
     color: "#fff",
