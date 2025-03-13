@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { EvilIcons, Ionicons } from "@expo/vector-icons";
@@ -15,33 +15,42 @@ import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
 import * as Location from 'expo-location';
 
-  const socket = io(BASE_URL);
+const socket = io(BASE_URL);
 
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
   const [destination, setDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropLocation, setDropLocation] = useState("");
+  const [driverID, setDriverID] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [socketUserData, setSocketUserData] = useState({});
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const router = useRouter();
   const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext);
   const mapRef = useRef<MapView>(null);
+  
+  useEffect(() => {
+      socket.connect();
+      socket.on("connect", () => {
+        console.log("Socket connected");
+        setisSocketConnected(true);
+      });
+      socket.on("disconnect", () => setisSocketConnected(false));
+      return () => {
+        socket.disconnect();
+      };
+    }, []);
 
-  useEffect(() => { 
-    socket.on("connect", () => setisSocketConnected(true));
-    socket.emit("userData", socketUserData)
-    socket.on("disconnect", () => setisSocketConnected(false));
-    return () => {
-      // socket.disconnect()
+  // Socket : Step 1
+    const userID = {
+      userID : user._id
     }
-  },[])
-
+    socket.emit("registerUser", userID)
+    
   const closeSheet = () => {
     setOpen(!Open);
   };
@@ -83,13 +92,13 @@ const UserDashboard = () => {
       setJourneyExpense(response.data.data.rideExpense);
       setModalOpen(true);
     } catch (error: any) {
-      console.log("error in adding ride from user Dashboard==>", error.message);
+      console.log("error in searching ride from user Dashboard==>", error.message);
     }
   };
 
   const collectDriverDetails = async (userID: any) => {
+    setDriverID(userID)
     try {
-      console.log(userID)
       const response = await axios.post(AppRoutes.getDynamicDriver, {id: userID});
       console.log("driverDetail", response.data.data);
       setSelectedDriver(response.data.data);
@@ -98,10 +107,9 @@ const UserDashboard = () => {
       console.log("error in collecting driver details==>", error.message);
     }
   }
+  
 
- 
-
-
+  // Socket : Step 2
   const handleSocketRequest = () => {
     const userData = {
       name: user.name,
@@ -114,8 +122,10 @@ const UserDashboard = () => {
       pickupLocation: pickupLocation,
       dropLocation: dropLocation,
       userID: user._id,
+      driver_ID : driverID
     };
-    setSocketUserData(userData);
+    socket.emit("userRequestToDriver", userData)
+    // socket.disconnect()
   };
 
   return (
@@ -245,6 +255,9 @@ const UserDashboard = () => {
                 <View style={styles.infouser}>
                   <Text style={styles.nameuser}>
                     Available Seats : {data.availableSeats}
+                  </Text>
+                  <Text style={styles.nameuser}>
+                    {data.userID}
                   </Text>
                   <Text style={styles.fareuser}>
                     Fare Per Seat : {data.farePerSeat}
