@@ -4,7 +4,8 @@
     "slug": "carpooling",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/carpool.png",
+    "icon": "./assets/images/hd.png",
+>>>>>>>>> Temporary merge branch 2
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
@@ -13,20 +14,21 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/carpool.png",
+        "foregroundImage": "./assets/images/hd.png",
+>>>>>>>>> Temporary merge branch 2
         "backgroundColor": "#000000"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/carpool.png"
+      "favicon": "./assets/images/hd.png"
     },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/carpool.png",
+          "image": "./assets/images/hd.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#000000"

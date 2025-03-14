@@ -218,9 +218,21 @@ const DriverDashboard = () => {
           onPress={closeSheet}
           style={globalStyle.iconContaineruser}
         >
+<<<<<<<<< Temporary merge branch 1
           <Ionicons name="menu" size={30} color="#5F9EE0" />
         </TouchableOpacity>
       </View>
+=========
+       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
+
+        </MapView>
+        <TouchableOpacity onPress={goToCurrentLocation} />
+        <View style={globalStyle.navbaruser}>
+      <TouchableOpacity onPress={closeSheet} style={globalStyle.iconContaineruser}>
+        <Ionicons name="menu" size={30} color="#5F9EE0" />
+      </TouchableOpacity>
+         </View>
+>>>>>>>>> Temporary merge branch 2
 
       {Open && <Sheet />}
       <View style={globalStyle.rideContainer}>

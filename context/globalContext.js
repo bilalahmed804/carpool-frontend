@@ -8,7 +8,7 @@ function GlobalContextProvider({ children }) {
     const [profileImage, setProfileImage] = useState();
     const [vehicleImage, setVehicleImage] = useState();
     const [userprofileImage , setUserProfileImage] = useState()
-    const [Open, setOpen] = useState(false);
+    const [Open, setOpen] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
 
