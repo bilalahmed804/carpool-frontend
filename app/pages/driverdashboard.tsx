@@ -197,16 +197,32 @@ const DriverDashboard = () => {
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         showsUserLocation={true}
-          showsMyLocationButton={true}
-          mapType="terrain"
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={{
-            latitude: 24.8607,
-            longitude: 67.0011,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
+        showsMyLocationButton={true}
+        mapType="terrain"
+        style={StyleSheet.absoluteFillObject}
+        initialRegion={{
+          latitude: 24.8607,
+          longitude: 67.0011,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      >
+        <Marker
+          coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
+          title="Pickup Location"
+        />
+      </MapView>
+      <TouchableOpacity onPress={goToCurrentLocation} />
+      <View style={globalStyle.navbaruser}>
+        <TouchableOpacity
+          onPress={closeSheet}
+          style={globalStyle.iconContaineruser}
         >
+<<<<<<<<< Temporary merge branch 1
+          <Ionicons name="menu" size={30} color="#5F9EE0" />
+        </TouchableOpacity>
+      </View>
+=========
        <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
 
         </MapView>
@@ -216,6 +232,7 @@ const DriverDashboard = () => {
         <Ionicons name="menu" size={30} color="#5F9EE0" />
       </TouchableOpacity>
          </View>
+>>>>>>>>> Temporary merge branch 2
 
       {Open && <Sheet />}
       <View style={globalStyle.rideContainer}>
