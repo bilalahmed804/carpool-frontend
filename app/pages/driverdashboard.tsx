@@ -193,7 +193,9 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
        <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
 
         </MapView>
-        <TouchableOpacity onPress={goToCurrentLocation} />
+        <TouchableOpacity style={globalStyle.iconButton} onPress={goToCurrentLocation}>
+          <Ionicons name="locate" size={30} color="#5F9EE0" style={globalStyle.iconlocat} />
+          </TouchableOpacity>
         <View style={globalStyle.navbaruser}>
       <TouchableOpacity onPress={closeSheet} style={globalStyle.iconContaineruser}>
         <Ionicons name="menu" size={30} color="#5F9EE0" />

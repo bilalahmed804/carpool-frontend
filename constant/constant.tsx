@@ -241,6 +241,21 @@ const globalStyle = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
+  iconlocat: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    zIndex: 10,
+  },
+  iconButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#fff",
+    borderRadius: 50,
+    padding: 10,
+    elevation: 5,
+  },
   iconContaineruser: {
     width: 50,
     height: 50,
@@ -378,7 +393,7 @@ const globalStyle = StyleSheet.create({
 })
 
 export default globalStyle;
-const devURL = "http://192.168.2.132:4000";
+const devURL = "http://192.168.5.230:4000";
 // const prodURL = "https://carpool-backend-staging.up.railway.app";
 
 
