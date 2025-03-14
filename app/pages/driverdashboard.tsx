@@ -1,5 +1,14 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { View, TextInput, StyleSheet, TouchableOpacity, Text, Image, ActivityIndicator, ToastAndroid } from "react-native";
+import {
+  View,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Image,
+  ActivityIndicator,
+  ToastAndroid,
+} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
@@ -12,8 +21,9 @@ import { AuthContext } from "@/context/authContext";
 import { Modal } from "react-native";
 import { io } from "socket.io-client";
 import GreenButton from "@/components/greenButton";
-import * as Location from 'expo-location';
+import * as Location from "expo-location";
 
+const socket = io(BASE_URL);
 
 interface UserData {
   name: string;
@@ -50,8 +60,14 @@ const validateLocation = (details: GooglePlaceDetail | null) => {
 };
 
 const DriverDashboard = () => {
-  const [driverInitialLocation, setDriverInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
-  const [driverDestination, setDriverDestination] = useState<{latitude: number;longitude: number;} | null>(null);
+  const [driverInitialLocation, setDriverInitialLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [driverDestination, setDriverDestination] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [fare, setFare] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
@@ -59,33 +75,37 @@ const DriverDashboard = () => {
   const { user } = useContext(AuthContext);
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
+  const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const [loading, setLoading] = useState(false);
-  const [pickupAreaName , setPickupAreaName] = useState("");
-  const [dropAreaName , setDropAreaName] = useState("");
-    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [pickupAreaName, setPickupAreaName] = useState("");
+  const [dropAreaName, setDropAreaName] = useState("");
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
 
-const mapRef = useRef<MapView | null>(null);
+  const mapRef = useRef<MapView | null>(null);
 
-console.log("pickupAreaName", pickupAreaName, dropAreaName);
+  // console.log("pickupAreaName", pickupAreaName, dropAreaName);
 
   useEffect(() => {
-    setTimeout(() => {
-      setUserData({
-        name: "Arslan",
-        profilePic: "https://randomuser.me/api/portraits/men/45.jpg",
-        seat: 2,
-        area: {
-          latitude: "north karachi",
-          longitude: "korangi",
-        },
-      });
-      setLoading(false);
-    }, 5000);
+    socket.connect();
+    socket.on("connect", () => {
+      console.log("Socket connected");
+      setisSocketConnected(true);
+    });
+    socket.on("disconnect", () => setisSocketConnected(false));
+
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
-  const socket = io(BASE_URL)
-  socket.on("userDataToDriver", (userData)=> console.log(userData))
-  
+  // Socket : Step 1
+  const userID = {
+    userID : user._id
+  }
+  socket.emit("registerUser", userID)
+
   const driverData = {
     name: "Ali Khan",
     profilePic:
@@ -96,99 +116,107 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
     DestinationLocation: "Gulshan",
   };
 
+  socket.on("rideRequest", (data) => console.log("rideRequest==>", data))
   const onClose = () => {
     setModalVisible(false);
+    // socket.disconnect();
   };
 
   const closeSheet = () => {
     setOpen(!Open);
   };
-   const goToCurrentLocation = async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      console.log("status", status);
-      
-      if (status !== 'granted') {
-        alert('Location permission denied!');
-        return;
-      }
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location)
-      if (mapRef.current) {
-        mapRef.current.animateToRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
-      }
+  const goToCurrentLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    console.log("status", status);
+
+    if (status !== "granted") {
+      alert("Location permission denied!");
+      return;
     }
+    let location = await Location.getCurrentPositionAsync({});
+    setLocation(location);
+    if (mapRef.current) {
+      mapRef.current.animateToRegion({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      });
+    }
+  };
 
   const handleAddRide = async () => {
     if (!driverInitialLocation || !driverDestination) {
       ToastAndroid.show("Please select both locations.", ToastAndroid.LONG);
       return;
     }
-  
-    const points = getIntermediatePoints(driverInitialLocation, driverDestination, 20);
+
+    const points = getIntermediatePoints(
+      driverInitialLocation,
+      driverDestination,
+      20
+    );
     setIntermediatePoints(points);
-  
+
     setModalVisible(true);
-  
+
     const rideData = {
       userID: user._id,
       availableSeats: seats,
       status: "pending",
       farePerSeat: fare,
-      routes: [
-        driverInitialLocation,
-        driverDestination,
-        ...points,
-      ],
+      routes: [driverInitialLocation, driverDestination, ...points],
     };
-    const rideDataSend = {
-      "userID": user._id,
-      "availableSeats": seats,
-      "status": "pending",
-      "farePerSeat": fare,
-      "pickupLocationCoor": [driverInitialLocation.latitude, driverInitialLocation.longitude],
-      "dropLocationCoor": [driverDestination.latitude, driverDestination.longitude],
-      "pickupLocation": driverInitialLocation,
-      "dropLocation": driverDestination
-    };
-    socket.emit("driverData", rideDataSend);
-    console.log("rideData", rideData);
-  
+    // socket.on("userData", (userData) => console.log("userData", userData))
+    // console.log("rideData", userData);
+
     try {
       const response = await axios.post(AppRoutes.DriverJourney, rideData);
       ToastAndroid.show("Ride data posted successfully!", ToastAndroid.LONG);
       console.log("Response:", response.data);
     } catch (error) {
       console.error("Error posting ride data:", error);
-      
+
       if (axios.isAxiosError(error) && error.response) {
-        ToastAndroid.show(`Error: ${error.response.data.message || "Something went wrong!"}`, ToastAndroid.LONG);
+        ToastAndroid.show(
+          `Error: ${error.response.data.message || "Something went wrong!"}`,
+          ToastAndroid.LONG
+        );
       } else {
-        ToastAndroid.show("Network error! Please try again.", ToastAndroid.LONG);
+        ToastAndroid.show(
+          "Network error! Please try again.",
+          ToastAndroid.LONG
+        );
       }
     }
   };
-  
 
   return (
     <View style={globalStyle.containerd}>
-    <MapView
+      <MapView
         ref={mapRef}
         provider={PROVIDER_GOOGLE}
         showsUserLocation={true}
-          showsMyLocationButton={true}
-          mapType="terrain"
-          style={StyleSheet.absoluteFillObject}
-          initialRegion={{
-            latitude: 24.8607,
-            longitude: 67.0011,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          }}
+        showsMyLocationButton={true}
+        mapType="terrain"
+        style={StyleSheet.absoluteFillObject}
+        initialRegion={{
+          latitude: 24.8607,
+          longitude: 67.0011,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }}
+      >
+        <Marker
+          coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
+          title="Pickup Location"
+        />
+      </MapView>
+      <TouchableOpacity onPress={goToCurrentLocation} />
+      <View style={globalStyle.navbaruser}>
+        <TouchableOpacity
+          onPress={closeSheet}
+          style={globalStyle.iconContaineruser}
         >
        <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
 
@@ -202,89 +230,113 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
       </TouchableOpacity>
          </View>
 
+
       {Open && <Sheet />}
       <View style={globalStyle.rideContainer}>
-         <AutoComplete
-  onPress={(data: any, details: GooglePlaceDetail | null) => {
-    const { isInPakistan, isInKarachi } = validateLocation(details);
-    if (!isInPakistan) {
-      ToastAndroid.show("Only locations within Pakistan are allowed.", ToastAndroid.LONG);
-      return;
-    }
-    
-    if (!isInKarachi) {
-      ToastAndroid.show("Maximum fare should be in thousands for out-of-Karachi trips.", ToastAndroid.LONG);
-    }
-  
-    if (data?.description) {
-      setPickupAreaName(data.description)
-    }
-    if (details?.geometry?.location) {
-      const initialCordinate = details.geometry.location;
-      setDriverInitialLocation({
-        latitude: initialCordinate.lat,
-        longitude: initialCordinate.lng,
-      });
-      console.log("data des", data.description, details.geometry.location);
-    } else {
-      console.log("no location found");
-    }
-  }}
-  text="Enter Initial Location"
-/>
+        <AutoComplete
+          onPress={(data: any, details: GooglePlaceDetail | null) => {
+            const { isInPakistan, isInKarachi } = validateLocation(details);
+            if (!isInPakistan) {
+              ToastAndroid.show(
+                "Only locations within Pakistan are allowed.",
+                ToastAndroid.LONG
+              );
+              return;
+            }
 
-<AutoComplete
-  onPress={(data: any, details: GooglePlaceDetail | null) => {
-    const { isInPakistan, isInKarachi } = validateLocation(details);
-    if (!isInPakistan) {
-      ToastAndroid.show("Only locations within Pakistan are allowed.", ToastAndroid.LONG);
-      return;
-    }
-    
-    if (!isInKarachi) {
-      ToastAndroid.show("Maximum fare should be in thousands for out-of-Karachi trips.", ToastAndroid.LONG);
-    }
-    if(data?.description){
-      setDropAreaName(data.description)}
-    if (details?.geometry?.location) {
-      const initialCordinate = details.geometry.location;
-      setDriverDestination({
-        latitude: initialCordinate.lat,
-        longitude: initialCordinate.lng,
-      });
+            if (!isInKarachi) {
+              ToastAndroid.show(
+                "Maximum fare should be in thousands for out-of-Karachi trips.",
+                ToastAndroid.LONG
+              );
+            }
 
-      console.log("data des", data.description, details.geometry.location);
-    } else {
-      console.log("no location found");
-    }
-  }}
-  text="Destination"
-/>
+            if (data?.description) {
+              setPickupAreaName(data.description);
+            }
+            if (details?.geometry?.location) {
+              const initialCordinate = details.geometry.location;
+              setDriverInitialLocation({
+                latitude: initialCordinate.lat,
+                longitude: initialCordinate.lng,
+              });
+              console.log(
+                "data des",
+                data.description,
+                details.geometry.location
+              );
+            } else {
+              console.log("no location found");
+            }
+          }}
+          text="Enter Initial Location"
+        />
 
-         
-          <View style={globalStyle.fareContainer}>
-            <TextInput
-              style={globalStyle.inputField}
-              placeholder="Fare"
-              placeholderTextColor="gray"
-              keyboardType="numeric"
-              value={fare}
-              onChangeText={setFare}
-            />
-            <TextInput
-              style={globalStyle.inputField}
-              placeholder="Seats Available"
-              placeholderTextColor="gray"
-              keyboardType="number-pad"
-              value={seats}
-              onChangeText={setSeats}
-            />
-          </View>
-          <GreenButton text="Add Ride" onPress={handleAddRide} />
+        <AutoComplete
+          onPress={(data: any, details: GooglePlaceDetail | null) => {
+            const { isInPakistan, isInKarachi } = validateLocation(details);
+            if (!isInPakistan) {
+              ToastAndroid.show(
+                "Only locations within Pakistan are allowed.",
+                ToastAndroid.LONG
+              );
+              return;
+            }
+
+            if (!isInKarachi) {
+              ToastAndroid.show(
+                "Maximum fare should be in thousands for out-of-Karachi trips.",
+                ToastAndroid.LONG
+              );
+            }
+            if (data?.description) {
+              setDropAreaName(data.description);
+            }
+            if (details?.geometry?.location) {
+              const initialCordinate = details.geometry.location;
+              setDriverDestination({
+                latitude: initialCordinate.lat,
+                longitude: initialCordinate.lng,
+              });
+
+              console.log(
+                "data des",
+                data.description,
+                details.geometry.location
+              );
+            } else {
+              console.log("no location found");
+            }
+          }}
+          text="Destination"
+        />
+
+        <View style={globalStyle.fareContainer}>
+          <TextInput
+            style={globalStyle.inputField}
+            placeholder="Fare"
+            placeholderTextColor="gray"
+            keyboardType="numeric"
+            value={fare}
+            onChangeText={setFare}
+          />
+          <TextInput
+            style={globalStyle.inputField}
+            placeholder="Seats Available"
+            placeholderTextColor="gray"
+            keyboardType="number-pad"
+            value={seats}
+            onChangeText={setSeats}
+          />
+        </View>
+        <GreenButton text="Add Ride" onPress={handleAddRide} />
         <Modal visible={modalVisible} transparent animationType="slide">
           <View style={globalStyle.overlayd}>
             <View style={globalStyle.modalContainerd}>
-              <TouchableOpacity onPress={onClose} style={globalStyle.closeButtond}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={globalStyle.closeButtond}
+              >
                 <Ionicons name="close" size={40} color="#333" />
               </TouchableOpacity>
 
@@ -297,11 +349,11 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
                     {driverData.fare} {" - "} {driverData.initialLocation} to{" "}
                     {driverData.DestinationLocation}
                   </Text>
-                  <TouchableOpacity
-                    onPress={onClose}
-                  >
+                  <TouchableOpacity onPress={onClose}>
                     <View style={globalStyle.buttond}>
-                      <Text style={globalStyle.buttonTextd}>Cancel My Ride</Text>
+                      <Text style={globalStyle.buttonTextd}>
+                        Cancel My Ride
+                      </Text>
                     </View>
                   </TouchableOpacity>
                 </View>
@@ -329,7 +381,9 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
                             style={globalStyle.userImage}
                           />
                           <View style={globalStyle.userInfo}>
-                            <Text style={globalStyle.named}>{userData.name}</Text>
+                            <Text style={globalStyle.named}>
+                              {userData.name}
+                            </Text>
                             <Text style={globalStyle.detail}>
                               Seats: {userData.seat}
                             </Text>
@@ -359,4 +413,5 @@ console.log("pickupAreaName", pickupAreaName, dropAreaName);
     </View>
   );
 };
+
 export default DriverDashboard;
