@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import {View,StyleSheet,Modal,Image,TouchableOpacity,Text, ToastAndroid,} from "react-native";
+import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { EvilIcons, Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
@@ -15,7 +15,9 @@ import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
 import * as Location from 'expo-location';
 
-const socket = io(BASE_URL);
+// const socket = io(BASE_URL);
+const socket = io("http://192.168.2.132:4000");
+
 
 const UserDashboard = () => {
   const [initialLocation, setInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
@@ -64,7 +66,7 @@ const UserDashboard = () => {
     console.log("status", status);
     
     if (status !== 'granted') {
-      ToastAndroid.show("Permission to access location was denied", ToastAndroid.SHORT);
+      alert('Location permission denied!');
       return;
     }
     let location = await Location.getCurrentPositionAsync({});
@@ -80,12 +82,16 @@ const UserDashboard = () => {
   }
 
   const handleSearchRides = async () => {
+    if (!user || !user._id) {
+      return; 
+    }
     const areaList = {
       userID: user._id,
       from: {latitude: initialLocation?.latitude,longitude: initialLocation?.longitude,},
       to: {latitude: destination?.latitude,longitude: destination?.longitude,},
     };
-    console.log("area list", areaList);
+    console.log("areaList", areaList);
+    
     try {
       const response = await axios.post(AppRoutes.UserJourney, areaList);
       console.log("finally", response.data.data);
@@ -168,6 +174,11 @@ const UserDashboard = () => {
                   latitude: initialCordinate.lat,
                   longitude: initialCordinate.lng,
                 });
+                // console.log(
+                //   "data des",
+                //   data.description,
+                //   details?.geometry?.location
+                // );
               } else {
                 console.log("no location found");
               }

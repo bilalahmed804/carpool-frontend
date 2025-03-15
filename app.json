@@ -5,17 +5,16 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/hd.png",
->>>>>>>>> Temporary merge branch 2
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
+    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package" : "com.saylanitec.carpooling",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/hd.png",
->>>>>>>>> Temporary merge branch 2
         "backgroundColor": "#000000"
       }
     },
