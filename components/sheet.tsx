@@ -1,22 +1,38 @@
 import { AuthContext } from "@/context/authContext";
-import { globalContext } from "@/context/globalContext";
-import React, { useContext, useEffect, useRef } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Animated } from "react-native";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Animated,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { io } from "socket.io-client";
+import { BASE_URL } from "@/constant/constant";
 
+const socket = io(BASE_URL);
 export default function Sheet() {
-  const { setOpen, Open } = useContext(globalContext);
+  const [Open, setOpen] = useState(false);
   const { user, setUser } = useContext(AuthContext);
+  const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const router = useRouter();
+  const slideAnim = useRef(new Animated.Value(-250)).current;
 
-  const slideAnim = useRef(new Animated.Value(-250)).current; 
+  useEffect(() => {
+    socket.on("disconnect", () => setisSocketConnected(false));
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (Open) {
       Animated.timing(slideAnim, {
-        toValue: 0, 
+        toValue: 0,
         duration: 300,
         useNativeDriver: true,
       }).start();
@@ -31,43 +47,54 @@ export default function Sheet() {
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem("token");
+    socket.disconnect();
     setUser(null);
     router.push("/");
   };
 
-  const closeSheet = () => {
-    setOpen(false);
-  };
+  // Function to open/close modal
+  const openSheet = () => setOpen(true);
+  const closeSheet = () => setOpen(false);
 
   return (
-    <Animated.View style={[styles.container, { transform: [{ translateX: slideAnim }] }]}>
-      <TouchableOpacity style={styles.closeButton} onPress={closeSheet}>
-        <Ionicons name="close" size={28} color="#333" />
+    <>
+      <TouchableOpacity onPress={openSheet} style={styles.iconContaineruser}>
+        <Ionicons name="menu" size={30} color="#5F9EE0" />
       </TouchableOpacity>
 
-      <View style={styles.header}>
-        <Image 
-          source={{ uri: user?.profileImage || "./assets/default-avatar.png" }}
-          style={styles.avatar}
-        />
-        <Text style={styles.title}>{user?.name || "Guest User"}</Text>
-        <Text style={styles.email}>{user?.email || "No email available"}</Text>
-      </View>
-      <TouchableOpacity style={styles.btn}
-          onPress={handleLogout}>
-                    <View style={styles.button}>
-                      <Text style={styles.title}>Logout</Text>
-                    </View>
-                  </TouchableOpacity>
-    </Animated.View>
+      {Open && (
+        <Animated.View
+          style={[styles.container, { transform: [{ translateX: slideAnim }] }]}
+        >
+          <TouchableOpacity style={styles.closeButton} onPress={closeSheet}>
+            <Ionicons name="close" size={28} color="#333" />
+          </TouchableOpacity>
+
+          <View style={styles.header}>
+            <Image
+              source={{
+                uri: user?.profileImage || "./assets/default-avatar.png",
+              }}
+              style={styles.avatar}
+            />
+            <Text style={styles.title}>{user?.name || "Guest User"}</Text>
+            <Text style={styles.email}>
+              {user?.email || "No email available"}
+            </Text>
+          </View>
+          <TouchableOpacity style={styles.btn} onPress={handleLogout}>
+            <View style={styles.button}>
+              <Text style={styles.title}>Logout</Text>
+            </View>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
-    left: 0,
-    top: 0,
     width: "65%",
     height: "100%",
     backgroundColor: "#fff",
@@ -78,7 +105,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    zIndex: 1000,
     elevation: 8,
   },
   closeButton: {
@@ -88,6 +114,19 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 20,
     backgroundColor: "#f2f2f2",
+  },
+  iconContaineruser: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
   },
   header: {
     marginTop: 50,

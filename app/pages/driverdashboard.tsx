@@ -13,7 +13,6 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
-import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import axios from "axios";
@@ -60,6 +59,7 @@ const validateLocation = (details: GooglePlaceDetail | null) => {
 };
 
 const DriverDashboard = () => {
+  const { user } = useContext(AuthContext);
   const [driverInitialLocation, setDriverInitialLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -69,10 +69,9 @@ const DriverDashboard = () => {
     longitude: number;
   } | null>(null);
   const [fare, setFare] = useState("");
+  const [Open, setOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
-  const { setOpen, Open } = useContext(globalContext);
-  const { user } = useContext(AuthContext);
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
@@ -82,10 +81,9 @@ const DriverDashboard = () => {
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
+  const [userDataSoc, setUserDataSoc] = useState(null);
 
   const mapRef = useRef<MapView | null>(null);
-
-  // console.log("pickupAreaName", pickupAreaName, dropAreaName);
 
   useEffect(() => {
     socket.connect();
@@ -94,17 +92,27 @@ const DriverDashboard = () => {
       setisSocketConnected(true);
     });
     socket.on("disconnect", () => setisSocketConnected(false));
-
     return () => {
       socket.disconnect();
     };
   }, []);
 
+
   // Socket : Step 1
-  const userID = {
-    userID : user._id
+  if (user && user._id) {
+    const userID = { userID: user._id };
+    socket.emit("registerUser", userID);
   }
-  socket.emit("registerUser", userID)
+
+  useEffect(() => {
+    socket.on("rideRequest", (userData) => {
+        console.log("Received userData:", userData);
+        setUserDataSoc(userData);
+    });
+    return () => {
+        socket.off("rideRequest"); 
+    };
+}, []);
 
   const driverData = {
     name: "Ali Khan",
@@ -119,12 +127,8 @@ const DriverDashboard = () => {
   socket.on("rideRequest", (data) => console.log("rideRequest==>", data))
   const onClose = () => {
     setModalVisible(false);
-    // socket.disconnect();
   };
 
-  const closeSheet = () => {
-    setOpen(!Open);
-  };
   const goToCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     console.log("status", status);
@@ -150,7 +154,9 @@ const DriverDashboard = () => {
       ToastAndroid.show("Please select both locations.", ToastAndroid.LONG);
       return;
     }
-
+    if (!user || !user._id) {
+      return; 
+    }
     const points = getIntermediatePoints(
       driverInitialLocation,
       driverDestination,
@@ -214,27 +220,11 @@ const DriverDashboard = () => {
       </MapView>
       <TouchableOpacity onPress={goToCurrentLocation} />
       <View style={globalStyle.navbaruser}>
-        <TouchableOpacity
-          onPress={closeSheet}
-          style={globalStyle.iconContaineruser}
-        >
-<<<<<<<<< Temporary merge branch 1
-          <Ionicons name="menu" size={30} color="#5F9EE0" />
-        </TouchableOpacity>
+        <Sheet/>
       </View>
-=========
        <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
 
-        </MapView>
-        <TouchableOpacity onPress={goToCurrentLocation} />
-        <View style={globalStyle.navbaruser}>
-      <TouchableOpacity onPress={closeSheet} style={globalStyle.iconContaineruser}>
-        <Ionicons name="menu" size={30} color="#5F9EE0" />
-      </TouchableOpacity>
-         </View>
->>>>>>>>> Temporary merge branch 2
 
-      {Open && <Sheet />}
       <View style={globalStyle.rideContainer}>
         <AutoComplete
           onPress={(data: any, details: GooglePlaceDetail | null) => {
@@ -386,6 +376,7 @@ const DriverDashboard = () => {
                           <View style={globalStyle.userInfo}>
                             <Text style={globalStyle.named}>
                               {userData.name}
+
                             </Text>
                             <Text style={globalStyle.detail}>
                               Seats: {userData.seat}
