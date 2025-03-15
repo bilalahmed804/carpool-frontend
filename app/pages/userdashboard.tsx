@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { EvilIcons, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
 import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
@@ -20,6 +20,9 @@ const socket = io("http://192.168.2.132:4000");
 
 
 const UserDashboard = () => {
+  const { setModalOpen, modalOpen } = useContext(globalContext);
+  const { user } = useContext(AuthContext); 
+  const [Open, setOpen] = useState(false);
   const [initialLocation, setInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
   const [destination, setDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [pickupLocation, setPickupLocation] = useState("");
@@ -31,8 +34,6 @@ const UserDashboard = () => {
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const router = useRouter();
-  const { setOpen, Open, setModalOpen, modalOpen } = useContext(globalContext);
-  const { user } = useContext(AuthContext);
   const mapRef = useRef<MapView>(null);
   
   useEffect(() => {
@@ -48,14 +49,10 @@ const UserDashboard = () => {
     }, []);
 
   // Socket : Step 1
-    const userID = {
-      userID : user._id
-    }
-    socket.emit("registerUser", userID)
-    
-  const closeSheet = () => {
-    setOpen(!Open);
-  };
+  if (user && user._id) {
+    const userID = { userID: user._id };
+    socket.emit("registerUser", userID);
+  }
 
   const closeModal = () => {
     setModalOpen(!modalOpen);
@@ -90,8 +87,7 @@ const UserDashboard = () => {
       from: {latitude: initialLocation?.latitude,longitude: initialLocation?.longitude,},
       to: {latitude: destination?.latitude,longitude: destination?.longitude,},
     };
-    console.log("areaList", areaList);
-    
+
     try {
       const response = await axios.post(AppRoutes.UserJourney, areaList);
       console.log("finally", response.data.data);
@@ -117,6 +113,9 @@ const UserDashboard = () => {
 
   // Socket : Step 2
   const handleSocketRequest = () => {
+    if (!user || !user._id) {
+      return; 
+    }
     const userData = {
       name: user.name,
       picture: user.picture,
@@ -127,11 +126,10 @@ const UserDashboard = () => {
       dropLocationCoor: [destination?.latitude, destination?.longitude],
       pickupLocation: pickupLocation,
       dropLocation: dropLocation,
-      userID: user._id,
-      driver_ID : driverID
+      driver_ID : driverID,
+      userID: user._id
     };
     socket.emit("userRequestToDriver", userData)
-    // socket.disconnect()
   };
 
   return (
@@ -156,13 +154,9 @@ const UserDashboard = () => {
         </MapView>
         <TouchableOpacity onPress={goToCurrentLocation} />
         <View style={styles.navbaruser}>
-      <TouchableOpacity onPress={closeSheet} style={styles.iconContaineruser}>
-        <Ionicons name="menu" size={30} color="#5F9EE0" />
-      </TouchableOpacity>
+      <Sheet/>
     </View>
    
-     
-        {Open && <Sheet />}
 
         <View style={styles.rideContaineruser}>
           <AutoComplete
@@ -195,11 +189,6 @@ const UserDashboard = () => {
                   latitude: initialCordinate.lat,
                   longitude: initialCordinate.lng,
                 });
-                // console.log(
-                //   "data des",
-                //   data.description,
-                //   details?.geometry?.location
-                // );
               } else {
                 console.log("no location found");
               }
@@ -229,20 +218,22 @@ const UserDashboard = () => {
             />
           </View>
           <View style={styles.infoContainer}>
-            <Text style={styles.title}>{data.name}</Text>
-            <Text style={styles.nameStyle}>{data.gender}</Text>
-            <Text style={styles.nameStyle}>{data.vehicleCategory}</Text>
-            <Text style={styles.nameStyle}>Vehicle No : {data.vehicleNo}</Text>
-            <Text style={styles.nameStyle}>License No : {data.licenseNo}</Text>
+            <Text style={{fontSize: 26,fontWeight:"bold", textAlign: "center"}}>{data.name}</Text>
+            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>{data.gender}</Text>
+            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>{data.vehicleCategory}</Text>
+            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>Vehicle No : {data.vehicleNo}</Text>
+            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>License No : {data.licenseNo}</Text>
+          <View style={styles.btn}>
+            <Ionicons name="call-outline" size={34} onPress={closeModal} />
+            <Ionicons name="logo-whatsapp" size={34} onPress={closeModal} />
+        </View>
+            <View>
+            <GreenButton onPress={handleSocketRequest} text="request ride" />
+            </View>
           </View>
           </View>
           ))}
-          <View style={styles.btn}>
-            <GreenButton onPress={closeModal} text="call" />
-            <GreenButton onPress={closeModal} text="whatsapp" />
-            <GreenButton onPress={handleSocketRequest} text="request ride" />
           </View>
-        </View>
         </View>
         </Modal>
 
@@ -261,9 +252,6 @@ const UserDashboard = () => {
                 <View style={styles.infouser}>
                   <Text style={styles.nameuser}>
                     Available Seats : {data.availableSeats}
-                  </Text>
-                  <Text style={styles.nameuser}>
-                    {data.userID}
                   </Text>
                   <Text style={styles.fareuser}>
                     Fare Per Seat : {data.farePerSeat}
@@ -288,19 +276,6 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "row",
     alignItems: "center",
-  },
-  iconContaineruser: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#FFF",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
   },
   rideContaineruser: {
     position: "absolute",
@@ -335,7 +310,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     backgroundColor: "#fff",
     padding: 6,
-    gap: 4,
+    gap: 8,
     borderTopLeftRadius: 6,
     borderTopRightRadius: 6,
     minHeight: "95%",
@@ -380,14 +355,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nameuser: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
-    color: "#222",
   },
   fareuser: {
-    fontSize: 16,
-    color: "#5F9EE0",
-    fontWeight: "500",
+    fontSize: 20,
+    color: "#4CAF50",
+    fontWeight: "bold",
   },
   vehicleuser: {
     fontSize: 14,
@@ -395,20 +369,29 @@ const styles = StyleSheet.create({
   },
   popupContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    width : "80%",
+    height : "70%",
     position: "absolute",
     borderRadius: 10,
-    top: "20%",
+    marginVertical: "auto",
+    marginHorizontal: "auto",
     backgroundColor: "white",
     elevation: 6,
     zIndex: 1000,
     padding: 10
   },
+  infoContainer:{
+    gap: 12,
+    textAlign: "center",
+    padding: 10,
+    borderRadius: 10,
+    margin: 20,
+  },
   btn: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 15,
+    gap: 30,
+    marginVertical : 10,
+    justifyContent: "space-around",
   },
   buttonContainer: {
     flexDirection: "row",
@@ -438,12 +421,6 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-  },
-  infoContainer: {
-    padding: 10,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 10,
-    marginBottom: 10,
   },
   locationButton: {
     position: 'absolute',

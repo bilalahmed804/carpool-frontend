@@ -12,7 +12,7 @@
       "supportsTablet": true
     },
     "android": {
-      "package" : "com.saylanitec.carpooling",
+      "package": "com.saylanitech.carpooling",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/hd.png",
         "backgroundColor": "#000000"

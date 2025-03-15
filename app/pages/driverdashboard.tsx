@@ -13,7 +13,6 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
-import { globalContext } from "@/context/globalContext";
 import AutoComplete from "@/components/autoComplete";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import axios from "axios";
@@ -60,6 +59,7 @@ const validateLocation = (details: GooglePlaceDetail | null) => {
 };
 
 const DriverDashboard = () => {
+  const { user } = useContext(AuthContext);
   const [driverInitialLocation, setDriverInitialLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -69,10 +69,9 @@ const DriverDashboard = () => {
     longitude: number;
   } | null>(null);
   const [fare, setFare] = useState("");
-  const [modalVisible, setModalVisible] = useState(true);
+  const [Open, setOpen] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
-  const { setOpen, Open } = useContext(globalContext);
-  const { user } = useContext(AuthContext);
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
@@ -83,6 +82,8 @@ const DriverDashboard = () => {
     null
   );
   const [userDataSoc, setUserDataSoc] = useState(null);
+
+
   const mapRef = useRef<MapView | null>(null);
 interface DriverData {
   name: string;
@@ -106,19 +107,19 @@ const [driverData, setDriverData] = useState<DriverData | null>(null);
     };
   }, []);
 
-  // socket.on("rideRequest",(userData)=>console.log("usredata",userData))
-  const userID = {
-    userID : user._id
+
+
+  // Socket : Step 1
+  if (user && user._id) {
+    const userID = { userID: user._id };
+    socket.emit("registerUser", userID);
   }
-  console.log(userID);
-  socket.emit("registerUser",userID)
+
   useEffect(() => {
     socket.on("rideRequest", (userData) => {
         console.log("Received userData:", userData);
         setUserDataSoc(userData);
-      
     });
-
     return () => {
         socket.off("rideRequest"); 
     };
@@ -140,16 +141,12 @@ useEffect(() => {
       setDriverData(null);
   }
 }, [userDataSoc]);
+  
 
-  socket.on("rideRequest", (data) => console.log("rideRequest==>", data))
   const onClose = () => {
     setModalVisible(false);
-    // socket.disconnect();
   };
 
-  const closeSheet = () => {
-    setOpen(!Open);
-  };
   const goToCurrentLocation = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
     console.log("status", status);
@@ -174,6 +171,10 @@ useEffect(() => {
     if (!driverInitialLocation || !driverDestination) {
       ToastAndroid.show("Please select both locations.", ToastAndroid.LONG);
       return;
+    }
+
+    if (!user || !user._id) {
+      return; 
     }
     const points = getIntermediatePoints(
       driverInitialLocation,
@@ -237,15 +238,11 @@ useEffect(() => {
       </MapView>
       <TouchableOpacity onPress={goToCurrentLocation} />
       <View style={globalStyle.navbaruser}>
-        <TouchableOpacity
-          onPress={closeSheet}
-          style={globalStyle.iconContaineruser}
-        >
-          <Ionicons name="menu" size={30} color="#5F9EE0" />
-        </TouchableOpacity>
+        <Sheet/>
       </View>
+       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
 
-      {Open && <Sheet />}
+
       <View style={globalStyle.rideContainer}>
         <AutoComplete
           onPress={(data: any, details: GooglePlaceDetail | null) => {
@@ -393,6 +390,54 @@ useEffect(() => {
                 <Text style={styles.detail}>PickUp: {driverData.pickupLocation}</Text>
                 <Text style={styles.detail}>Drop: {driverData.dropLocation}</Text>
                 <Text style={styles.detail}>Fare: {driverData.fare}</Text>
+              <View style={globalStyle.driverCard}>
+                {loading ? (
+                  <>
+                    <ActivityIndicator
+                      size="large"
+                      color="#007BFF"
+                      style={globalStyle.spinner}
+                    />
+
+                    <Text style={globalStyle.messaged}>
+                      "Wating user passanger..."
+                    </Text>
+                  </>
+                ) : (
+                  <>
+                    <View>
+                      {userData && (
+                        <View style={globalStyle.userCard}>
+                          <Image
+                            source={{ uri: userData.profilePic }}
+                            style={globalStyle.userImage}
+                          />
+                          <View style={globalStyle.userInfo}>
+                            <Text style={globalStyle.named}>
+                              {userData.name}
+
+                            </Text>
+                            <Text style={globalStyle.detail}>
+                              Seats: {userData.seat}
+                            </Text>
+                            <Text style={globalStyle.detail}>
+                              from {userData.area.latitude} to {""}
+                              {userData.area.longitude}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
+                      <View style={globalStyle.buttonRow}>
+                        <TouchableOpacity style={globalStyle.buttonAccept}>
+                          <Text style={globalStyle.buttonText}>Accept</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={globalStyle.buttonReject}>
+                          <Text style={globalStyle.buttonTextd}>Reject</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </>
+                )}
               </View>
             )}
 
