@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import {View,StyleSheet,Modal,Image,TouchableOpacity,Text,} from "react-native";
+import {View,StyleSheet,Modal,Image,TouchableOpacity,Text, ToastAndroid,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
@@ -61,7 +61,7 @@ const UserDashboard = () => {
     console.log("status", status);
     
     if (status !== 'granted') {
-      alert('Location permission denied!');
+      ToastAndroid.show("Permission to access location was denied", ToastAndroid.SHORT);
       return;
     }
     let location = await Location.getCurrentPositionAsync({});
@@ -428,5 +428,14 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  }
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  nameStyle: {
+    fontSize: 16,
+    color: "#555",
+  },
 });

@@ -222,6 +222,8 @@ const DriverDashboard = () => {
       <View style={globalStyle.navbaruser}>
         <Sheet/>
       </View>
+       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
+
 
       <View style={globalStyle.rideContainer}>
         <AutoComplete
