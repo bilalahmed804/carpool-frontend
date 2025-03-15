@@ -8,7 +8,6 @@ function GlobalContextProvider({ children }) {
     const [profileImage, setProfileImage] = useState();
     const [vehicleImage, setVehicleImage] = useState();
     const [userprofileImage , setUserProfileImage] = useState()
-    const [Open, setOpen] = useState(false);
     const [modalOpen, setModalOpen] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -16,7 +15,7 @@ function GlobalContextProvider({ children }) {
   
   return (
     <globalContext.Provider value={{profileImage, setProfileImage, vehicleImage, setVehicleImage,
-      userprofileImage , setUserProfileImage, Open, setOpen, modalOpen, setModalOpen ,
+      userprofileImage , setUserProfileImage, modalOpen, setModalOpen ,
       modalVisible, setModalVisible
 
     }}>
