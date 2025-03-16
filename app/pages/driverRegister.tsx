@@ -75,6 +75,7 @@ function DriverRegister(){
       console.error("error when submiting the data", error);
     }
   };
+  
   return (
     <ScrollView style={globalStyle.backgroundColor}
   >
