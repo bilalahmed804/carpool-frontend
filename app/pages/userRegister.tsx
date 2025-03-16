@@ -4,7 +4,7 @@ import globalStyle, { AppRoutes } from "@/constant/constant";
 import { globalContext } from "@/context/globalContext";
 import { Picker } from "@react-native-picker/picker";
 import axios from "axios";
-import { router, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useContext, useState } from "react";
 import { ScrollView, Text, TextInput, View } from "react-native";
 
