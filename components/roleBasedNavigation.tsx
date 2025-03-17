@@ -1,29 +1,25 @@
 import { AuthContext } from "@/context/authContext";
 import { useRouter } from "expo-router";
 import { useContext, useEffect } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 
-function RoleBasedNavigation(){
+function RoleBasedNavigation() {
   const { user } = useContext(AuthContext);
   const router = useRouter();
 
-  useEffect(() => {
-    if (!user) {
-      router.push("/");
-      return;
-    }
-    switch (user?.role) {
-      case "driver":
-        router.push("/pages/driverdashboard");
-        break;
-      case "user":
-        router.push("/pages/userdashboard");
-        break;
-      default:
-        router.push("/");
-    }
-  }, [user]);
+  useFocusEffect(() => {
+    if (!user) return;
 
-  return null; 
-};
+    if (user?.role === "driver") {
+      router.push("/pages/driverdashboard");
+    } else if (user?.role === "user") {
+      router.push("/pages/userdashboard");
+    } else {
+      router.push("/");
+    }
+  });
+
+  return null;
+}
 
 export default RoleBasedNavigation;

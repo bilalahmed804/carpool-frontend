@@ -393,7 +393,7 @@ const globalStyle = StyleSheet.create({
 })
 
 export default globalStyle;
-const devURL = "http://192.168.5.230:4000";
+const devURL = "http://192.168.100.50:4000";
 // const prodURL = "https://carpool-backend-staging.up.railway.app";
 
 

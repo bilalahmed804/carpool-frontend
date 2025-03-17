@@ -1,14 +1,5 @@
 import React, { useContext, useEffect, useId, useRef, useState } from "react";
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  Image,
-  ActivityIndicator,
-  ToastAndroid,
-} from "react-native";
+import {View,TextInput,StyleSheet,TouchableOpacity,Text,Image,ActivityIndicator,ToastAndroid,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
@@ -22,7 +13,8 @@ import { io } from "socket.io-client";
 import GreenButton from "@/components/greenButton";
 import * as Location from "expo-location";
 
-const socket = io("http://192.168.2.132:4000");
+const socket = io(BASE_URL)
+// const socket = io("http://192.168.2.132:4000");
 
 interface UserData {
   name: string;
@@ -58,7 +50,7 @@ const validateLocation = (details: GooglePlaceDetail | null) => {
   };
 };
 
-const DriverDashboard = () => {
+function DriverDashboard() {
   const { user } = useContext(AuthContext);
   const [driverInitialLocation, setDriverInitialLocation] = useState<{
     latitude: number;
@@ -111,6 +103,7 @@ const DriverDashboard = () => {
     socket.emit("registerUser", userID);
   }
 
+  // Socket : Step 2
   useEffect(() => {
     socket.on("rideRequest", (userData) => {
       console.log("Received userData:", userData);
@@ -126,7 +119,6 @@ const DriverDashboard = () => {
       setDriverData(null);
       return;
     }
-
     try {
       const parsedUserData =
         typeof userDataSoc === "string" ? JSON.parse(userDataSoc) : userDataSoc;
@@ -137,6 +129,15 @@ const DriverDashboard = () => {
       setDriverData(null);
     }
   }, [userDataSoc]);
+
+  // Socket : Step 3
+  const acceptUserRequest = () => {
+    socket.emit("DriverResponse_Accept", "accepted");
+  };
+
+  const rejectUserRequest = () => {
+    socket.emit("DriverResponse_Reject", "rejected");
+  }
 
   const onClose = () => {
     setModalVisible(false);
@@ -187,9 +188,6 @@ const DriverDashboard = () => {
       farePerSeat: fare,
       routes: [driverInitialLocation, driverDestination, ...points],
     };
-    // socket.on("userData", (userData) => console.log("userData", userData))
-    // console.log("rideData", userData);
-
     try {
       const response = await axios.post(AppRoutes.DriverJourney, rideData);
       ToastAndroid.show("Ride data posted successfully!", ToastAndroid.LONG);
@@ -465,10 +463,11 @@ const DriverDashboard = () => {
                   )}
 
                   <View style={styles.buttonContainer}>
-                    <TouchableOpacity style={styles.buttonAccept}>
+
+                    <TouchableOpacity onPress={acceptUserRequest} style={styles.buttonAccept}>
                       <Text style={styles.buttonText}>Accept</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.buttonReject}>
+                    <TouchableOpacity onPress={rejectUserRequest} style={styles.buttonReject}>
                       <Text style={styles.buttonText}>Reject</Text>
                     </TouchableOpacity>
                   </View>
@@ -597,4 +596,5 @@ const styles = StyleSheet.create({
   spinner: {
     marginVertical: 20,
   },
+
 });

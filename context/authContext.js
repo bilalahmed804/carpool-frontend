@@ -7,7 +7,6 @@ export const AuthContext = createContext();
 
 function AuthContextProvider({ children }) {
   const [user, setUser] = useState(null);
-  // const [token, setToken] = useState(AsyncStorage.getItem("token") || null );
   
   useEffect(()=> {
     const getCurrentUserInfo = async () => {
@@ -18,7 +17,7 @@ function AuthContextProvider({ children }) {
         })
         setUser(response?.data?.data)
       } catch (error) {
-        console.log("no token==>", error)
+        console.log("no token==>", error.message)
       }
     }
     getCurrentUserInfo()

@@ -1,8 +1,8 @@
 import {useRouter } from "expo-router";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import GreenButton from "../components/greenButton";
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { View, Text, TextInput, StyleSheet, Image, ScrollView, Alert, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, StyleSheet, Image, ScrollView, TouchableOpacity } from "react-native";
 import globalStyle, { AppRoutes } from "@/constant/constant";
 import axios from "axios"
 import { AuthContext } from "@/context/authContext";
@@ -12,12 +12,10 @@ import { Ionicons } from "@expo/vector-icons";
 function Index() {
   const { user, setUser } = useContext(AuthContext)
   const router = useRouter()
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState({email: "",password: "",});
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [isPasswordVisible, setPasswordVisible] = useState(false);
+  
 
   const handleChange = (key: any, value: any) => {
     setFormData({ ...formData, [key]: value });
@@ -109,7 +107,7 @@ function Index() {
         </Text>
       </Text>
     </ScrollView>
-     } 
+      }  
     </>
   );
 }

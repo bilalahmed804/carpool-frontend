@@ -15,8 +15,8 @@ import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
 import * as Location from 'expo-location';
 
-// const socket = io(BASE_URL);
-const socket = io("http://192.168.2.132:4000");
+const socket = io(BASE_URL);
+// const socket = io("http://192.168.2.132:4000");
 
 
 const UserDashboard = () => {
