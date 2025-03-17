@@ -463,6 +463,7 @@ function DriverDashboard() {
                   )}
 
                   <View style={styles.buttonContainer}>
+
                     <TouchableOpacity onPress={acceptUserRequest} style={styles.buttonAccept}>
                       <Text style={styles.buttonText}>Accept</Text>
                     </TouchableOpacity>
@@ -595,4 +596,5 @@ const styles = StyleSheet.create({
   spinner: {
     marginVertical: 20,
   },
+
 });
