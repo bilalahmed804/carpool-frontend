@@ -14,5 +14,6 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts" ,
     "context/globalContext.js" ,
- "context/authContext.js" ]
+ "context/authContext.js" ],
+ "exclude": ["node_modules"]
 }

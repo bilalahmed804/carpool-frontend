@@ -1,13 +1,5 @@
 import React, { useContext, useEffect, useId, useRef, useState } from "react";
-import {
-  View,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  ActivityIndicator,
-  ToastAndroid,
-} from "react-native";
+import {View,TextInput,StyleSheet,TouchableOpacity,Text,Image,ActivityIndicator,ToastAndroid,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
@@ -22,8 +14,9 @@ import GreenButton from "@/components/greenButton";
 import * as Location from "expo-location";
 import LottieView from "lottie-react-native";
 
-const socket = io(BASE_URL);
-// const socket = io("http://192.168.7.236:4000");
+
+const socket = io(BASE_URL)
+// const socket = io("http://192.168.2.132:4000");
 
 interface UserData {
   name: string;
@@ -95,6 +88,9 @@ function DriverDashboard() {
     dropLocation: string;
   }
 
+
+  const [driverData, setDriverData] = useState<DriverData | null>(null);
+
   useEffect(() => {
     socket.connect();
     socket.on("connect", () => {
@@ -113,11 +109,14 @@ function DriverDashboard() {
     socket.emit("registerUser", userID);
   }
 
+  // Socket : Step 2
   useEffect(() => {
     // Listen for new ride updates
     socket.on("rideRequest", (userData) => {
       setDriverData((prev: any) => [...prev, userData]);
       setLoading(false);
+      console.log("Received userData:", userData);
+      setUserDataSoc(userData);
     });
 
     return () => {
@@ -184,6 +183,35 @@ function DriverDashboard() {
     socket.emit("DriverResponse_Reject", "rejected");
     console.log("Data Emitted");
   };
+
+      socket.off("rideRequest");
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!userDataSoc) {
+      setDriverData(null);
+      return;
+    }
+    try {
+      const parsedUserData =
+        typeof userDataSoc === "string" ? JSON.parse(userDataSoc) : userDataSoc;
+
+      setDriverData(parsedUserData);
+    } catch (error) {
+      console.error("Error parsing userData:", error);
+      setDriverData(null);
+    }
+  }, [userDataSoc]);
+
+  // Socket : Step 3
+  const acceptUserRequest = () => {
+    socket.emit("DriverResponse_Accept", "accepted");
+  };
+
+  const rejectUserRequest = () => {
+    socket.emit("DriverResponse_Reject", "rejected");
+  }
 
   const onClose = () => {
     setModalVisible(false);
@@ -294,6 +322,7 @@ function DriverDashboard() {
         </TouchableOpacity>
         <TouchableOpacity onPress={goToCurrentLocation} />
           <Sheet />
+     
         <Marker
           coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
           title="Pickup Location"
@@ -407,6 +436,7 @@ function DriverDashboard() {
               <View style={styles.info}>
                 <Text style={styles.location}>From : {pickupAreaName}</Text>
                 <Text  style={styles.location}>To : {dropAreaName} </Text>
+
                 <TouchableOpacity onPress={onClose}>
                   <View style={styles.cancelButton}>
                     <Text style={styles.cancelButtonText}>Cancel My Ride</Text>
@@ -418,7 +448,7 @@ function DriverDashboard() {
               {loading ? (
                 <>
                   <LottieView
-                    source={require("../../assets/images/loading.json")} // Apna Lottie file add karo
+                    source={require("../../assets/images/loading.json")}
                     autoPlay
                     loop
                     style={styles.loader}
@@ -451,6 +481,115 @@ function DriverDashboard() {
                       </View>
                     </View>
                   ))}
+
+            <View style={styles.driverCard}>
+              {loading ? (
+                <>
+                  <ActivityIndicator
+                    size="large"
+                    color="#007BFF"
+                    style={styles.spinner}
+                  />
+                  <Text style={styles.message}>Waiting for Passenger...</Text>
+                </>
+              ) : (
+                <>
+                  {userData && (
+                    <View style={styles.userCard}>
+                      <Image
+                        source={{ uri: userData.profilePic }}
+                        style={styles.userImage}
+                      />
+                      <View style={styles.userInfo}>
+                        <Text style={styles.named}>{userData.name}</Text>
+                        <Text style={styles.detail}>
+                          Seats: {userData.seat}
+                        </Text>
+                        <Text style={styles.detail}>
+                          From {userData.area.latitude} to{" "}
+                          {userData.area.longitude}
+                        </Text>
+                      </View>
+                    </View>
+                  )}
+                  {driverData && (
+                    <View>
+                      <Text style={styles.detail}>Name: {driverData.name}</Text>
+                      <Text style={styles.detail}>
+                        PickUp: {driverData.pickupLocation}
+                      </Text>
+                      <Text style={styles.detail}>
+                        Drop: {driverData.dropLocation}
+                      </Text>
+                      <Text style={styles.detail}>Fare: {driverData.fare}</Text>
+                      <View style={globalStyle.driverCard}>
+                        {loading ? (
+                          <>
+                            <ActivityIndicator
+                              size="large"
+                              color="#007BFF"
+                              style={globalStyle.spinner}
+                            />
+
+                            <Text style={globalStyle.messaged}>
+                              "Wating user passanger..."
+                            </Text>
+                          </>
+                        ) : (
+                          <>
+                            <View>
+                              {userData && (
+                                <View style={globalStyle.userCard}>
+                                  <Image
+                                    source={{ uri: userData.profilePic }}
+                                    style={globalStyle.userImage}
+                                  />
+                                  <View style={globalStyle.userInfo}>
+                                    <Text style={globalStyle.named}>
+                                      {userData.name}
+                                    </Text>
+                                    <Text style={globalStyle.detail}>
+                                      Seats: {userData.seat}
+                                    </Text>
+                                    <Text style={globalStyle.detail}>
+                                      from {userData.area.latitude} to {""}
+                                      {userData.area.longitude}
+                                    </Text>
+                                  </View>
+                                </View>
+                              )}
+                              <View style={globalStyle.buttonRow}>
+                                <TouchableOpacity
+                                  style={globalStyle.buttonAccept}
+                                >
+                                  <Text style={globalStyle.buttonText}>
+                                    Accept
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  style={globalStyle.buttonReject}
+                                >
+                                  <Text style={globalStyle.buttonTextd}>
+                                    Reject
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </View>
+                          </>
+                        )}
+                      </View>
+                    </View>
+                  )}
+
+                  <View style={styles.buttonContainer}>
+
+                    <TouchableOpacity onPress={acceptUserRequest} style={styles.buttonAccept}>
+                      <Text style={styles.buttonText}>Accept</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={rejectUserRequest} style={styles.buttonReject}>
+                      <Text style={styles.buttonText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               )}
             </View>
@@ -487,7 +626,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 2,
     borderRadius: 10,
-    borderColor: "green",
+    borderColor: "green", 
   },
   info: {
     alignItems: "center",

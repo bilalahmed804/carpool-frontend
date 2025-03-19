@@ -225,9 +225,9 @@ const globalStyle = StyleSheet.create({
   },
   modalContainerd: {
     backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    paddingHorizontal: 6,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     minHeight: "90%",
     alignItems: "center",
     shadowColor: "#000",
@@ -340,12 +340,12 @@ const globalStyle = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 15,
+    padding: 5,
     marginBottom: 20,
     backgroundColor: "#C8E6C9",
     width: "100%",
     elevation: 5,
-    borderRadius: 12,
+    borderRadius: 7,
     borderColor: "#388E3C",
   },
   userCard: {
@@ -393,7 +393,8 @@ const globalStyle = StyleSheet.create({
 })
 
 export default globalStyle;
-const devURL = "http://192.168.6.111:4000";
+
+const devURL = "http://192.168.100.50:4000";
 // const prodURL = "https://carpool-backend-staging.up.railway.app";
 
 
