@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useId, useRef, useState } from "react";
-import {View,TextInput,StyleSheet,TouchableOpacity,Text,Image,ActivityIndicator,ToastAndroid,} from "react-native";
+import {View,TextInput,StyleSheet,TouchableOpacity,Text,ActivityIndicator,ToastAndroid,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
@@ -15,8 +15,8 @@ import * as Location from "expo-location";
 import LottieView from "lottie-react-native";
 
 
-const socket = io(BASE_URL)
-// const socket = io("http://192.168.2.132:4000");
+// const socket = io(BASE_URL);  
+const socket = io("http://192.168.7.236:4000");
 
 interface UserData {
   name: string;
@@ -54,33 +54,24 @@ const validateLocation = (details: GooglePlaceDetail | null) => {
 
 function DriverDashboard() {
   const { user } = useContext(AuthContext);
-  const [driverInitialLocation, setDriverInitialLocation] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
-  const [driverDestination, setDriverDestination] = useState<{
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [driverInitialLocation, setDriverInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
+  const [driverDestination, setDriverDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [fare, setFare] = useState("");
-  const [Open, setOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
-  // const [userData, setUserData] = useState<UserData | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const [loading, setLoading] = useState(true);
   const [pickupAreaName, setPickupAreaName] = useState("");
   console.log("pickupAreaName", pickupAreaName);
 
   const [dropAreaName, setDropAreaName] = useState("");
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
-  const [userDataSoc, setUserDataSoc] = useState(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const [driverData, setDriverData] = useState<any | []>([]);
-
+    
   const mapRef = useRef<MapView | null>(null);
+
   interface DriverData {
     name: string;
     fare: string;
@@ -88,8 +79,6 @@ function DriverDashboard() {
     dropLocation: string;
   }
 
-
-  const [driverData, setDriverData] = useState<DriverData | null>(null);
 
   useEffect(() => {
     socket.connect();
@@ -109,139 +98,99 @@ function DriverDashboard() {
     socket.emit("registerUser", userID);
   }
 
-  // Socket : Step 2
+  //Socket : Step : 2
   useEffect(() => {
     // Listen for new ride updates
     socket.on("rideRequest", (userData) => {
-      setDriverData((prev: any) => [...prev, userData]);
-      setLoading(false);
-      console.log("Received userData:", userData);
-      setUserDataSoc(userData);
-    });
-
+      setDriverData((prev:any) => [...prev, userData])
+      setLoading(false)
+    })
     return () => {
-      socket.off("rideUpdate"); // Cleanup listener on unmount
+      socket.off('rideUpdate'); // Cleanup listener on unmount
     };
-  }, []);
-
-  // Socket : Step 2
-  // useEffect(() => {
-  //   socket.on("rideRequest", (userData) => {
-  //     console.log("Received userData:", userData);
-  //     rideRequests_Array.push(userData);
-  //     setUserDataSoc(userData);
-  //   });
-  //   return () => {
-  //     socket.off("rideRequest");
-  //   };
-  // }, []);
-
-  // useEffect(() => {
-  //   if (!userDataSoc) {
-  //     setDriverData(null);
-  //     return;
-  //   }
-  //   try {
-  //     const parsedUserData =
-  //       typeof userDataSoc === "string" ? JSON.parse(userDataSoc) : userDataSoc;
-
-  //     setDriverData(parsedUserData);
-  //   } catch (error) {
-  //     console.error("Error parsing userData:", error);
-  //     setDriverData(null);
-  //   }
-  // }, [userDataSoc]);
+  }, [socket.on]);
 
   // Socket : Step 3
-
-  const acceptUserRequest = async () => {
+  const acceptUserRequest = async (requestee:any) => {
     try {
-      const locationData = await goToCurrentLocation(); // Wait for location
-
-      if (!locationData) {
-        return console.log("accept nahin kia", locationData);
-      }
-
+      const locationData = await goToCurrentLocation();
       if (!user || !user._id) {
-        return;
+        return console.log("user ka data nahin he")
       }
-
       const userData = {
         name: user.name,
-        userID: user._id,
-        driverLiveLocation: locationData,
+        requesteeID : requestee,
+        driver_ID: user._id,
+        driverLiveLocation: locationData 
       };
-
       socket.emit("DriverResponse_Accept", userData);
-      console.log("Data Emitted");
+      console.log("Data Emitted", userData);
     } catch (error) {
-      console.log("Location fetch failed:", error);
+      console.log("Location fetching failed:", error);
     }
   };
 
-  const rejectUserRequest = () => {
-    socket.emit("DriverResponse_Reject", "rejected");
+  const rejectUserRequest = (requestee:any) => {
+    const userData = {
+      requesteeID : requestee,
+      message : "Ride Rejected"
+    }
+    socket.emit("DriverResponse_Reject", userData);
     console.log("Data Emitted");
   };
 
-      socket.off("rideRequest");
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!userDataSoc) {
-      setDriverData(null);
-      return;
-    }
-    try {
-      const parsedUserData =
-        typeof userDataSoc === "string" ? JSON.parse(userDataSoc) : userDataSoc;
-
-      setDriverData(parsedUserData);
-    } catch (error) {
-      console.error("Error parsing userData:", error);
-      setDriverData(null);
-    }
-  }, [userDataSoc]);
-
-  // Socket : Step 3
-  const acceptUserRequest = () => {
-    socket.emit("DriverResponse_Accept", "accepted");
-  };
-
-  const rejectUserRequest = () => {
-    socket.emit("DriverResponse_Reject", "rejected");
-  }
-
   const onClose = () => {
     setModalVisible(false);
-    setDriverData([]);
+    setDriverData([])
   };
 
-  const goToCurrentLocation = async () => {
-    return new Promise(async (resolve, reject) => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      console.log("status", status);
+const goToCurrentLocation = async () => {
+  let { status } = await Location.requestForegroundPermissionsAsync();
+  console.log("Location Permission Status:", status);
 
-      if (status !== "granted") {
-        alert("Location permission denied!");
-        return reject("Permission Denied");
+  if (status !== "granted") {
+    alert("Location permission denied!");
+    return;
+  }
+
+  locationSubscription.current = await Location.watchPositionAsync(
+    {
+      accuracy: Location.Accuracy.High,
+      timeInterval: 2000,
+      distanceInterval: 5,
+    },
+    (newLocation) => {
+      console.log("Updated Location:", newLocation);
+
+      if (newLocation && newLocation.coords) {
+        setLocation(newLocation);
+        if (mapRef.current) {
+          mapRef.current.animateToRegion({
+            latitude: newLocation.coords.latitude,
+            longitude: newLocation.coords.longitude,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          });
+        }
+      } else {
+        console.log("Location not received correctly!");
       }
+    }
+  );
+};
 
-      let location = await Location.getCurrentPositionAsync({});
-      // setLocation(location);
+  // useEffect(()=> {
+  //   socket.emit("liveLocation", location)
+  // }, [location])
 
-      if (mapRef.current) {
-        mapRef.current.animateToRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
+  useEffect(() => {
+    return () => {
+      if (locationSubscription.current) {
+        locationSubscription.current.remove();
       }
-      resolve(location);
-    });
-  };
+    };
+  }, []);
+  
 
   const handleAddRide = async () => {
     if (!driverInitialLocation || !driverDestination) {
@@ -292,7 +241,7 @@ function DriverDashboard() {
   return (
     <>
       <View style={globalStyle.containerd}>
-        <MapView
+      <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
@@ -314,13 +263,13 @@ function DriverDashboard() {
           />
         </MapView>
 
+
         <TouchableOpacity
           style={styles.locationButton}
           onPress={goToCurrentLocation}
         >
           <MaterialIcons name="my-location" size={24} color="#4CAF50" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={goToCurrentLocation} />
           <Sheet />
      
         <Marker
@@ -444,6 +393,7 @@ function DriverDashboard() {
                 </TouchableOpacity>
               </View>
             </View>
+
             <View>
               {loading ? (
                 <>
@@ -490,107 +440,34 @@ function DriverDashboard() {
                     color="#007BFF"
                     style={styles.spinner}
                   />
-                  <Text style={styles.message}>Waiting for Passenger...</Text>
                 </>
               ) : (
                 <>
-                  {userData && (
-                    <View style={styles.userCard}>
-                      <Image
-                        source={{ uri: userData.profilePic }}
-                        style={styles.userImage}
-                      />
-                      <View style={styles.userInfo}>
-                        <Text style={styles.named}>{userData.name}</Text>
-                        <Text style={styles.detail}>
-                          Seats: {userData.seat}
-                        </Text>
-                        <Text style={styles.detail}>
-                          From {userData.area.latitude} to{" "}
-                          {userData.area.longitude}
-                        </Text>
-                      </View>
-                    </View>
-                  )}
-                  {driverData && (
-                    <View>
-                      <Text style={styles.detail}>Name: {driverData.name}</Text>
-                      <Text style={styles.detail}>
-                        PickUp: {driverData.pickupLocation}
-                      </Text>
-                      <Text style={styles.detail}>
-                        Drop: {driverData.dropLocation}
-                      </Text>
-                      <Text style={styles.detail}>Fare: {driverData.fare}</Text>
-                      <View style={globalStyle.driverCard}>
-                        {loading ? (
-                          <>
-                            <ActivityIndicator
-                              size="large"
-                              color="#007BFF"
-                              style={globalStyle.spinner}
-                            />
-
-                            <Text style={globalStyle.messaged}>
-                              "Wating user passanger..."
-                            </Text>
-                          </>
-                        ) : (
-                          <>
-                            <View>
-                              {userData && (
-                                <View style={globalStyle.userCard}>
-                                  <Image
-                                    source={{ uri: userData.profilePic }}
-                                    style={globalStyle.userImage}
-                                  />
-                                  <View style={globalStyle.userInfo}>
-                                    <Text style={globalStyle.named}>
-                                      {userData.name}
-                                    </Text>
-                                    <Text style={globalStyle.detail}>
-                                      Seats: {userData.seat}
-                                    </Text>
-                                    <Text style={globalStyle.detail}>
-                                      from {userData.area.latitude} to {""}
-                                      {userData.area.longitude}
-                                    </Text>
-                                  </View>
-                                </View>
-                              )}
-                              <View style={globalStyle.buttonRow}>
-                                <TouchableOpacity
-                                  style={globalStyle.buttonAccept}
-                                >
-                                  <Text style={globalStyle.buttonText}>
-                                    Accept
-                                  </Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                  style={globalStyle.buttonReject}
-                                >
-                                  <Text style={globalStyle.buttonTextd}>
-                                    Reject
-                                  </Text>
-                                </TouchableOpacity>
-                              </View>
-                            </View>
-                          </>
-                        )}
-                      </View>
-                    </View>
-                  )}
-
-                  <View style={styles.buttonContainer}>
-
-                    <TouchableOpacity onPress={acceptUserRequest} style={styles.buttonAccept}>
-                      <Text style={styles.buttonText}>Accept</Text>
+                {driverData.map((data:any, index:number) => (
+                <View key={index}>
+                  <Text style={styles.detail}>Name: {data.name}</Text>
+                  <Text style={styles.detail}>
+                    PickUp: {data.pickupLocation}
+                  </Text>
+                  <Text style={styles.detail}>
+                    Drop: {data.dropLocation}
+                  </Text>
+                  <View style={globalStyle.buttonRow}>
+                    <TouchableOpacity
+                      style={globalStyle.buttonAccept}
+                      onPress={() => acceptUserRequest(data.userID)}>
+                      <Text style={globalStyle.buttonText}>Accept</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={rejectUserRequest} style={styles.buttonReject}>
-                      <Text style={styles.buttonText}>Reject</Text>
+                    <TouchableOpacity
+                      style={globalStyle.buttonReject}
+                      onPress={() => rejectUserRequest(data.userID)}
+                    >
+                      <Text style={globalStyle.buttonTextd}>Reject</Text>
                     </TouchableOpacity>
                   </View>
-                </>
+                </View>
+              ))}
+              </>
               )}
             </View>
           </View>
@@ -718,4 +595,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  locationButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
+
