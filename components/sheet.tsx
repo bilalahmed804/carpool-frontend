@@ -13,11 +13,14 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { io } from "socket.io-client";
 import { BASE_URL } from "@/constant/constant";
+import GreenButton from "./greenButton";
 
 const socket = io(BASE_URL);
 export default function Sheet() {
   const [Open, setOpen] = useState(false);
   const { user, setUser } = useContext(AuthContext);
+  console.log(user);
+
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const router = useRouter();
   const slideAnim = useRef(new Animated.Value(-250)).current;
@@ -59,7 +62,7 @@ export default function Sheet() {
   return (
     <>
       <TouchableOpacity onPress={openSheet} style={styles.iconContaineruser}>
-        <Ionicons name="menu" size={30} color="#5F9EE0" />
+        <Ionicons name="menu" size={50} color="green" />
       </TouchableOpacity>
 
       {Open && (
@@ -77,15 +80,37 @@ export default function Sheet() {
               }}
               style={styles.avatar}
             />
+
             <Text style={styles.title}>{user?.name || "Guest User"}</Text>
-            <Text style={styles.email}>
+            <View style={styles.divider}></View>
+            <Text style={styles.userInfoMenuText}>
               {user?.email || "No email available"}
             </Text>
+            <View style={styles.divider}></View>
+            <Text style={styles.userInfoMenuText}>
+              Phone: {user?.phoneNumber}
+            </Text>
+            <View style={styles.divider}></View>
+            <Text style={styles.userInfoMenuText}>CNIC: {user?.nicNo}</Text>
+            <View style={styles.divider}></View>
+            {
+              user?.licenseNo && <Text style={styles.userInfoMenuText}>
+              License: {user.licenseNo}
+              <View style={styles.divider}></View>
+              </Text>
+            
+            }
+            {/* <Text style={styles.userInfoMenuText}> */}
+              {/* License: {user.licenseNo} */}
+            {/* </Text> */}
+
+            <Text style={styles.userInfoMenuText}>
+              Registerd at : {user?.createdAt.slice(0, 10)}
+            </Text>
+            <View style={styles.divider}></View>
           </View>
-          <TouchableOpacity style={styles.btn} onPress={handleLogout}>
-            <View style={styles.button}>
-              <Text style={styles.title}>Logout</Text>
-            </View>
+          <TouchableOpacity style={styles.btn}>
+            <GreenButton text="Logout" onPress={handleLogout} />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -95,17 +120,19 @@ export default function Sheet() {
 
 const styles = StyleSheet.create({
   container: {
+    top: 0,
+    left: 0,
+    padding: 20,
     width: "65%",
     height: "100%",
     backgroundColor: "#fff",
-    borderTopRightRadius: 20,
     borderBottomRightRadius: 20,
-    padding: 20,
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 8,
+    zIndex: 1000,
   },
   closeButton: {
     position: "absolute",
@@ -116,43 +143,41 @@ const styles = StyleSheet.create({
     backgroundColor: "#f2f2f2",
   },
   iconContaineruser: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
     borderRadius: 25,
-    backgroundColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 4,
+    padding: 10,
+    position: "absolute",
   },
   header: {
-    marginTop: 50,
+    marginTop: 90,
     alignItems: "center",
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 170,
+    height: 170,
+
+    borderRadius: 90,
     borderWidth: 2,
     borderColor: "lightgray",
   },
   title: {
-    fontSize: 18,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#333",
     marginTop: 8,
   },
-  email: {
-    fontSize: 14,
-    color: "#777",
+  userInfoMenuText: {
+    fontSize: 18,
+    textAlign: "center",
+    color: "darkgrey",
     marginTop: 4,
   },
   button: {
-    backgroundColor: "lightgray",
-    padding: 10,
     borderRadius: 5,
     alignItems: "center",
   },
@@ -162,5 +187,11 @@ const styles = StyleSheet.create({
     left: 20,
     width: "100%",
     paddingHorizontal: 10,
+  },
+  divider: {
+    height: 2,
+    backgroundColor: "darkgrey",
+    marginVertical: 10,
+    width: "100%",
   },
 });
