@@ -18,7 +18,6 @@ import * as Location from 'expo-location';
 const socket = io(BASE_URL);
 // const socket = io("http://192.168.2.132:4000");
 
-
 const UserDashboard = () => {
   const { setModalOpen, modalOpen } = useContext(globalContext);
   const { user } = useContext(AuthContext); 
@@ -53,6 +52,35 @@ const UserDashboard = () => {
     const userID = { userID: user._id };
     socket.emit("registerUser", userID);
   }
+
+  // Socket : Step 2
+  const handleSocketRequest = () => {
+    if (!user || !user._id) {
+      return; 
+    }
+    const userData = {
+      name: user.name,
+      picture: user.picture,
+      pickupLocationCoor: [
+        initialLocation?.latitude,
+        initialLocation?.longitude,
+      ],
+      dropLocationCoor: [destination?.latitude, destination?.longitude],
+      pickupLocation: pickupLocation,
+      dropLocation: dropLocation,
+      driver_ID : driverID,
+      userID: user._id
+    };
+    socket.emit("userRequestToDriver", userData)
+  };
+
+  //Socket : Step 3
+  useEffect(() => {
+    socket.on("requestAccepted", (data: any) => {
+      console.log("requestAccepted", data);})
+    socket.on("requestRejected", (data: any) => {
+      console.log("requestRejected", data);})
+  }, [socket.on])
 
   const closeModal = () => {
     setModalOpen(!modalOpen);
@@ -111,27 +139,6 @@ const UserDashboard = () => {
   }
   
 
-  // Socket : Step 2
-  const handleSocketRequest = () => {
-    if (!user || !user._id) {
-      return; 
-    }
-    const userData = {
-      name: user.name,
-      picture: user.picture,
-      pickupLocationCoor: [
-        initialLocation?.latitude,
-        initialLocation?.longitude,
-      ],
-      dropLocationCoor: [destination?.latitude, destination?.longitude],
-      pickupLocation: pickupLocation,
-      dropLocation: dropLocation,
-      driver_ID : driverID,
-      userID: user._id
-    };
-    socket.emit("userRequestToDriver", userData)
-  };
-
   return (
     <>
       <View style={styles.containeruser}>
@@ -150,7 +157,6 @@ const UserDashboard = () => {
           }}
         >
        <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
-
         </MapView>
         <TouchableOpacity onPress={goToCurrentLocation} />
         <View style={styles.navbaruser}>
