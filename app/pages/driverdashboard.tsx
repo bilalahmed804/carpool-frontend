@@ -1,16 +1,15 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useId, useRef, useState } from "react";
 import {
   View,
   TextInput,
   StyleSheet,
   TouchableOpacity,
   Text,
-  Image,
   ActivityIndicator,
   ToastAndroid,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import AutoComplete from "@/components/autoComplete";
@@ -21,8 +20,10 @@ import { Modal } from "react-native";
 import { io } from "socket.io-client";
 import GreenButton from "@/components/greenButton";
 import * as Location from "expo-location";
+import LottieView from "lottie-react-native";
 
 const socket = io(BASE_URL);
+// const socket = io("http://192.168.7.236:4000");
 
 interface UserData {
   name: string;
@@ -58,7 +59,7 @@ const validateLocation = (details: GooglePlaceDetail | null) => {
   };
 };
 
-const DriverDashboard = () => {
+function DriverDashboard() {
   const { user } = useContext(AuthContext);
   const [driverInitialLocation, setDriverInitialLocation] = useState<{
     latitude: number;
@@ -73,17 +74,26 @@ const DriverDashboard = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [seats, setSeats] = useState("");
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
-  const [userData, setUserData] = useState<UserData | null>(null);
+  // const [userData, setUserData] = useState<UserData | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [pickupAreaName, setPickupAreaName] = useState("");
+  console.log("pickupAreaName", pickupAreaName);
+
   const [dropAreaName, setDropAreaName] = useState("");
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
   const [userDataSoc, setUserDataSoc] = useState(null);
+  const [driverData, setDriverData] = useState<any | []>([]);
 
   const mapRef = useRef<MapView | null>(null);
+  interface DriverData {
+    name: string;
+    fare: string;
+    pickupLocation: string;
+    dropLocation: string;
+  }
 
   useEffect(() => {
     socket.connect();
@@ -97,7 +107,6 @@ const DriverDashboard = () => {
     };
   }, []);
 
-
   // Socket : Step 1
   if (user && user._id) {
     const userID = { userID: user._id };
@@ -105,48 +114,105 @@ const DriverDashboard = () => {
   }
 
   useEffect(() => {
+    // Listen for new ride updates
     socket.on("rideRequest", (userData) => {
-        console.log("Received userData:", userData);
-        setUserDataSoc(userData);
+      setDriverData((prev: any) => [...prev, userData]);
+      setLoading(false);
     });
-    return () => {
-        socket.off("rideRequest"); 
-    };
-}, []);
 
-  const driverData = {
-    name: "Ali Khan",
-    profilePic:
-      "http://res.cloudinary.com/dl4kqxuyk/image/upload/v1740661676/Ride_Sharing/Drivers/nyabkfscagusux11fxl8.jpg",
-    fare: "Rs.500",
-    vehicle: "Toyota Corolla",
-    initialLocation: "zaitoon ashraf",
-    DestinationLocation: "Gulshan",
+    return () => {
+      socket.off("rideUpdate"); // Cleanup listener on unmount
+    };
+  }, []);
+
+  // Socket : Step 2
+  // useEffect(() => {
+  //   socket.on("rideRequest", (userData) => {
+  //     console.log("Received userData:", userData);
+  //     rideRequests_Array.push(userData);
+  //     setUserDataSoc(userData);
+  //   });
+  //   return () => {
+  //     socket.off("rideRequest");
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   if (!userDataSoc) {
+  //     setDriverData(null);
+  //     return;
+  //   }
+  //   try {
+  //     const parsedUserData =
+  //       typeof userDataSoc === "string" ? JSON.parse(userDataSoc) : userDataSoc;
+
+  //     setDriverData(parsedUserData);
+  //   } catch (error) {
+  //     console.error("Error parsing userData:", error);
+  //     setDriverData(null);
+  //   }
+  // }, [userDataSoc]);
+
+  // Socket : Step 3
+
+  const acceptUserRequest = async () => {
+    try {
+      const locationData = await goToCurrentLocation(); // Wait for location
+
+      if (!locationData) {
+        return console.log("accept nahin kia", locationData);
+      }
+
+      if (!user || !user._id) {
+        return;
+      }
+
+      const userData = {
+        name: user.name,
+        userID: user._id,
+        driverLiveLocation: locationData,
+      };
+
+      socket.emit("DriverResponse_Accept", userData);
+      console.log("Data Emitted");
+    } catch (error) {
+      console.log("Location fetch failed:", error);
+    }
   };
 
-  socket.on("rideRequest", (data) => console.log("rideRequest==>", data))
+  const rejectUserRequest = () => {
+    socket.emit("DriverResponse_Reject", "rejected");
+    console.log("Data Emitted");
+  };
+
   const onClose = () => {
     setModalVisible(false);
+    setDriverData([]);
   };
 
   const goToCurrentLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    console.log("status", status);
+    return new Promise(async (resolve, reject) => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      console.log("status", status);
 
-    if (status !== "granted") {
-      alert("Location permission denied!");
-      return;
-    }
-    let location = await Location.getCurrentPositionAsync({});
-    setLocation(location);
-    if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
-    }
+      if (status !== "granted") {
+        alert("Location permission denied!");
+        return reject("Permission Denied");
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      // setLocation(location);
+
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+      }
+      resolve(location);
+    });
   };
 
   const handleAddRide = async () => {
@@ -154,8 +220,9 @@ const DriverDashboard = () => {
       ToastAndroid.show("Please select both locations.", ToastAndroid.LONG);
       return;
     }
+
     if (!user || !user._id) {
-      return; 
+      return;
     }
     const points = getIntermediatePoints(
       driverInitialLocation,
@@ -173,9 +240,6 @@ const DriverDashboard = () => {
       farePerSeat: fare,
       routes: [driverInitialLocation, driverDestination, ...points],
     };
-    // socket.on("userData", (userData) => console.log("userData", userData))
-    // console.log("rideData", userData);
-
     try {
       const response = await axios.post(AppRoutes.DriverJourney, rideData);
       ToastAndroid.show("Ride data posted successfully!", ToastAndroid.LONG);
@@ -198,214 +262,321 @@ const DriverDashboard = () => {
   };
 
   return (
-    <View style={globalStyle.containerd}>
-      <MapView
-        ref={mapRef}
-        provider={PROVIDER_GOOGLE}
-        showsUserLocation={true}
-        showsMyLocationButton={true}
-        mapType="terrain"
-        style={StyleSheet.absoluteFillObject}
-        initialRegion={{
-          latitude: 24.8607,
-          longitude: 67.0011,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        }}
-      >
+    <>
+      <View style={globalStyle.containerd}>
+        <MapView
+          ref={mapRef}
+          provider={PROVIDER_GOOGLE}
+          showsUserLocation={true}
+          showsMyLocationButton={false}
+          showsCompass={true}
+          showsTraffic={true}
+          mapType="terrain"
+          style={StyleSheet.absoluteFillObject}
+          initialRegion={{
+            latitude: 24.8607,
+            longitude: 67.0011,
+            latitudeDelta: 0.05,
+            longitudeDelta: 0.05,
+          }}
+        >
+          <Marker
+            coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
+            title="Pickup Location"
+          />
+        </MapView>
+
+        <TouchableOpacity
+          style={styles.locationButton}
+          onPress={goToCurrentLocation}
+        >
+          <MaterialIcons name="my-location" size={24} color="#4CAF50" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={goToCurrentLocation} />
+          <Sheet />
         <Marker
           coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
           title="Pickup Location"
         />
-      </MapView>
-      <TouchableOpacity onPress={goToCurrentLocation} />
-      <View style={globalStyle.navbaruser}>
-        <Sheet/>
-      </View>
-       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
 
+        <View style={globalStyle.rideContainer}>
+          <AutoComplete
+            onPress={(data: any, details: GooglePlaceDetail | null) => {
+              const { isInPakistan, isInKarachi } = validateLocation(details);
+              if (!isInPakistan) {
+                ToastAndroid.show(
+                  "Only locations within Pakistan are allowed.",
+                  ToastAndroid.LONG
+                );
+                return;
+              }
 
-      <View style={globalStyle.rideContainer}>
-        <AutoComplete
-          onPress={(data: any, details: GooglePlaceDetail | null) => {
-            const { isInPakistan, isInKarachi } = validateLocation(details);
-            if (!isInPakistan) {
-              ToastAndroid.show(
-                "Only locations within Pakistan are allowed.",
-                ToastAndroid.LONG
-              );
-              return;
-            }
+              if (!isInKarachi) {
+                ToastAndroid.show(
+                  "Maximum fare should be in thousands for out-of-Karachi trips.",
+                  ToastAndroid.LONG
+                );
+              }
 
-            if (!isInKarachi) {
-              ToastAndroid.show(
-                "Maximum fare should be in thousands for out-of-Karachi trips.",
-                ToastAndroid.LONG
-              );
-            }
-
-            if (data?.description) {
-              setPickupAreaName(data.description);
-            }
-            if (details?.geometry?.location) {
-              const initialCordinate = details.geometry.location;
-              setDriverInitialLocation({
-                latitude: initialCordinate.lat,
-                longitude: initialCordinate.lng,
-              });
-              console.log(
-                "data des",
-                data.description,
-                details.geometry.location
-              );
-            } else {
-              console.log("no location found");
-            }
-          }}
-          text="Enter Initial Location"
-        />
-
-        <AutoComplete
-          onPress={(data: any, details: GooglePlaceDetail | null) => {
-            const { isInPakistan, isInKarachi } = validateLocation(details);
-            if (!isInPakistan) {
-              ToastAndroid.show(
-                "Only locations within Pakistan are allowed.",
-                ToastAndroid.LONG
-              );
-              return;
-            }
-
-            if (!isInKarachi) {
-              ToastAndroid.show(
-                "Maximum fare should be in thousands for out-of-Karachi trips.",
-                ToastAndroid.LONG
-              );
-            }
-            if (data?.description) {
-              setDropAreaName(data.description);
-            }
-            if (details?.geometry?.location) {
-              const initialCordinate = details.geometry.location;
-              setDriverDestination({
-                latitude: initialCordinate.lat,
-                longitude: initialCordinate.lng,
-              });
-
-              console.log(
-                "data des",
-                data.description,
-                details.geometry.location
-              );
-            } else {
-              console.log("no location found");
-            }
-          }}
-          text="Destination"
-        />
-
-        <View style={globalStyle.fareContainer}>
-          <TextInput
-            style={globalStyle.inputField}
-            placeholder="Fare"
-            placeholderTextColor="gray"
-            keyboardType="numeric"
-            value={fare}
-            onChangeText={setFare}
+              if (data?.description) {
+                setPickupAreaName(data.description);
+              }
+              if (details?.geometry?.location) {
+                const initialCordinate = details.geometry.location;
+                setDriverInitialLocation({
+                  latitude: initialCordinate.lat,
+                  longitude: initialCordinate.lng,
+                });
+                console.log(
+                  "data des",
+                  data.description,
+                  details.geometry.location
+                );
+              } else {
+                console.log("no location found");
+              }
+            }}
+            text="Enter Initial Location"
           />
-          <TextInput
-            style={globalStyle.inputField}
-            placeholder="Seats Available"
-            placeholderTextColor="gray"
-            keyboardType="number-pad"
-            value={seats}
-            onChangeText={setSeats}
+
+          <AutoComplete
+            onPress={(data: any, details: GooglePlaceDetail | null) => {
+              const { isInPakistan, isInKarachi } = validateLocation(details);
+              if (!isInPakistan) {
+                ToastAndroid.show(
+                  "Only locations within Pakistan are allowed.",
+                  ToastAndroid.LONG
+                );
+                return;
+              }
+
+              if (!isInKarachi) {
+                ToastAndroid.show(
+                  "Maximum fare should be in thousands for out-of-Karachi trips.",
+                  ToastAndroid.LONG
+                );
+              }
+              if (data?.description) {
+                setDropAreaName(data.description);
+              }
+              if (details?.geometry?.location) {
+                const initialCordinate = details.geometry.location;
+                setDriverDestination({
+                  latitude: initialCordinate.lat,
+                  longitude: initialCordinate.lng,
+                });
+
+                console.log(
+                  "data des",
+                  data.description,
+                  details.geometry.location
+                );
+              } else {
+                console.log("no location found");
+              }
+            }}
+            text="Destination"
           />
+
+          <View style={globalStyle.fareContainer}>
+            <TextInput
+              style={globalStyle.inputField}
+              placeholder="Fare"
+              placeholderTextColor="gray"
+              keyboardType="numeric"
+              value={fare}
+              onChangeText={setFare}
+            />
+            <TextInput
+              style={globalStyle.inputField}
+              placeholder="Seats Available"
+              placeholderTextColor="gray"
+              keyboardType="number-pad"
+              value={seats}
+              onChangeText={setSeats}
+            />
+          </View>
+          <GreenButton text="Add Ride" onPress={handleAddRide} />
         </View>
-        <GreenButton text="Add Ride" onPress={handleAddRide} />
-        <Modal visible={modalVisible} transparent animationType="slide">
-          <View style={globalStyle.overlayd}>
-            <View style={globalStyle.modalContainerd}>
-              <TouchableOpacity
-                onPress={onClose}
-                style={globalStyle.closeButtond}
-              >
-                <Ionicons name="close" size={40} color="#333" />
-              </TouchableOpacity>
+      </View>
 
-              <Text style={globalStyle.message}>
-                {loading ? "massege" : "Waiting for Passanger..."}
-              </Text>
-              <View style={globalStyle.driverCard}>
-                <View style={globalStyle.info}>
-                  <Text style={globalStyle.fare}>
-                    {driverData.fare} {" - "} {driverData.initialLocation} to{" "}
-                    {driverData.DestinationLocation}
-                  </Text>
-                  <TouchableOpacity onPress={onClose}>
-                    <View style={globalStyle.buttond}>
-                      <Text style={globalStyle.buttonTextd}>
-                        Cancel My Ride
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View style={styles.overlayd}>
+          <View style={styles.modalContainerd}>
+            <View style={styles.driverCard}>
+              <View style={styles.info}>
+                <Text style={styles.location}>From : {pickupAreaName}</Text>
+                <Text  style={styles.location}>To : {dropAreaName} </Text>
+                <TouchableOpacity onPress={onClose}>
+                  <View style={styles.cancelButton}>
+                    <Text style={styles.cancelButtonText}>Cancel My Ride</Text>
+                  </View>
+                </TouchableOpacity>
               </View>
-              <View style={globalStyle.driverCard}>
-                {loading ? (
-                  <>
-                    <ActivityIndicator
-                      size="large"
-                      color="#007BFF"
-                      style={globalStyle.spinner}
-                    />
-
-                    <Text style={globalStyle.messaged}>
-                      "Wating user passanger..."
-                    </Text>
-                  </>
-                ) : (
-                  <>
-                    <View>
-                      {userData && (
-                        <View style={globalStyle.userCard}>
-                          <Image
-                            source={{ uri: userData.profilePic }}
-                            style={globalStyle.userImage}
-                          />
-                          <View style={globalStyle.userInfo}>
-                            <Text style={globalStyle.named}>
-                              {userData.name}
-
-                            </Text>
-                            <Text style={globalStyle.detail}>
-                              Seats: {userData.seat}
-                            </Text>
-                            <Text style={globalStyle.detail}>
-                              from {userData.area.latitude} to {""}
-                              {userData.area.longitude}
-                            </Text>
-                          </View>
-                        </View>
-                      )}
+            </View>
+            <View>
+              {loading ? (
+                <>
+                  <LottieView
+                    source={require("../../assets/images/loading.json")} // Apna Lottie file add karo
+                    autoPlay
+                    loop
+                    style={styles.loader}
+                  />
+                </>
+              ) : (
+                <>
+                  {driverData.map((data: any, index: number) => (
+                    <View key={index}>
+                      <Text style={styles.detail}>Name: {data.name}</Text>
+                      <Text style={styles.detail}>
+                        PickUp: {data.pickupLocation}
+                      </Text>
+                      <Text style={styles.detail}>
+                        Drop: {data.dropLocation}
+                      </Text>
                       <View style={globalStyle.buttonRow}>
-                        <TouchableOpacity style={globalStyle.buttonAccept}>
+                        <TouchableOpacity
+                          style={globalStyle.buttonAccept}
+                          onPress={() => acceptUserRequest()}
+                        >
                           <Text style={globalStyle.buttonText}>Accept</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={globalStyle.buttonReject}>
+                        <TouchableOpacity
+                          style={globalStyle.buttonReject}
+                          onPress={rejectUserRequest}
+                        >
                           <Text style={globalStyle.buttonTextd}>Reject</Text>
                         </TouchableOpacity>
                       </View>
                     </View>
-                  </>
-                )}
-              </View>
+                  ))}
+                </>
+              )}
             </View>
           </View>
-        </Modal>
-      </View>
-    </View>
+        </View>
+      </Modal>
+    </>
   );
-};
+}
 
 export default DriverDashboard;
+
+const styles = StyleSheet.create({
+  overlayd: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContainerd: {
+    minHeight: "90%",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 15,
+    elevation: 5,
+  },
+  closeButtond: {
+    alignSelf: "flex-end",
+    padding: 5,
+  },
+  driverCard: {
+    alignItems: "center",
+    padding: 10,
+    marginVertical: 10,
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "green",
+  },
+  info: {
+    alignItems: "center",
+  },
+  location: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 8,
+  },
+  cancelButton: {
+    backgroundColor: "#dc3545",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    paddingHorizontal: 100,
+  },
+  userCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  userImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  userInfo: {
+    flex: 1,
+  },
+  named: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  detail: {
+    fontSize: 14,
+    color: "#666",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  buttonAccept: {
+    backgroundColor: "#28a745",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    flex: 1,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  buttonReject: {
+    backgroundColor: "#dc3545",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    flex: 1,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  loader: {
+    width: 400,
+    height: 500,
+    alignSelf: "center",
+  },
+  locationButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

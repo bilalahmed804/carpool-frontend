@@ -57,7 +57,7 @@ function Index() {
     <ScrollView style={globalStyle.container}>
       <Image
         style={styles.logo}
-        source={require("../assets/images/carpool.png")}
+        source={require("../assets/images/hd.png")}
       />
       
       <Text style={styles.title}>Welcome To Carpool</Text>

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import {View,StyleSheet,Modal,Image,TouchableOpacity,Text, ToastAndroid,} from "react-native";
+import {View,StyleSheet,Modal,Image,TouchableOpacity,Text, ToastAndroid, FlatList,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
@@ -150,9 +150,7 @@ const UserDashboard = () => {
 
         </MapView>
         <TouchableOpacity onPress={goToCurrentLocation} />
-        <View style={styles.navbaruser}>
       <Sheet/>
-    </View>
    
 
         <View style={styles.rideContaineruser}>
@@ -211,17 +209,25 @@ const UserDashboard = () => {
           </View>
           <View style={styles.infoContainer}>
             <Text style={{fontSize: 26,fontWeight:"bold", textAlign: "center"}}>{data.name}</Text>
-            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>{data.gender}</Text>
-            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>{data.vehicleCategory}</Text>
-            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>Vehicle No : {data.vehicleNo}</Text>
-            <Text style={{fontSize: 20,fontWeight:"bold", textAlign: "center"}}>License No : {data.licenseNo}</Text>
+            <View style={styles.divider}></View>
+            <View style={{flexDirection:"row", justifyContent: "space-evenly"}}>
+            <Text style={{fontSize: 20, textAlign: "center"}}>{data.gender}</Text>
+            <Text>|</Text>
+            <Text style={{fontSize: 20, textAlign: "center"}}>{data.vehicleCategory}</Text>
+            </View>
+            <View style={styles.divider}></View>
+            <Text > <Ionicons style={{fontSize: 20, textAlign: "center"}} name="help-buoy-outline">  Vehicle No :  {data.vehicleNo}</Ionicons></Text>
+            <View style={styles.divider}></View>
+            <Text > <Ionicons style={{fontSize: 20, textAlign: "center"}} name="document-outline">  License No : {data.licenseNo}</Ionicons></Text>
+            <View style={styles.divider}></View>
+
           <View style={styles.btn}>
             <Ionicons name="call-outline" size={34} onPress={closeModal} />
-            <Ionicons name="logo-whatsapp" size={34} onPress={closeModal} />
-        </View>
-            <View>
+            <Ionicons name="logo-whatsapp" color="green" size={34} onPress={closeModal} />
+           
             <GreenButton onPress={handleSocketRequest} text="request ride" />
-            </View>
+         
+        </View>
           </View>
           </View>
           ))}
@@ -238,20 +244,24 @@ const UserDashboard = () => {
             >
               <Ionicons name="close" size={30} color="#333" />
             </TouchableOpacity>
-            <Text style={styles.messageuser}>My Route:{} </Text>
-            {journeyExpense.map((data: any, index: number) => (
-              <View key={index} style={styles.carduser}>
+            <FlatList data={journeyExpense} renderItem={({item, index}: {item: any, index: number})=>{
+              return(
+                <View key={index} style={styles.carduser}>
                 <View style={styles.infouser}>
                   <Text style={styles.nameuser}>
-                    Available Seats : {data.availableSeats}
+                    Available Seats : {item.availableSeats}
                   </Text>
                   <Text style={styles.fareuser}>
-                    Fare Per Seat : {data.farePerSeat}
+                    Fare Per Seat : {item.farePerSeat}
                   </Text>
                 </View>
-                <GreenButton text="Details" onPress={() => collectDriverDetails(data.userID)}/>
+                <GreenButton text="Details" onPress={() => collectDriverDetails(item.userID)}/>
               </View>
-            ))}
+              )
+            }}/>
+            {/* {journeyExpense.map((data: any, index: number) => (
+            
+            ))} */}
           </View>
         </View>
         }
@@ -263,11 +273,6 @@ export default UserDashboard;
 const styles = StyleSheet.create({
   containeruser: {
     flex: 1,
-  },
-  navbaruser: {
-    padding: 10,
-    flexDirection: "row",
-    alignItems: "center",
   },
   rideContaineruser: {
     position: "absolute",
@@ -294,18 +299,27 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.6)",
   },
   overlay1: {
+    position:"absolute",
     flex: 1,
+    height:"100%",
+    width:"100%",
+    marginTop:60,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+     backgroundColor: "rgba(0, 0, 0, 0.8)"
+   
   },
   modalContainer: {
+    justifyContent: "center",
     backgroundColor: "#fff",
     padding: 6,
     gap: 8,
-    borderTopLeftRadius: 6,
-    borderTopRightRadius: 6,
-    minHeight: "95%",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    width: "100%",
+    height: "100%",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
@@ -315,25 +329,18 @@ const styles = StyleSheet.create({
   },
   closeButtonuser: {
     alignSelf: "flex-end",
-    padding: 8,
-  },
-  messageuser: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#333",
+    paddingRight: 10,
   },
   carduser: {
     flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    padding: 12,
-    backgroundColor: "#E3F2FD",
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
-    marginTop: 10,
+    padding: 10,
+    borderRadius: 8,
+    margin: 6,
+    width: "95%",
+    borderColor: "green",
+    borderWidth: 2,
   },
   driverImageuser: {
     width: 60,
@@ -347,12 +354,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   nameuser: {
-    fontSize: 22,
+    fontSize: 18,
+    marginBottom: 5,
     fontWeight: "bold",
+    color: "#4CAF50",
+
   },
   fareuser: {
-    fontSize: 20,
-    color: "#4CAF50",
+    fontSize: 16,
     fontWeight: "bold",
   },
   vehicleuser: {
@@ -361,16 +370,18 @@ const styles = StyleSheet.create({
   },
   popupContainer: {
     flex: 1,
-    width : "80%",
-    height : "70%",
+    width : "90%",
+    height : "60%",
     position: "absolute",
-    borderRadius: 10,
+    borderRadius: 20,
     marginVertical: "auto",
     marginHorizontal: "auto",
     backgroundColor: "white",
     elevation: 6,
     zIndex: 1000,
-    padding: 10
+    padding: 10,
+    borderColor: "green",
+    borderWidth: 2,
   },
   infoContainer:{
     gap: 12,
@@ -378,10 +389,11 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
     margin: 20,
+    
   },
   btn: {
     flexDirection: "row",
-    gap: 30,
+    gap: 10,
     marginVertical : 10,
     justifyContent: "space-around",
   },
@@ -407,7 +419,6 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 20,
   },
   avatar: {
     width: 100,
@@ -437,5 +448,10 @@ const styles = StyleSheet.create({
   nameStyle: {
     fontSize: 16,
     color: "#555",
+  },
+  divider: {
+    height: 2,
+    backgroundColor: "darkgrey",
+    width: "100%",
   },
 });
