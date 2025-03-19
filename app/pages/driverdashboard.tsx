@@ -12,6 +12,8 @@ import { Modal } from "react-native";
 import { io } from "socket.io-client";
 import GreenButton from "@/components/greenButton";
 import * as Location from "expo-location";
+import LottieView from "lottie-react-native";
+
 
 // const socket = io(BASE_URL);  
 const socket = io("http://192.168.7.236:4000");
@@ -61,10 +63,13 @@ function DriverDashboard() {
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const [loading, setLoading] = useState(true);
   const [pickupAreaName, setPickupAreaName] = useState("");
+  console.log("pickupAreaName", pickupAreaName);
+
   const [dropAreaName, setDropAreaName] = useState("");
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const [driverData, setDriverData] = useState<any | []>([]);
+    
   const mapRef = useRef<MapView | null>(null);
 
   interface DriverData {
@@ -257,14 +262,16 @@ const goToCurrentLocation = async () => {
             title="Pickup Location"
           />
         </MapView>
-          
-        <TouchableOpacity style={styles.locationButton} onPress={goToCurrentLocation}>
-        <MaterialIcons name="my-location" size={24} color="#4CAF50" />
+
+
+        <TouchableOpacity
+          style={styles.locationButton}
+          onPress={goToCurrentLocation}
+        >
+          <MaterialIcons name="my-location" size={24} color="#4CAF50" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={goToCurrentLocation} />
-        <View style={globalStyle.navbaruser}>
           <Sheet />
-        </View>
+     
         <Marker
           coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
           title="Pickup Location"
@@ -374,13 +381,11 @@ const goToCurrentLocation = async () => {
       <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.overlayd}>
           <View style={styles.modalContainerd}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButtond}>
-              <Ionicons name="close" size={40} color="#333" />
-            </TouchableOpacity>
-
             <View style={styles.driverCard}>
               <View style={styles.info}>
-                <Text style={styles.fare}>Ride Details</Text>
+                <Text style={styles.location}>From : {pickupAreaName}</Text>
+                <Text  style={styles.location}>To : {dropAreaName} </Text>
+
                 <TouchableOpacity onPress={onClose}>
                   <View style={styles.cancelButton}>
                     <Text style={styles.cancelButtonText}>Cancel My Ride</Text>
@@ -388,6 +393,45 @@ const goToCurrentLocation = async () => {
                 </TouchableOpacity>
               </View>
             </View>
+
+            <View>
+              {loading ? (
+                <>
+                  <LottieView
+                    source={require("../../assets/images/loading.json")}
+                    autoPlay
+                    loop
+                    style={styles.loader}
+                  />
+                </>
+              ) : (
+                <>
+                  {driverData.map((data: any, index: number) => (
+                    <View key={index}>
+                      <Text style={styles.detail}>Name: {data.name}</Text>
+                      <Text style={styles.detail}>
+                        PickUp: {data.pickupLocation}
+                      </Text>
+                      <Text style={styles.detail}>
+                        Drop: {data.dropLocation}
+                      </Text>
+                      <View style={globalStyle.buttonRow}>
+                        <TouchableOpacity
+                          style={globalStyle.buttonAccept}
+                          onPress={() => acceptUserRequest()}
+                        >
+                          <Text style={globalStyle.buttonText}>Accept</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={globalStyle.buttonReject}
+                          onPress={rejectUserRequest}
+                        >
+                          <Text style={globalStyle.buttonTextd}>Reject</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+
             <View style={styles.driverCard}>
               {loading ? (
                 <>
@@ -426,8 +470,6 @@ const goToCurrentLocation = async () => {
               </>
               )}
             </View>
-
-            
           </View>
         </View>
       </Modal>
@@ -448,43 +490,40 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
-    elevation: 10,
+    padding: 15,
+    elevation: 5,
   },
   closeButtond: {
     alignSelf: "flex-end",
     padding: 5,
   },
   driverCard: {
-    backgroundColor: "#C8E6C9",
-    borderRadius: 10,
-    padding: 15,
+    alignItems: "center",
+    padding: 10,
     marginVertical: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 3,
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: "green", 
   },
   info: {
     alignItems: "center",
   },
-  fare: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 10,
+  location: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 8,
   },
   cancelButton: {
-    backgroundColor: "#388E3C",
+    backgroundColor: "#dc3545",
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 15,
   },
   cancelButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-    paddingHorizontal: 70,
+    paddingHorizontal: 100,
   },
   userCard: {
     flexDirection: "row",
@@ -541,8 +580,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  spinner: {
-    marginVertical: 20,
+  loader: {
+    width: 400,
+    height: 500,
+    alignSelf: "center",
+  },
+  locationButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
   locationButton: {
     position: 'absolute',
