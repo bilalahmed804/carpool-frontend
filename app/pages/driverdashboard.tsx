@@ -1,7 +1,7 @@
-import React, { useContext, useEffect, useId, useRef, useState } from "react";
-import {View,TextInput,StyleSheet,TouchableOpacity,Text,ActivityIndicator,ToastAndroid,} from "react-native";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import {View,TextInput,StyleSheet,TouchableOpacity,Text,ToastAndroid,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import globalStyle, { AppRoutes, BASE_URL } from "@/constant/constant";
 import Sheet from "@/components/sheet";
 import AutoComplete from "@/components/autoComplete";
@@ -14,19 +14,9 @@ import GreenButton from "@/components/greenButton";
 import * as Location from "expo-location";
 import LottieView from "lottie-react-native";
 
+const socket = io(BASE_URL);
+// const socket = io("http://192.168.7.236:4000");
 
-// const socket = io(BASE_URL);  
-const socket = io("http://192.168.7.236:4000");
-
-interface UserData {
-  name: string;
-  profilePic: string;
-  seat: number;
-  area: {
-    latitude: string;
-    longitude: string;
-  };
-}
 
 const getIntermediatePoints = (start: any, end: any, numPoints = 20) => {
   return Array.from({ length: numPoints }, (_, i) => {
@@ -61,24 +51,20 @@ function DriverDashboard() {
   const [seats, setSeats] = useState("");
   const [intermediatePoints, setIntermediatePoints] = useState<any[]>([]);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [isRideAccepted, setIsRideAccepted] = useState(false);
   const [pickupAreaName, setPickupAreaName] = useState("");
-  console.log("pickupAreaName", pickupAreaName);
-
+  const [connectedUserID, setConnectedUserID] = useState("");
   const [dropAreaName, setDropAreaName] = useState("");
-  const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const locationSubscription = useRef<Location.LocationSubscription | null>(null);
+  const [location, setLocation] = useState<Location.LocationObject | null>(
+    null
+  );
+  const locationSubscription = useRef<Location.LocationSubscription | null>(
+    null
+  );
   const [driverData, setDriverData] = useState<any | []>([]);
-    
+
   const mapRef = useRef<MapView | null>(null);
-
-  interface DriverData {
-    name: string;
-    fare: string;
-    pickupLocation: string;
-    dropLocation: string;
-  }
-
 
   useEffect(() => {
     socket.connect();
@@ -102,102 +88,137 @@ function DriverDashboard() {
   useEffect(() => {
     // Listen for new ride updates
     socket.on("rideRequest", (userData) => {
-      setDriverData((prev:any) => [...prev, userData])
-      setLoading(false)
-    })
+      setDriverData((prev: any) => [...prev, userData]);
+      setLoading(false);
+    });
     return () => {
-      socket.off('rideUpdate'); // Cleanup listener on unmount
+      socket.off("rideUpdate"); // Cleanup listener on unmount
     };
   }, [socket.on]);
 
   // Socket : Step 3
-  const acceptUserRequest = async (requestee:any) => {
+  const acceptUserRequest = async (requestee: any) => {
+    setConnectedUserID(requestee)
     try {
-      const locationData = await goToCurrentLocation();
       if (!user || !user._id) {
-        return console.log("user ka data nahin he")
+        return console.log("user ka data nahin he");
       }
       const userData = {
         name: user.name,
-        requesteeID : requestee,
+        requesteeID: requestee,
         driver_ID: user._id,
-        driverLiveLocation: locationData 
       };
       socket.emit("DriverResponse_Accept", userData);
-      console.log("Data Emitted", userData);
+      setIsRideAccepted(true)
+      setModalVisible(false)
+      sendMyLocation();
     } catch (error) {
       console.log("Location fetching failed:", error);
     }
   };
 
-  const rejectUserRequest = (requestee:any) => {
+  const rejectUserRequest = (requestee: any) => {
     const userData = {
-      requesteeID : requestee,
-      message : "Ride Rejected"
-    }
+      requesteeID: requestee,
+      message: "Ride Rejected",
+    };
     socket.emit("DriverResponse_Reject", userData);
     console.log("Data Emitted");
   };
 
+  //Socket : Step 4
+  useEffect(() => {
+    if (isRideAccepted) {  // Emit location only when the ride is accepted
+      const obj = {
+        liveLocation : location,
+        userID: connectedUserID
+      }
+      socket.emit("driverLiveLocation", obj);
+    }
+  }, [location]);
+
   const onClose = () => {
     setModalVisible(false);
-    setDriverData([])
+    setDriverData([]);
   };
 
-const goToCurrentLocation = async () => {
-  let { status } = await Location.requestForegroundPermissionsAsync();
-  console.log("Location Permission Status:", status);
-
-  if (status !== "granted") {
-    alert("Location permission denied!");
-    return;
-  }
-
-  locationSubscription.current = await Location.watchPositionAsync(
-    {
-      accuracy: Location.Accuracy.High,
-      timeInterval: 2000,
-      distanceInterval: 5,
-    },
-    (newLocation) => {
-      console.log("Updated Location:", newLocation);
-
-      if (newLocation && newLocation.coords) {
-        setLocation(newLocation);
-        if (mapRef.current) {
-          mapRef.current.animateToRegion({
-            latitude: newLocation.coords.latitude,
-            longitude: newLocation.coords.longitude,
-            latitudeDelta: 0.05,
-            longitudeDelta: 0.05,
-          });
-        }
-      } else {
-        console.log("Location not received correctly!");
-      }
-    }
-  );
-};
-
-  // useEffect(()=> {
-  //   socket.emit("liveLocation", location)
-  // }, [location])
-
-  useEffect(() => {
-    return () => {
-      if (locationSubscription.current) {
-        locationSubscription.current.remove();
-      }
-    };
-  }, []);
+  const sendMyLocation = async () => {
+    let { status } = await Location.requestForegroundPermissionsAsync();
+    console.log("Location Permission Status:", status);
   
+    if (status !== "granted") {
+      alert("Location permission denied!");
+      return;
+    }
+    locationSubscription.current = await Location.watchPositionAsync(
+      {
+        accuracy: Location.Accuracy.High,
+        distanceInterval: 2,
+      },
+      (newLocation) => {
+        // Ensure newLocation is valid
+        if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
+          setLocation(newLocation);  // Update only when valid location is received
+          console.log("driver Live Location=>",newLocation);
+          
+          if (mapRef.current) {
+            mapRef.current.animateToRegion({
+              latitude: newLocation.coords.latitude,
+              longitude: newLocation.coords.longitude,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
+            });
+          }
+        } else {
+          console.log("Invalid location data received, ignoring update.");
+        }
+      }
+    );
+  };
+
+  const goToCurrentLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      console.log("status", status);
+  
+      if (status !== "granted") {
+        alert("Location permission denied!");
+        return;
+      }
+  
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High, // High accuracy ke liye
+      });
+  
+      console.log("Current Location:", location);
+  
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+    }
+  };
+  
+
+  const stopLocationTracking = () => {
+  if (locationSubscription.current) {
+      locationSubscription.current.remove(); // Tracking stop karo
+      locationSubscription.current = null;   // Reference clear karo
+      console.log(" Location tracking stopped.");
+  }
+  };
 
   const handleAddRide = async () => {
     if (!driverInitialLocation || !driverDestination) {
       ToastAndroid.show("Please select both locations.", ToastAndroid.LONG);
       return;
     }
-
     if (!user || !user._id) {
       return;
     }
@@ -207,9 +228,8 @@ const goToCurrentLocation = async () => {
       20
     );
     setIntermediatePoints(points);
-
     setModalVisible(true);
-
+    setLoading(true)
     const rideData = {
       userID: user._id,
       availableSeats: seats,
@@ -223,7 +243,6 @@ const goToCurrentLocation = async () => {
       console.log("Response:", response.data);
     } catch (error) {
       console.error("Error posting ride data:", error);
-
       if (axios.isAxiosError(error) && error.response) {
         ToastAndroid.show(
           `Error: ${error.response.data.message || "Something went wrong!"}`,
@@ -241,7 +260,7 @@ const goToCurrentLocation = async () => {
   return (
     <>
       <View style={globalStyle.containerd}>
-      <MapView
+        <MapView
           ref={mapRef}
           provider={PROVIDER_GOOGLE}
           showsUserLocation={true}
@@ -263,15 +282,14 @@ const goToCurrentLocation = async () => {
           />
         </MapView>
 
-
         <TouchableOpacity
           style={styles.locationButton}
-          onPress={goToCurrentLocation}
+          onPress={stopLocationTracking}
         >
           <MaterialIcons name="my-location" size={24} color="#4CAF50" />
         </TouchableOpacity>
-          <Sheet />
-     
+        <Sheet />
+
         <Marker
           coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
           title="Pickup Location"
@@ -305,11 +323,11 @@ const goToCurrentLocation = async () => {
                   latitude: initialCordinate.lat,
                   longitude: initialCordinate.lng,
                 });
-                console.log(
-                  "data des",
-                  data.description,
-                  details.geometry.location
-                );
+                // console.log(
+                //   "data des",
+                //   data.description,
+                //   details.geometry.location
+                // );
               } else {
                 console.log("no location found");
               }
@@ -343,12 +361,11 @@ const goToCurrentLocation = async () => {
                   latitude: initialCordinate.lat,
                   longitude: initialCordinate.lng,
                 });
-
-                console.log(
-                  "data des",
-                  data.description,
-                  details.geometry.location
-                );
+                // console.log(
+                //   "data des",
+                //   data.description,
+                //   details.geometry.location
+                // );
               } else {
                 console.log("no location found");
               }
@@ -384,7 +401,7 @@ const goToCurrentLocation = async () => {
             <View style={styles.driverCard}>
               <View style={styles.info}>
                 <Text style={styles.location}>From : {pickupAreaName}</Text>
-                <Text  style={styles.location}>To : {dropAreaName} </Text>
+                <Text style={styles.location}>To : {dropAreaName} </Text>
 
                 <TouchableOpacity onPress={onClose}>
                   <View style={styles.cancelButton}>
@@ -406,68 +423,30 @@ const goToCurrentLocation = async () => {
                 </>
               ) : (
                 <>
-                  {driverData.map((data: any, index: number) => (
-                    <View key={index}>
-                      <Text style={styles.detail}>Name: {data.name}</Text>
-                      <Text style={styles.detail}>
-                        PickUp: {data.pickupLocation}
-                      </Text>
-                      <Text style={styles.detail}>
-                        Drop: {data.dropLocation}
-                      </Text>
-                      <View style={globalStyle.buttonRow}>
-                        <TouchableOpacity
-                          style={globalStyle.buttonAccept}
-                          onPress={() => acceptUserRequest()}
-                        >
-                          <Text style={globalStyle.buttonText}>Accept</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={globalStyle.buttonReject}
-                          onPress={rejectUserRequest}
-                        >
-                          <Text style={globalStyle.buttonTextd}>Reject</Text>
-                        </TouchableOpacity>
-                      </View>
+                {driverData.map((data: any, index: number) => (
+                  <View key={index}>
+                    <Text style={styles.detail}>Name: {data.name}</Text>
+                    <Text style={styles.detail}>
+                      PickUp: {data.pickupLocation}
+                    </Text>
+                    <Text style={styles.detail}>Drop: {data.dropLocation}</Text>
+                    <View style={globalStyle.buttonRow}>
+                      <TouchableOpacity
+                        style={globalStyle.buttonAccept}
+                        onPress={() => acceptUserRequest(data.userID)}
+                      >
+                        <Text style={globalStyle.buttonText}>Accept</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={globalStyle.buttonReject}
+                        onPress={() => rejectUserRequest(data.userID)}
+                      >
+                        <Text style={globalStyle.buttonTextd}>Reject</Text>
+                      </TouchableOpacity>
                     </View>
-                  ))}
-
-            <View style={styles.driverCard}>
-              {loading ? (
-                <>
-                  <ActivityIndicator
-                    size="large"
-                    color="#007BFF"
-                    style={styles.spinner}
-                  />
-                </>
-              ) : (
-                <>
-                {driverData.map((data:any, index:number) => (
-                <View key={index}>
-                  <Text style={styles.detail}>Name: {data.name}</Text>
-                  <Text style={styles.detail}>
-                    PickUp: {data.pickupLocation}
-                  </Text>
-                  <Text style={styles.detail}>
-                    Drop: {data.dropLocation}
-                  </Text>
-                  <View style={globalStyle.buttonRow}>
-                    <TouchableOpacity
-                      style={globalStyle.buttonAccept}
-                      onPress={() => acceptUserRequest(data.userID)}>
-                      <Text style={globalStyle.buttonText}>Accept</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={globalStyle.buttonReject}
-                      onPress={() => rejectUserRequest(data.userID)}
-                    >
-                      <Text style={globalStyle.buttonTextd}>Reject</Text>
-                    </TouchableOpacity>
                   </View>
-                </View>
-              ))}
-              </>
+                ))}
+                </>
               )}
             </View>
           </View>
@@ -503,7 +482,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     borderWidth: 2,
     borderRadius: 10,
-    borderColor: "green", 
+    borderColor: "green",
   },
   info: {
     alignItems: "center",
@@ -595,15 +574,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  locationButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: '#fff',
-    padding: 10,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
 });
-

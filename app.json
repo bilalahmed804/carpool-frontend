@@ -4,7 +4,7 @@
     "slug": "carpooling",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/carpool.png",
+    "icon": "./assets/images/hd.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -14,20 +14,20 @@
     "android": {
       "package": "com.saylanitech.carpooling",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/carpool.png",
+        "foregroundImage": "./assets/images/hd.png",
         "backgroundColor": "#000000"
       }
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/carpool.png"
+      "favicon": "./assets/images/hd.png"
     },
     "plugins": [
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/carpool.png",
+          "image": "./assets/images/hd.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#000000"

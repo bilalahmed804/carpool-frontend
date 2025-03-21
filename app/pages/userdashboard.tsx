@@ -1,13 +1,11 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import {View,StyleSheet,Modal,Image,TouchableOpacity,Text, ToastAndroid, FlatList,} from "react-native";
+import {View,StyleSheet,Modal,Image,TouchableOpacity,Text, FlatList,} from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import GreenButton from "@/components/greenButton";
-import { globalContext } from "@/context/globalContext";
 import Sheet from "@/components/sheet";
 import { AppRoutes, BASE_URL } from "@/constant/constant";
 import AutoComplete from "@/components/autoComplete";
-import { useRouter } from "expo-router";
 import { GooglePlaceDetail } from "react-native-google-places-autocomplete";
 import axios from "axios";
 import { AuthContext } from "@/context/authContext";
@@ -15,26 +13,29 @@ import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
 import * as Location from 'expo-location';
 
-const socket = io(BASE_URL);
-// const socket = io("http://192.168.2.132:4000");
 
-const UserDashboard = () => {
-  const { setModalOpen, modalOpen } = useContext(globalContext);
+const socket = io(BASE_URL);
+// const socket = io("http://192.168.2.131:4000");
+
+
+function UserDashboard(){
   const { user } = useContext(AuthContext); 
-  const [Open, setOpen] = useState(false);
   const [initialLocation, setInitialLocation] = useState<{latitude: number;longitude: number;} | null>(null);
   const [destination, setDestination] = useState<{latitude: number;longitude: number;} | null>(null);
   const [pickupLocation, setPickupLocation] = useState("");
   const [dropLocation, setDropLocation] = useState("");
+  const [isRideAccepted, setIsRideAccepted] = useState(false);
   const [driverID, setDriverID] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
-  const router = useRouter();
   const mapRef = useRef<MapView>(null);
+  const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   
+
   useEffect(() => {
       socket.connect();
       socket.on("connect", () => {
@@ -51,6 +52,7 @@ const UserDashboard = () => {
   if (user && user._id) {
     const userID = { userID: user._id };
     socket.emit("registerUser", userID);
+    console.log("user registered with socket");
   }
 
   // Socket : Step 2
@@ -76,34 +78,64 @@ const UserDashboard = () => {
 
   //Socket : Step 3
   useEffect(() => {
-    socket.on("requestAccepted", (data: any) => {
-      console.log("requestAccepted", data);})
-    socket.on("requestRejected", (data: any) => {
-      console.log("requestRejected", data);})
-  }, [socket.on])
+  socket.on("requestAccepted", (driverdata: any) => {
+    console.log("requestAccepted", driverdata);
+    setDriverID(driverdata.driver_ID);
+    setIsRideAccepted(true);
+    setModalVisible(false);
+    setModalOpen(false)
+    sendMyLocation()
+  })
+  socket.on("requestRejected", (driverdata: any) => {
+    console.log("requestRejected", driverdata)
+    setModalVisible(false)
+  })
+}, [socket.on])
 
-  const closeModal = () => {
-    setModalOpen(!modalOpen);
-  };
+// Socket : Step 4
+  useEffect(() => {
+  if (isRideAccepted) {  // Emit location only when the ride is accepted
+    const obj = {
+      liveLocation : location,
+      driverID: driverID
+    }
+    socket.emit("userLiveLocation", obj);
+  }
+}, [location]);
 
-  const goToCurrentLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    console.log("status", status);
+  const sendMyLocation = async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      console.log("Location Permission Status:", status);
     
-    if (status !== 'granted') {
-      alert('Location permission denied!');
-      return;
-    }
-    let location = await Location.getCurrentPositionAsync({});
-    setLocation(location)
-    if (mapRef.current) {
-      mapRef.current.animateToRegion({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.05,
-        longitudeDelta: 0.05,
-      });
-    }
+      if (status !== "granted") {
+        alert("Location permission denied!");
+        return;
+      }
+      locationSubscription.current = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          distanceInterval: 2,
+        },
+        (newLocation) => {
+    
+          // Ensure newLocation is valid
+          if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
+            setLocation(newLocation);  // Update only when valid location is received
+            console.log("User Live Location:",newLocation);
+            
+            if (mapRef.current) {
+              mapRef.current.animateToRegion({
+                latitude: newLocation.coords.latitude,
+                longitude: newLocation.coords.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+              });
+            }
+          } else {
+            console.log("Invalid location data received, ignoring update.");
+          }
+        }
+      );
   }
 
   const handleSearchRides = async () => {
@@ -137,7 +169,47 @@ const UserDashboard = () => {
       console.log("error in collecting driver details==>", error.message);
     }
   }
+
+  const closeModal = () => {
+    setModalOpen(!modalOpen);
+  };
   
+  const goToCurrentLocation = async () => {
+    try {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      console.log("status", status);
+  
+      if (status !== "granted") {
+        alert("Location permission denied!");
+        return;
+      }
+  
+      let location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High, // High accuracy ke liye
+      });
+  
+      console.log("Current Location:", location);
+  
+      if (mapRef.current) {
+        mapRef.current.animateToRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        });
+      }
+    } catch (error) {
+      console.error("Error getting location:", error);
+    }
+  };
+      
+  const stopLocationTracking = () => {
+  if (locationSubscription.current) {
+      locationSubscription.current.remove(); // Tracking stop 
+      locationSubscription.current = null;   // Reference clear 
+      console.log("Location tracking stopped.");
+  }
+};
 
   return (
     <>
@@ -158,7 +230,12 @@ const UserDashboard = () => {
         >
        <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
         </MapView>
-        <TouchableOpacity onPress={goToCurrentLocation} />
+        <TouchableOpacity
+          style={styles.locationButton}
+          onPress={stopLocationTracking}
+        >
+          <MaterialIcons name="my-location" size={24} color="#4CAF50" />
+        </TouchableOpacity>
       <Sheet/>
    
 
@@ -273,9 +350,6 @@ const UserDashboard = () => {
               </View>
               )
             }}/>
-            {/* {journeyExpense.map((data: any, index: number) => (
-            
-            ))} */}
           </View>
         </View>
         }
@@ -284,6 +358,7 @@ const UserDashboard = () => {
 };
 
 export default UserDashboard;
+
 const styles = StyleSheet.create({
   containeruser: {
     flex: 1,
@@ -440,14 +515,14 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   locationButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 10,
     right: 10,
-    backgroundColor: '#5F9EE0',
+    backgroundColor: "#fff",
     padding: 10,
     borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonText: {
     color: "#fff",
