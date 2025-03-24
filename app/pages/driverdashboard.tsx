@@ -56,6 +56,7 @@ function DriverDashboard() {
   const [pickupAreaName, setPickupAreaName] = useState("");
   const [connectedUserID, setConnectedUserID] = useState("");
   const [dropAreaName, setDropAreaName] = useState("");
+  const [userLiveLocation, setUserLiveLocation] = useState<{latitude: number; longitude: number;} | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -126,9 +127,21 @@ function DriverDashboard() {
     console.log("Data Emitted");
   };
 
-  //Socket : Step 4
+ // Socket : Step 4 (reciving driver live location)
   useEffect(() => {
-    if (isRideAccepted) {  // Emit location only when the ride is accepted
+    socket.on("userLocation", (data: any) => {
+      setUserLiveLocation({
+        latitude: data.liveLocation.coords.latitude,
+        longitude: data.liveLocation.coords.longitude,
+      });
+      console.log("(137) user Live Location set in stat :", userLiveLocation);
+
+    });
+  }, [location]);
+
+  //Socket : Step 5 (driver is sending its live location on its backend)
+  useEffect(() => {
+    if (isRideAccepted) {  
       const obj = {
         liveLocation : location,
         userID: connectedUserID
@@ -159,7 +172,8 @@ function DriverDashboard() {
         // Ensure newLocation is valid
         if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
           setLocation(newLocation);  // Update only when valid location is received
-          console.log("driver Live Location=>",newLocation);
+          // console.log("(162) - driver Live Location=>",newLocation);
+          
           
           if (mapRef.current) {
             mapRef.current.animateToRegion({
