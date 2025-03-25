@@ -12,6 +12,7 @@ import { AuthContext } from "@/context/authContext";
 import { io } from "socket.io-client";
 import BlueButton from "@/components/blueButton";
 import * as Location from 'expo-location';
+import MapViewDirections from "react-native-maps-directions";
 
 const socket = io(BASE_URL);
 // const socket = io("http://192.168.2.131:4000");
@@ -33,6 +34,8 @@ function UserDashboard() {
   const mapRef = useRef<MapView>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
   const [driverLiveLocation, setDriverLiveLocation] = useState<{ latitude: number; longitude: number; } | null>(null);
+  const [centerPoint, setCenterPoint] = useState<{ latitude: number; longitude: number; }[] | null>(null);
+  const ApiKey = process.env.EXPO_PUBLIC_API_KEY
   // const [driverLiveLocation, setDriverLiveLocation] = useState();
 
 
@@ -130,14 +133,14 @@ function UserDashboard() {
     locationSubscription.current = await Location.watchPositionAsync(
       {
         accuracy: Location.Accuracy.High,
-        distanceInterval: 2,
+        timeInterval:2000,
       },
       (newLocation) => {
 
         // Ensure newLocation is valid
         if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
           setLocation(newLocation);  // Update only when valid location is received
-          // console.log("User Live Location:",newLocation);
+          console.log("User Live Location:",newLocation);
 
           if (mapRef.current) {
             mapRef.current.animateToRegion({
@@ -173,6 +176,18 @@ function UserDashboard() {
       console.log("error in searching ride from user Dashboard==>", error.message);
     }
   };
+  const handleDirectionsBetween =(result : any)=>{
+    const totalPoint = 20
+    const coordinates = result.coordinates
+    if(result.coordinates.length >= totalPoint){
+      const betweenSpace = Math.floor(result.coordinates.length / totalPoint)
+
+    const betweenPoint = Array.from({length:totalPoint}, (_,i)=>
+    coordinates[betweenSpace * (i + 1)]).filter(point => point)
+      setCenterPoint(betweenPoint)
+      // console.log("20 betweenPoint Coordinates:", betweenPoint);
+    }
+  }
 
   const collectDriverDetails = async (userID: any) => {
     setDriverID(userID)
@@ -190,34 +205,34 @@ function UserDashboard() {
     setModalOpen(!modalOpen);
   };
 
-  const goToCurrentLocation = async () => {
-    try {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      console.log("status", status);
+  // const goToCurrentLocation = async () => {
+  //   try {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     console.log("status", status);
 
-      if (status !== "granted") {
-        alert("Location permission denied!");
-        return;
-      }
+  //     if (status !== "granted") {
+  //       alert("Location permission denied!");
+  //       return;
+  //     }
 
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High, // High accuracy ke liye
-      });
+  //     let location = await Location.getCurrentPositionAsync({
+  //       accuracy: Location.Accuracy.High, // High accuracy ke liye
+  //     });
 
-      console.log("Current Location:", location);
+  //     console.log("Current Location:", location);
 
-      if (mapRef.current) {
-        mapRef.current.animateToRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
-      }
-    } catch (error) {
-      console.error("Error getting location:", error);
-    }
-  };
+  //     if (mapRef.current) {
+  //       mapRef.current.animateToRegion({
+  //         latitude: location.coords.latitude,
+  //         longitude: location.coords.longitude,
+  //         latitudeDelta: 0.05,
+  //         longitudeDelta: 0.05,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error getting location:", error);
+  //   }
+  // };
 
   const stopLocationTracking = () => {
     if (locationSubscription.current) {
@@ -226,15 +241,19 @@ function UserDashboard() {
       console.log("Location tracking stopped.");
     }
   };
+console.log("userDashboard usercurrentlocation (244)",location);
+console.log("user Dashboard driver live location (245)",driverLiveLocation);
 
   return (
     <>
       <View style={styles.containeruser}>
-        <MapView
-          ref={mapRef}
-          provider={PROVIDER_GOOGLE}
-          showsUserLocation={true}
-          showsMyLocationButton={true}
+      <MapView
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE}
+        showsUserLocation={true}
+          showsMyLocationButton={false}
+          showsCompass={true}
+        showsTraffic={true}
           mapType="terrain"
           style={StyleSheet.absoluteFillObject}
           initialRegion={{
@@ -244,7 +263,36 @@ function UserDashboard() {
             longitudeDelta: 0.05,
           }}
         >
-          <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
+       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
+      {location && (<Marker
+                  coordinate={{
+                    latitude: location?.coords?.latitude,
+                    longitude: location?.coords?.longitude,
+                  }}
+                  title="your Current Location"
+                  description="This is your Current location"
+                  pinColor="blue"
+                />)}
+        {driverLiveLocation &&(
+          <Marker
+          coordinate={driverLiveLocation}
+          title="Location"
+          description="Driver Current Location"
+          pinColor="red"
+          />
+        )}
+          
+       {location && driverLiveLocation && (
+                      <MapViewDirections
+                          origin={{ latitude: location?.coords?.latitude, longitude: location?.coords?.longitude }}
+                          destination={driverLiveLocation}
+                          apikey={ApiKey || ""}
+                          strokeWidth={4}
+                          strokeColor="blue"
+                          onReady={handleDirectionsBetween}
+                      />
+                  )}
+        
         </MapView>
         <TouchableOpacity
           style={styles.locationButton}
