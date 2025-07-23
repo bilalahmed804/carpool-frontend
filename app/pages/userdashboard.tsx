@@ -31,6 +31,7 @@ function UserDashboard(){
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [driverLocation, setDriverLocation] = useState<Location.LocationObject | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const mapRef = useRef<MapView>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
@@ -79,7 +80,7 @@ function UserDashboard(){
   //Socket : Step 3
   useEffect(() => {
   socket.on("requestAccepted", (driverdata: any) => {
-    console.log("requestAccepted", driverdata);
+    console.log("requestAccepted==>", JSON.stringify(driverdata));
     setDriverID(driverdata.driver_ID);
     setIsRideAccepted(true);
     setModalVisible(false);
@@ -87,10 +88,10 @@ function UserDashboard(){
     sendMyLocation()
   })
   socket.on("requestRejected", (driverdata: any) => {
-    console.log("requestRejected", driverdata)
+    console.log("requestRejected", JSON.stringify(driverdata))
     setModalVisible(false)
   })
-}, [socket.on])
+}, [])
 
 // Socket : Step 4
   useEffect(() => {
@@ -102,6 +103,20 @@ function UserDashboard(){
     socket.emit("userLiveLocation", obj);
   }
 }, [location]);
+
+// Socket  Step : 5
+  useEffect(() => {
+  socket.on("driverLocation", (data) => {
+    console.log("Driver's Live Location:", data);
+    setDriverLocation(data)
+  });
+  return () => {
+    socket.off("driverLocation"); // Cleanup jab component unmount ho
+  };
+}, []);
+
+  console.log("driverLocation==>", driverLocation);
+  
 
   const sendMyLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -121,7 +136,6 @@ function UserDashboard(){
           // Ensure newLocation is valid
           if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
             setLocation(newLocation);  // Update only when valid location is received
-            console.log("User Live Location:",newLocation);
             
             if (mapRef.current) {
               mapRef.current.animateToRegion({
@@ -211,6 +225,7 @@ function UserDashboard(){
   }
 };
 
+  
   return (
     <>
       <View style={styles.containeruser}>

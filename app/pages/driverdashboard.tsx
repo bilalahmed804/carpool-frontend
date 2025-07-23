@@ -137,6 +137,16 @@ function DriverDashboard() {
     }
   }, [location]);
 
+  // Socket Step : 5
+  useEffect(() => {
+    socket.on("userLocation", (data) => {
+      console.log("User's Live Location:", data);
+    });
+    return () => {
+      socket.off("userLocation"); // Cleanup jab component unmount ho
+    };
+  }, []);
+
   const onClose = () => {
     setModalVisible(false);
     setDriverData([]);
@@ -159,7 +169,6 @@ function DriverDashboard() {
         // Ensure newLocation is valid
         if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
           setLocation(newLocation);  // Update only when valid location is received
-          console.log("driver Live Location=>",newLocation);
           
           if (mapRef.current) {
             mapRef.current.animateToRegion({
@@ -256,6 +265,9 @@ function DriverDashboard() {
       }
     }
   };
+
+  
+
 
   return (
     <>
