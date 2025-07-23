@@ -30,6 +30,7 @@ function UserDashboard() {
   const [selectedDriver, setSelectedDriver] = useState([]);
   const [journeyExpense, setJourneyExpense] = useState([]);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [driverLocation, setDriverLocation] = useState<Location.LocationObject | null>(null);
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const mapRef = useRef<MapView>(null);
   const locationSubscription = useRef<Location.LocationSubscription | null>(null);
@@ -244,6 +245,7 @@ function UserDashboard() {
 console.log("userDashboard usercurrentlocation (244)",location);
 console.log("user Dashboard driver live location (245)",driverLiveLocation);
 
+  
   return (
     <>
       <View style={styles.containeruser}>

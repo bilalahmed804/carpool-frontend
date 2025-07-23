@@ -152,10 +152,21 @@ function DriverDashboard() {
     }
   }, [location]);
 
+  // Socket Step : 5
+  useEffect(() => {
+    socket.on("userLocation", (data) => {
+      console.log("User's Live Location:", data);
+    });
+    return () => {
+      socket.off("userLocation"); // Cleanup jab component unmount ho
+    };
+  }, []);
+
   const onClose = () => {
     setModalVisible(false);
     setDriverData([]);
   };
+
 
     const sendMyLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -290,6 +301,9 @@ function DriverDashboard() {
   };
 console.log("driverdashbaord line (287)",location);
 console.log("driverDashboard (288)",userLiveLocation);
+
+
+  
 
 
   return (
