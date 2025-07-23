@@ -13,6 +13,7 @@ import { io } from "socket.io-client";
 import GreenButton from "@/components/greenButton";
 import * as Location from "expo-location";
 import LottieView from "lottie-react-native";
+import MapViewDirections from "react-native-maps-directions";
 
 const socket = io(BASE_URL);
 // const socket = io("http://192.168.7.236:4000");
@@ -56,6 +57,7 @@ function DriverDashboard() {
   const [pickupAreaName, setPickupAreaName] = useState("");
   const [connectedUserID, setConnectedUserID] = useState("");
   const [dropAreaName, setDropAreaName] = useState("");
+  const [userLiveLocation, setUserLiveLocation] = useState<{latitude: number; longitude: number;} | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null
   );
@@ -63,7 +65,8 @@ function DriverDashboard() {
     null
   );
   const [driverData, setDriverData] = useState<any | []>([]);
-
+  const [centerPoint, setCenterPoint] = useState<any[]>([]);
+  const ApiKey = process.env.EXPO_PUBLIC_API_KEY
   const mapRef = useRef<MapView | null>(null);
 
   useEffect(() => {
@@ -126,9 +129,21 @@ function DriverDashboard() {
     console.log("Data Emitted");
   };
 
-  //Socket : Step 4
+ // Socket : Step 4 (reciving driver live location)
   useEffect(() => {
-    if (isRideAccepted) {  // Emit location only when the ride is accepted
+    socket.on("userLocation", (data: any) => {
+      setUserLiveLocation({
+        latitude: data.liveLocation.coords.latitude,
+        longitude: data.liveLocation.coords.longitude,
+      });
+      console.log("(137) user Live Location set in stat :", userLiveLocation);
+
+    });
+  }, [location]);
+
+  //Socket : Step 5 (driver is sending its live location on its backend)
+  useEffect(() => {
+    if (isRideAccepted) {  
       const obj = {
         liveLocation : location,
         userID: connectedUserID
@@ -152,67 +167,86 @@ function DriverDashboard() {
     setDriverData([]);
   };
 
-  const sendMyLocation = async () => {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    console.log("Location Permission Status:", status);
-  
-    if (status !== "granted") {
-      alert("Location permission denied!");
-      return;
-    }
-    locationSubscription.current = await Location.watchPositionAsync(
-      {
-        accuracy: Location.Accuracy.High,
-        distanceInterval: 2,
-      },
-      (newLocation) => {
-        // Ensure newLocation is valid
-        if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
-          setLocation(newLocation);  // Update only when valid location is received
-          
-          if (mapRef.current) {
-            mapRef.current.animateToRegion({
-              latitude: newLocation.coords.latitude,
-              longitude: newLocation.coords.longitude,
-              latitudeDelta: 0.05,
-              longitudeDelta: 0.05,
-            });
-          }
-        } else {
-          console.log("Invalid location data received, ignoring update.");
-        }
-      }
-    );
-  };
 
-  const goToCurrentLocation = async () => {
-    try {
+    const sendMyLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
-      console.log("status", status);
-  
+      console.log("Location Permission Status:", status);
+    
       if (status !== "granted") {
         alert("Location permission denied!");
         return;
       }
   
-      let location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High, // High accuracy ke liye
-      });
+      // Start watching location (no need for setInterval)
+      locationSubscription.current = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          timeInterval: 5000,  // Location update every 2 sec
+        },
+        (newLocation) => {
+          if (newLocation?.coords?.latitude && newLocation?.coords?.longitude) {
+            setLocation(newLocation);  
+            console.log("(162) - driver Live Location=>", newLocation);
   
-      console.log("Current Location:", location);
+            if (mapRef.current) {
+              mapRef.current.animateToRegion({
+                latitude: newLocation.coords.latitude,
+                longitude: newLocation.coords.longitude,
+                latitudeDelta: 0.05,
+                longitudeDelta: 0.05,
+              });
+            }
+          } else {
+            console.log("Invalid location data received, ignoring update.");
+          }
+        }
+      );
+    };
+
+
+
   
-      if (mapRef.current) {
-        mapRef.current.animateToRegion({
-          latitude: location.coords.latitude,
-          longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
-        });
-      }
-    } catch (error) {
-      console.error("Error getting location:", error);
+  const handleDirectionsBetween =(result : any)=>{
+    const totalPoint = 20
+    const coordinates = result.coordinates
+    if(result.coordinates.length >= totalPoint){
+      const betweenSpace = Math.floor(result.coordinates.length / totalPoint)
+
+    const betweenPoint = Array.from({length:totalPoint}, (_,i)=>
+    coordinates[betweenSpace * (i + 1)]).filter(point => point)
+      setCenterPoint(betweenPoint)
+      // console.log("20 betweenPoint Coordinates:", betweenPoint);
     }
-  };
+  }
+
+  // const goToCurrentLocation = async () => {
+  //   try {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     console.log("status", status);
+  
+  //     if (status !== "granted") {
+  //       alert("Location permission denied!");
+  //       return;
+  //     }
+  
+  //     let location = await Location.getCurrentPositionAsync({
+  //       accuracy: Location.Accuracy.High, // High accuracy ke liye
+  //     });
+      
+  //     console.log("Current Location:", location);
+  
+  //     if (mapRef.current) {
+  //       mapRef.current.animateToRegion({
+  //         latitude: location.coords.latitude,
+  //         longitude: location.coords.longitude,
+  //         latitudeDelta: 0.05,
+  //         longitudeDelta: 0.05,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error("Error getting location:", error);
+  //   }
+  // };
   
 
   const stopLocationTracking = () => {
@@ -265,6 +299,9 @@ function DriverDashboard() {
       }
     }
   };
+console.log("driverdashbaord line (287)",location);
+console.log("driverDashboard (288)",userLiveLocation);
+
 
   
 
@@ -272,13 +309,13 @@ function DriverDashboard() {
   return (
     <>
       <View style={globalStyle.containerd}>
-        <MapView
-          ref={mapRef}
-          provider={PROVIDER_GOOGLE}
-          showsUserLocation={true}
+      <MapView
+        ref={mapRef}
+        provider={PROVIDER_GOOGLE}
+        showsUserLocation={true}
           showsMyLocationButton={false}
           showsCompass={true}
-          showsTraffic={true}
+        showsTraffic={true}
           mapType="terrain"
           style={StyleSheet.absoluteFillObject}
           initialRegion={{
@@ -288,11 +325,38 @@ function DriverDashboard() {
             longitudeDelta: 0.05,
           }}
         >
+       <Marker coordinate={{ latitude: 24.8607, longitude: 67.0011 }} title="Pickup Location" />
+      {location && (<Marker
+                  coordinate={{
+                    latitude: location?.coords?.latitude,
+                    longitude: location?.coords?.longitude,
+                  }}
+                  title="your Current Location"
+                  description="This is your Current location"
+                  pinColor="blue"
+                />)}
+        {userLiveLocation &&(
           <Marker
-            coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
-            title="Pickup Location"
+          coordinate={userLiveLocation}
+          title="Location"
+          description="user Current Location"
+          pinColor="red"
           />
+        )}
+            
+       {location && userLiveLocation && (
+                      <MapViewDirections
+                          origin={{ latitude: location?.coords?.latitude, longitude: location?.coords?.longitude }}
+                          destination={userLiveLocation}
+                          apikey={ApiKey || ""}
+                          strokeWidth={4}
+                          strokeColor="blue"
+                          onReady={handleDirectionsBetween}
+                      />
+                  )}
+        
         </MapView>
+       
 
         <TouchableOpacity
           style={styles.locationButton}
@@ -302,10 +366,7 @@ function DriverDashboard() {
         </TouchableOpacity>
         <Sheet />
 
-        <Marker
-          coordinate={{ latitude: 24.8607, longitude: 67.0011 }}
-          title="Pickup Location"
-        />
+      
 
         <View style={globalStyle.rideContainer}>
           <AutoComplete

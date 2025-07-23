@@ -1,4 +1,3 @@
-
 import { StyleSheet } from "react-native";
 
 const globalStyle = StyleSheet.create({
@@ -394,11 +393,13 @@ const globalStyle = StyleSheet.create({
 
 export default globalStyle;
 
-const devURL = "http://192.168.2.131:4000";
+const devURL = "http://192.168.5.229:4000";
+// 192.168.5.229
 // const prodURL = "https://carpool-backend-staging.up.railway.app";
 
 
 export const BASE_URL = devURL;
+
 export const AppRoutes = {
   signupUser: BASE_URL + "/user/signupUser",
   signupRider: BASE_URL+"/user/signupRider",
@@ -410,4 +411,3 @@ export const AppRoutes = {
   DriverJourney : BASE_URL + '/rides/rider',
   areaCordinate : BASE_URL + "/location/getLocations"
 };
-

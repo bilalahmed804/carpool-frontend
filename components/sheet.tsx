@@ -19,7 +19,7 @@ const socket = io(BASE_URL);
 export default function Sheet() {
   const [Open, setOpen] = useState(false);
   const { user, setUser } = useContext(AuthContext);
-  console.log(user);
+  // console.log("current user detail--->",user);
 
   const [isSocketConnected, setisSocketConnected] = useState(socket.connected);
   const router = useRouter();
